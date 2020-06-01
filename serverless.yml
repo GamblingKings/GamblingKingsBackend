@@ -1,0 +1,74 @@
+service: gamblingkingsbackend
+
+plugins:
+  - serverless-plugin-typescript
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-west-2
+
+  websocketsApiName: mahjong-websocket
+  websocketsApiRouteSelectionExpression: $request.body.action # custom routes are selected by the value of the action property in the body
+
+  # you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "execute-api:ManageConnections"
+      Resource:
+        - "arn:aws:execute-api:*:*:**/@connections/*"
+    - Effect: Allow
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:BatchGetItem"
+        - "dynamodb:BatchWriteItem"
+        - "dynamodb:Query"
+      Resource:
+        - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
+        - Fn::Join:
+            - "/"
+            - - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
+              - "*"
+
+  # you can define service wide environment variables here
+  environment:
+    ConnectionDynamoDBTable:
+      Ref: ConnectionDynamoDBTable
+    API_REGION: "${self:provider.region}"
+
+functions:
+  # manage connection and disconnection of clients
+  connectionManager:
+    handler: src/handler.connectionManager
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+
+  defaultMessages:
+    handler: src/handler.defaultMessage
+    events:
+      - websocket:
+          route: $default
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    ConnectionDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
