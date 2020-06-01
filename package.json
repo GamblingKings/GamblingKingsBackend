@@ -6,7 +6,14 @@
   "author": "Vincent Wong <vwong125@my.bcit.ca>",
   "license": "MIT",
   "dependencies": {
+    "@types/aws-lambda": "^8.10.52",
+    "@types/node": "^14.0.9",
     "serverless-plugin-typescript": "^1.1.9",
     "typescript": "^3.9.3"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^6.3.0"
   }
 }

@@ -1,2 +1,10 @@
-**/node_modules
-.serverless
+# Package directories
+node_modules/
+
+# Serverless directories
+.serverless/
+.build/
+.dynamodb/
+
+# Misc
+.env

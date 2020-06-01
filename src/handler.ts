@@ -1,49 +1,40 @@
-import db from "./module/db";
+import { DB } from './module/db';
+import { DynamoDB } from 'aws-sdk';
+import { Handler } from 'aws-lambda';
+import { WebsocketAPIGatewayEvent } from './types';
 
-interface putParamsObj {
-  TableName: string;
-  Item: {
-    connectionId: string;
+const connectionDBTable: string = 'ConnectionsTable';
+
+export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent): Promise<object> => {
+  const putParams: DynamoDB.DocumentClient.PutItemInput = {
+    TableName: connectionDBTable,
+    Item: {
+      connectionId: event.requestContext.connectionId
+    }
   };
-}
 
-interface deleteParamsObj {
-  TableName: string;
-  Key: {
-    connectionId: string;
+  console.log('putParams', putParams);
+  console.log('writing to the db table...');
+  return await DB.put(putParams).promise();
+};
+
+export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent): Promise<object> => {
+  const deleteParams: DynamoDB.DocumentClient.DeleteItemInput = {
+    TableName: connectionDBTable,
+    Key: {
+      connectionId: event.requestContext.connectionId
+    }
   };
-}
 
-async function connectionManager(event: any): Promise<object> {
-  if (event.requestContext.eventType === "CONNECT") {
-    const putParams: putParamsObj = {
-      TableName: process.env.ConnectionDynamoDBTable,
-      Item: {
-        connectionId: event.requestContext.connectionId,
-      },
-    };
+  console.log('deleteParams', deleteParams);
 
-    return await db.put(putParams).promise();
-  } else if (event.requestContext.eventType === "DISCONNECT") {
-    const deleteParams: deleteParamsObj = {
-      TableName: process.env.ConnectionDynamoDBTable,
-      Key: {
-        connectionId: event.requestContext.connectionId,
-      },
-    };
+  return await DB.delete(deleteParams).promise();
+};
 
-    return await db.delete(deleteParams).promise();
-  }
-}
-
-async function defaultMessage(event: any) {
+// TODO: add return type
+export const defaultMessage: Handler = async (event: WebsocketAPIGatewayEvent) => {
   return {
     status: 403,
-    event: event,
+    event: event
   };
-}
-
-module.exports = {
-  connectionManager,
-  defaultMessage,
 };

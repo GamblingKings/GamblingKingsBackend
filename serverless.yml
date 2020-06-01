@@ -2,6 +2,25 @@ service: gamblingkingsbackend
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-dynamodb-local
+
+# Only uncomment for local dev
+custom:
+  dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+    # Uncomment only if you already have a DynamoDB running locally
+    # noStart: true
 
 provider:
   name: aws
@@ -16,29 +35,29 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - "execute-api:ManageConnections"
+        - 'execute-api:ManageConnections'
       Resource:
-        - "arn:aws:execute-api:*:*:**/@connections/*"
+        - 'arn:aws:execute-api:*:*:**/@connections/*'
     - Effect: Allow
       Action:
-        - "dynamodb:PutItem"
-        - "dynamodb:GetItem"
-        - "dynamodb:UpdateItem"
-        - "dynamodb:DeleteItem"
-        - "dynamodb:BatchGetItem"
-        - "dynamodb:BatchWriteItem"
-        - "dynamodb:Query"
+        - 'dynamodb:PutItem'
+        - 'dynamodb:GetItem'
+        - 'dynamodb:UpdateItem'
+        - 'dynamodb:DeleteItem'
+        - 'dynamodb:BatchGetItem'
+        - 'dynamodb:BatchWriteItem'
+        - 'dynamodb:Query'
       Resource:
         - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
         - Fn::GetAtt: [GamesDynamoDBTable, Arn]
         - Fn::Join:
-            - "/"
+            - '/'
             - - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
-              - "*"
+              - '*'
         - Fn::Join:
-            - "/"
+            - '/'
             - - Fn::GetAtt: [GamesDynamoDBTable, Arn]
-              - "*"
+              - '*'
 
   # you can define service wide environment variables here
   environment:
@@ -46,7 +65,7 @@ provider:
       Ref: ConnectionDynamoDBTable
     GamesDynamoDBTable:
       Ref: GamesDynamoDBTable
-    API_REGION: "${self:provider.region}"
+    API_REGION: '${self:provider.region}'
 
 layers:
   aws:
@@ -55,22 +74,19 @@ layers:
       artifact: src/aws_sdk_layer.zip
 
 functions:
-  # manage connection and disconnection of clients
-  connectionManager:
-    handler: src/handler.connectionManager
-    layers:
-      - { Ref: AwsLambdaLayer }
+  onConnect:
+    handler: src/handler.onConnect
     events:
-      - websocket:
-          route: $connect
-      - websocket:
-          route: $disconnect
-
-  defaultMessages:
+      - websocket: $connect
+  onDisconnect:
+    handler: src/handler.onDisconnect
+    events:
+      - websocket: $disconnect
+  defaultHandler:
     handler: src/handler.defaultMessage
     events:
-      - websocket:
-          route: $default
+      - websocket: $default
+
 # you can add CloudFormation resource templates here
 resources:
   Resources:
