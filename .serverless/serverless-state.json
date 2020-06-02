@@ -252,16 +252,16 @@
               }
             }
           },
-          "AwsUnderscoresdkUnderscorelayerLambdaLayer": {
+          "AwsLambdaLayer": {
             "Type": "AWS::Lambda::LayerVersion",
             "Properties": {
               "Content": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/src/aws_sdk_layer.zip"
+                "S3Key": "serverless/gamblingkingsbackend/dev/1591062797548-2020-06-02T01:53:17.548Z/src/aws_sdk_layer.zip"
               },
-              "LayerName": "aws_sdk_layer",
+              "LayerName": "aws",
               "Description": "layer that holds the aws_sdk"
             }
           },
@@ -272,7 +272,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/gamblingkingsbackend.zip"
+                "S3Key": "serverless/gamblingkingsbackend/dev/1591062797548-2020-06-02T01:53:17.548Z/gamblingkingsbackend.zip"
               },
               "FunctionName": "gamblingkingsbackend-dev-connectionManager",
               "Handler": "src/handler.connectionManager",
@@ -295,13 +295,18 @@
                   },
                   "API_REGION": "us-west-2"
                 }
-              }
+              },
+              "Layers": [
+                {
+                  "Ref": "AwsLambdaLayer"
+                }
+              ]
             },
             "DependsOn": [
               "ConnectionManagerLogGroup"
             ]
           },
-          "ConnectionManagerLambdaVersionKZZIn1tkKZ5xEosApymafatKeRf8cvkmTParfPhuBA": {
+          "ConnectionManagerLambdaVersionB1OH4RkmBAWZge99oR0J5xkRnCG9fRz9RM7N1lipn0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
@@ -318,7 +323,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/gamblingkingsbackend.zip"
+                "S3Key": "serverless/gamblingkingsbackend/dev/1591062797548-2020-06-02T01:53:17.548Z/gamblingkingsbackend.zip"
               },
               "FunctionName": "gamblingkingsbackend-dev-defaultMessages",
               "Handler": "src/handler.defaultMessage",
@@ -605,24 +610,24 @@
               "Ref": "ServerlessDeploymentBucket"
             }
           },
-          "AwsUnderscoresdkUnderscorelayerLambdaLayerQualifiedArn": {
+          "AwsLambdaLayerQualifiedArn": {
             "Description": "Current Lambda layer version",
             "Value": {
-              "Ref": "AwsUnderscoresdkUnderscorelayerLambdaLayer"
+              "Ref": "AwsLambdaLayer"
             }
           },
-          "AwsUnderscoresdkUnderscorelayerLambdaLayerHash": {
+          "AwsLambdaLayerHash": {
             "Description": "Current Lambda layer hash",
-            "Value": "8c8786ea54bd0933b8db6f2d5389d3e550645bc2"
+            "Value": "4ad4ae028ce6b545f6af507b0cfc2c6c2fe274db"
           },
-          "AwsUnderscoresdkUnderscorelayerLambdaLayerS3Key": {
+          "AwsLambdaLayerS3Key": {
             "Description": "Current Lambda layer S3Key",
-            "Value": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/src/aws_sdk_layer.zip"
+            "Value": "serverless/gamblingkingsbackend/dev/1591062797548-2020-06-02T01:53:17.548Z/src/aws_sdk_layer.zip"
           },
           "ConnectionManagerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ConnectionManagerLambdaVersionKZZIn1tkKZ5xEosApymafatKeRf8cvkmTParfPhuBA"
+              "Ref": "ConnectionManagerLambdaVersionB1OH4RkmBAWZge99oR0J5xkRnCG9fRz9RM7N1lipn0"
             }
           },
           "DefaultMessagesLambdaFunctionQualifiedArn": {
@@ -732,6 +737,9 @@
     "functions": {
       "connectionManager": {
         "handler": "src/handler.connectionManager",
+        "layers": {
+          "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"ConnectionManagerLambdaFunction\"][\"Properties\"][\"Layers\"]"
+        },
         "events": [
           {
             "websocket": {
@@ -755,7 +763,7 @@
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "ConnectionManagerLambdaVersionKZZIn1tkKZ5xEosApymafatKeRf8cvkmTParfPhuBA"
+        "versionLogicalId": "ConnectionManagerLambdaVersionB1OH4RkmBAWZge99oR0J5xkRnCG9fRz9RM7N1lipn0"
       },
       "defaultMessages": {
         "handler": "src/handler.defaultMessage",
@@ -831,7 +839,7 @@
     },
     "serviceFilename": "serverless.yml",
     "layers": {
-      "aws_sdk_layer": {
+      "aws": {
         "description": "layer that holds the aws_sdk",
         "package": {
           "artifact": "src/aws_sdk_layer.zip"
@@ -842,7 +850,7 @@
     "artifact": "C:\\Users\\Vincent\\Desktop\\GamblingKingsBackend\\.build\\.serverless\\gamblingkingsbackend.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z",
+    "artifactDirectoryName": "serverless/gamblingkingsbackend/dev/1591062797548-2020-06-02T01:53:17.548Z",
     "artifact": "gamblingkingsbackend.zip"
   }
 }
