@@ -5,6 +5,3 @@ node_modules
 .serverless
 .build
 .dynamodb
-
-# Misc
-.env

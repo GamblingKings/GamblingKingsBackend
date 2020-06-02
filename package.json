@@ -5,6 +5,9 @@
   "repository": "https://github.com/yummyblabla/GamblingKingsBackend.git",
   "author": "Vincent Wong <vwong125@my.bcit.ca>",
   "license": "MIT",
+  "scripts": {
+    "format": "prettier --write \"**/*.{js,md}\""
+  },
   "dependencies": {
     "@types/aws-lambda": "^8.10.52",
     "@types/node": "^14.0.9",

@@ -9,12 +9,12 @@ export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent): Promi
   const putParams: DynamoDB.DocumentClient.PutItemInput = {
     TableName: connectionDBTable,
     Item: {
-      connectionId: event.requestContext.connectionId
-    }
+      connectionId: event.requestContext.connectionId,
+    },
   };
 
   console.log('putParams', putParams);
-  console.log('writing to the db table...');
+  console.log('Writing connectionId to the db table...');
   return await DB.put(putParams).promise();
 };
 
@@ -22,12 +22,12 @@ export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent): Pr
   const deleteParams: DynamoDB.DocumentClient.DeleteItemInput = {
     TableName: connectionDBTable,
     Key: {
-      connectionId: event.requestContext.connectionId
-    }
+      connectionId: event.requestContext.connectionId,
+    },
   };
 
   console.log('deleteParams', deleteParams);
-
+  console.log('Deleting connectionId from the db table...');
   return await DB.delete(deleteParams).promise();
 };
 
@@ -35,6 +35,6 @@ export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent): Pr
 export const defaultMessage: Handler = async (event: WebsocketAPIGatewayEvent) => {
   return {
     status: 403,
-    event: event
+    event: event,
   };
 };
