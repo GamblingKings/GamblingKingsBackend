@@ -11,7 +11,10 @@ cd src/aws_sdk_layer/
 yarn install
 
 # Zip lambda layer folder
+cd ..
 zip -r aws_sdk_layer.zip aws_sdk_layer/
+
+# Uncomment the code for local dev in both serverless.yml and db.ts (under src/module/db.ts)
 
 # Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory)
 sls dynamodb install
