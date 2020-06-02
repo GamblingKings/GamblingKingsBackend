@@ -7,6 +7,11 @@
 ```bash
 # Install dependencies
 yarn install
+cd src/aws_sdk_layer/
+yarn install
+
+# Zip lambda layer folder
+zip -r aws_sdk_layer.zip aws_sdk_layer/
 
 # Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory)
 sls dynamodb install
