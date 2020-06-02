@@ -153,12 +153,32 @@
                       ]
                     },
                     {
+                      "Fn::GetAtt": [
+                        "GamesDynamoDBTable",
+                        "Arn"
+                      ]
+                    },
+                    {
                       "Fn::Join": [
                         "/",
                         [
                           {
                             "Fn::GetAtt": [
                               "ConnectionDynamoDBTable",
+                              "Arn"
+                            ]
+                          },
+                          "*"
+                        ]
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "/",
+                        [
+                          {
+                            "Fn::GetAtt": [
+                              "GamesDynamoDBTable",
                               "Arn"
                             ]
                           },
@@ -199,6 +219,19 @@
         }
       }
     },
+    "AwsUnderscoresdkUnderscorelayerLambdaLayer": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/src/aws_sdk_layer.zip"
+        },
+        "LayerName": "aws_sdk_layer",
+        "Description": "layer that holds the aws_sdk"
+      }
+    },
     "ConnectionManagerLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
@@ -206,7 +239,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/gamblingkingsbackend/dev/1591055701270-2020-06-01T23:55:01.270Z/gamblingkingsbackend.zip"
+          "S3Key": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/gamblingkingsbackend.zip"
         },
         "FunctionName": "gamblingkingsbackend-dev-connectionManager",
         "Handler": "src/handler.connectionManager",
@@ -224,6 +257,9 @@
             "ConnectionDynamoDBTable": {
               "Ref": "ConnectionDynamoDBTable"
             },
+            "GamesDynamoDBTable": {
+              "Ref": "GamesDynamoDBTable"
+            },
             "API_REGION": "us-west-2"
           }
         }
@@ -232,14 +268,14 @@
         "ConnectionManagerLogGroup"
       ]
     },
-    "ConnectionManagerLambdaVersiontkqM0RFksfWHgaInxmmtyzyOAYRtVPl6wBSZ6TU8": {
+    "ConnectionManagerLambdaVersionKZZIn1tkKZ5xEosApymafatKeRf8cvkmTParfPhuBA": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ConnectionManagerLambdaFunction"
         },
-        "CodeSha256": "MEHho1W6gsFNmJGta96Cn3cksH4RybKO4ESwSsoz0BE="
+        "CodeSha256": "yNs0jVf/20hJP/1Q/iyEKfp6dpSvLKfq8z3yjeF/gfA="
       }
     },
     "DefaultMessagesLambdaFunction": {
@@ -249,7 +285,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/gamblingkingsbackend/dev/1591055701270-2020-06-01T23:55:01.270Z/gamblingkingsbackend.zip"
+          "S3Key": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/gamblingkingsbackend.zip"
         },
         "FunctionName": "gamblingkingsbackend-dev-defaultMessages",
         "Handler": "src/handler.defaultMessage",
@@ -267,6 +303,9 @@
             "ConnectionDynamoDBTable": {
               "Ref": "ConnectionDynamoDBTable"
             },
+            "GamesDynamoDBTable": {
+              "Ref": "GamesDynamoDBTable"
+            },
             "API_REGION": "us-west-2"
           }
         }
@@ -275,14 +314,14 @@
         "DefaultMessagesLogGroup"
       ]
     },
-    "DefaultMessagesLambdaVersiono2uShvC4grfurdth74RYKRSuoKagskVla1vrB9a4A": {
+    "DefaultMessagesLambdaVersion8BepBRIPzcEgQbeZAcgPf72zVpI3DrIJU04ESQTqu4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "DefaultMessagesLambdaFunction"
         },
-        "CodeSha256": "MEHho1W6gsFNmJGta96Cn3cksH4RybKO4ESwSsoz0BE="
+        "CodeSha256": "yNs0jVf/20hJP/1Q/iyEKfp6dpSvLKfq8z3yjeF/gfA="
       }
     },
     "WebsocketsApi": {
@@ -485,7 +524,7 @@
     "ConnectionDynamoDBTable": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
-        "TableName": "usersTable",
+        "TableName": "ConnectionsTable",
         "AttributeDefinitions": [
           {
             "AttributeName": "connectionId",
@@ -503,6 +542,28 @@
           "WriteCapacityUnits": 1
         }
       }
+    },
+    "GamesDynamoDBTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": "GamessTable",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "gameId",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "gameId",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        }
+      }
     }
   },
   "Outputs": {
@@ -511,16 +572,30 @@
         "Ref": "ServerlessDeploymentBucket"
       }
     },
+    "AwsUnderscoresdkUnderscorelayerLambdaLayerQualifiedArn": {
+      "Description": "Current Lambda layer version",
+      "Value": {
+        "Ref": "AwsUnderscoresdkUnderscorelayerLambdaLayer"
+      }
+    },
+    "AwsUnderscoresdkUnderscorelayerLambdaLayerHash": {
+      "Description": "Current Lambda layer hash",
+      "Value": "8c8786ea54bd0933b8db6f2d5389d3e550645bc2"
+    },
+    "AwsUnderscoresdkUnderscorelayerLambdaLayerS3Key": {
+      "Description": "Current Lambda layer S3Key",
+      "Value": "serverless/gamblingkingsbackend/dev/1591060669371-2020-06-02T01:17:49.371Z/src/aws_sdk_layer.zip"
+    },
     "ConnectionManagerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ConnectionManagerLambdaVersiontkqM0RFksfWHgaInxmmtyzyOAYRtVPl6wBSZ6TU8"
+        "Ref": "ConnectionManagerLambdaVersionKZZIn1tkKZ5xEosApymafatKeRf8cvkmTParfPhuBA"
       }
     },
     "DefaultMessagesLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "DefaultMessagesLambdaVersiono2uShvC4grfurdth74RYKRSuoKagskVla1vrB9a4A"
+        "Ref": "DefaultMessagesLambdaVersion8BepBRIPzcEgQbeZAcgPf72zVpI3DrIJU04ESQTqu4"
       }
     },
     "ServiceEndpointWebsocket": {

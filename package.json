@@ -5,9 +5,7 @@
   "repository": "https://github.com/yummyblabla/GamblingKingsBackend.git",
   "author": "Vincent Wong <vwong125@my.bcit.ca>",
   "license": "MIT",
-  "devDependencies": {},
   "dependencies": {
-    "aws-sdk": "^2.687.0",
     "serverless-plugin-typescript": "^1.1.9",
     "typescript": "^3.9.3"
   }

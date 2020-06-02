@@ -30,16 +30,29 @@ provider:
         - "dynamodb:Query"
       Resource:
         - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
+        - Fn::GetAtt: [GamesDynamoDBTable, Arn]
         - Fn::Join:
             - "/"
             - - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
+              - "*"
+        - Fn::Join:
+            - "/"
+            - - Fn::GetAtt: [GamesDynamoDBTable, Arn]
               - "*"
 
   # you can define service wide environment variables here
   environment:
     ConnectionDynamoDBTable:
       Ref: ConnectionDynamoDBTable
+    GamesDynamoDBTable:
+      Ref: GamesDynamoDBTable
     API_REGION: "${self:provider.region}"
+
+layers:
+  aws_sdk_layer:
+    description: layer that holds the aws_sdk
+    package:
+      artifact: src/aws_sdk_layer.zip
 
 functions:
   # manage connection and disconnection of clients
@@ -62,12 +75,25 @@ resources:
     ConnectionDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: usersTable
+        TableName: ConnectionsTable
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S
         KeySchema:
           - AttributeName: connectionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    GamesDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: GamessTable
+        AttributeDefinitions:
+          - AttributeName: gameId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: gameId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

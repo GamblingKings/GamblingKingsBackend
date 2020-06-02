@@ -19,7 +19,7 @@ async function connectionManager(event: any): Promise<object> {
     const putParams: putParamsObj = {
       TableName: process.env.ConnectionDynamoDBTable,
       Item: {
-        connectionId: event.connectionId,
+        connectionId: event.requestContext.connectionId,
       },
     };
 
@@ -28,7 +28,7 @@ async function connectionManager(event: any): Promise<object> {
     const deleteParams: deleteParamsObj = {
       TableName: process.env.ConnectionDynamoDBTable,
       Key: {
-        connectionId: event.connectionId,
+        connectionId: event.requestContext.connectionId,
       },
     };
 
@@ -36,7 +36,7 @@ async function connectionManager(event: any): Promise<object> {
   }
 }
 
-async function defaultMessage(event, context) {
+async function defaultMessage(event: any) {
   return {
     status: 403,
     event: event,
