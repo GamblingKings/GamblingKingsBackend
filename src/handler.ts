@@ -1,11 +1,14 @@
-import { DB } from './module/db';
+/* eslint-disable import/no-extraneous-dependencies */
 import { DynamoDB } from 'aws-sdk';
+// eslint-disable-next-line import/no-unresolved
 import { Handler } from 'aws-lambda';
+import DB from './module/db';
 import { WebsocketAPIGatewayEvent } from './types';
 
-const connectionDBTable: string = 'ConnectionsTable';
+const connectionDBTable = 'ConnectionsTable';
 
-export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent): Promise<object> => {
+// eslint-disable-next-line consistent-return
+export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
   const putParams: DynamoDB.DocumentClient.PutItemInput = {
     TableName: connectionDBTable,
     Item: {
@@ -15,10 +18,16 @@ export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent): Promi
 
   console.log('putParams', putParams);
   console.log('Writing connectionId to the db table...');
-  return await DB.put(putParams).promise();
+
+  try {
+    return DB.put(putParams).promise();
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent): Promise<object> => {
+// eslint-disable-next-line consistent-return
+export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
   const deleteParams: DynamoDB.DocumentClient.DeleteItemInput = {
     TableName: connectionDBTable,
     Key: {
@@ -28,13 +37,18 @@ export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent): Pr
 
   console.log('deleteParams', deleteParams);
   console.log('Deleting connectionId from the db table...');
-  return await DB.delete(deleteParams).promise();
+
+  try {
+    return DB.delete(deleteParams).promise();
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // TODO: add return type
 export const defaultMessage: Handler = async (event: WebsocketAPIGatewayEvent) => {
   return {
     status: 403,
-    event: event,
+    event,
   };
 };

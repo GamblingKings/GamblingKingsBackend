@@ -2,25 +2,30 @@
 
 ## Local development
 
-1. Install dependencies and start serverless offline for local dev
+Prerequisite:
 
-```bash
+- Node.Js
+- Typescript
+- Serverless
+- Java Runtime Engine (JRE) version 6.x or newer
+
+1. Install dependencies and start serverless offline for local dev:
+
+```shell script
+# Cleanup auto-generated folders
+yarn run dev:cleanup
+
 # Install dependencies
-yarn install
-cd src/aws_sdk_layer/
-yarn install
-
-# Zip lambda layer folder
-cd ..
-zip -r aws_sdk_layer.zip aws_sdk_layer/
+yarn run dev:install
 
 # Uncomment the code for local dev in both serverless.yml and db.ts (under src/module/db.ts)
 
 # Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory)
-sls dynamodb install
-
 # Start serverless and dynamodb locally
-sls offline start
+yarn run dev:run
+
+# Or run all three scripts at the same time
+yarn run start_local
 ```
 
 2. Test Connection [here](https://www.websocket.org/echo.html) by entering the websocket url (e.g. `ws://localhost:3001`)
@@ -32,3 +37,26 @@ For more details on local dev, see the following links
 - [Serverless Plugin Typescript](https://www.serverless.com/plugins/serverless-plugin-typescript/)
 
 3. To invoke lambda function locally see [invoke-local](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/)
+
+## Deploy to AWS account
+
+1. Add profile and credentials to .aws/credentials and ./aws/config file OR use [aws-vault](https://github.com/99designs/aws-vault) (Recommended):
+
+```shell script
+aws-vault add gamblingkings-sls
+```
+
+2. Deploy or remove AWS resources
+   Note： --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
+
+To deploy:
+
+```shell script
+aws-vault exec <PROFILE_NAME> --no-session -- sls deploy
+```
+
+To remove:
+
+```shell script
+aws-vault exec <PROFILE_NAME> --no-session -- sls remove
+```

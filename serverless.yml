@@ -6,21 +6,21 @@ plugins:
   - serverless-dynamodb-local
 
 # Uncomment for local dev only
-# custom:
-#   dynamodb:
-#     # If you only want to use DynamoDB Local in some stages, declare them here
-#     stages:
-#       - dev
-#     start:
-#       port: 8000
-#       inMemory: true
-#       heapInitial: 200m
-#       heapMax: 1g
-#       migrate: true
-#       seed: true
-#       convertEmptyValues: true
-#     # Uncomment only if you already have a DynamoDB running locally
-#     # noStart: true
+custom:
+  dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+    # Uncomment only if you already have a DynamoDB running locally
+    # noStart: true
 
 provider:
   name: aws
@@ -66,26 +66,41 @@ provider:
     GamesDynamoDBTable:
       Ref: GamesDynamoDBTable
     API_REGION: '${self:provider.region}'
+    NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
+
+package:
+  include:
+    - src/
+  exclude:
+    - node_modules/**
+    - .dynamodb/**
+    - layer/**
 
 layers:
-  aws:
-    description: layer that holds the aws_sdk
+  main:
+    description: layer that holds all the main dependencies
     package:
-      artifact: src/aws_sdk_layer.zip
+      artifact: main_layer.zip
 
 functions:
   onConnect:
     handler: src/handler.onConnect
     events:
       - websocket: $connect
+    layers:
+      - { Ref: MainLambdaLayer } # should be named as TitleCased name followed by LambdaLayer
   onDisconnect:
     handler: src/handler.onDisconnect
     events:
       - websocket: $disconnect
+    layers:
+      - { Ref: MainLambdaLayer }
   defaultHandler:
     handler: src/handler.defaultMessage
     events:
       - websocket: $default
+    layers:
+      - { Ref: MainLambdaLayer }
 
 # you can add CloudFormation resource templates here
 resources:

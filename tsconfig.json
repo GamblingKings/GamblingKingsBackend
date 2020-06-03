@@ -10,5 +10,7 @@
     "moduleResolution": "node",
     "lib": ["es2015"],
     "rootDir": "./"
-  }
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules/**/*", ".dynamodb/**/*", ".vscode/**/*"]
 }
