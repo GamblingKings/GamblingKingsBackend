@@ -60,3 +60,9 @@ To remove:
 ```shell script
 aws-vault exec <PROFILE_NAME> --no-session -- sls remove
 ```
+
+**To start a production build and deploy to AWS**
+
+```shell script
+yarn start
+```
