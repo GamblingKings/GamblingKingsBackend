@@ -4,14 +4,12 @@ import { DynamoDB } from 'aws-sdk';
 import { Handler } from 'aws-lambda';
 import DB from './module/db';
 import { WebsocketAPIGatewayEvent } from './types';
-import './env'; // Load env variables from .env
-
-const connectionDBTable = <string>process.env.ConnectionsTable;
+import { CONNECTIONS_TABLE } from './constants';
 
 // eslint-disable-next-line consistent-return
 export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
   const putParams: DynamoDB.DocumentClient.PutItemInput = {
-    TableName: connectionDBTable,
+    TableName: CONNECTIONS_TABLE,
     Item: {
       connectionId: event.requestContext.connectionId,
     },
@@ -30,7 +28,7 @@ export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
 // eslint-disable-next-line consistent-return
 export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
   const deleteParams: DynamoDB.DocumentClient.DeleteItemInput = {
-    TableName: connectionDBTable,
+    TableName: CONNECTIONS_TABLE,
     Key: {
       connectionId: event.requestContext.connectionId,
     },

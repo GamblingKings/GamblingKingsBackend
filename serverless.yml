@@ -53,26 +53,26 @@ provider:
         - 'dynamodb:BatchWriteItem'
         - 'dynamodb:Query'
       Resource:
-        - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
-        - Fn::GetAtt: [GamesDynamoDBTable, Arn]
+        - Fn::GetAtt: [ConnectionsTable, Arn]
+        - Fn::GetAtt: [GamesTable, Arn]
         - Fn::Join:
             - '/'
-            - - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
+            - - Fn::GetAtt: [ConnectionsTable, Arn]
               - '*'
         - Fn::Join:
             - '/'
-            - - Fn::GetAtt: [GamesDynamoDBTable, Arn]
+            - - Fn::GetAtt: [GamesTable, Arn]
               - '*'
 
   # you can define service wide environment variables here
   environment:
-    ConnectionDynamoDBTable:
-      Ref: ConnectionDynamoDBTable
-    GamesDynamoDBTable:
-      Ref: GamesDynamoDBTable
+    CONNECTIONS_TABLE:
+      Ref: ConnectionsTable
+    GAMES_TABLE:
+      Ref: GamesTable
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
-    ENVIRONMENT: prod
+    ENV: prod
 
 package:
   include:
@@ -111,7 +111,7 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    ConnectionDynamoDBTable:
+    ConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ConnectionsTable
@@ -124,7 +124,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    GamesDynamoDBTable:
+    GamesTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: GamesTable
