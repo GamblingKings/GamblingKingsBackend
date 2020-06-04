@@ -8,4 +8,5 @@ interface RealtimeAPIGatewayEventRequestContext extends APIGatewayEventRequestCo
 
 export interface WebsocketAPIGatewayEvent extends APIGatewayEvent {
   requestContext: RealtimeAPIGatewayEventRequestContext;
+  body: string;
 }

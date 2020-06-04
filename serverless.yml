@@ -80,7 +80,7 @@ package:
   exclude:
     - node_modules/**
     - .dynamodb/**
-    - layer/**
+    - lambda_layer/**
 
 layers:
   main:
@@ -105,6 +105,12 @@ functions:
     handler: src/handler.defaultMessage
     events:
       - websocket: $default
+    layers:
+      - { Ref: MainLambdaLayer }
+  setUsername:
+    handler: src/handler.onSetUsername
+    events:
+      - websocket: SET_USERNAME
     layers:
       - { Ref: MainLambdaLayer }
 
