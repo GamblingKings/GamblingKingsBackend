@@ -4,7 +4,6 @@ import { DynamoDB } from 'aws-sdk';
 import { Handler } from 'aws-lambda';
 import DB from './module/db';
 import { WebsocketAPIGatewayEvent } from './types';
-import './env'; // Load env variables from .env
 
 const connectionDBTable = <string>process.env.ConnectionsTable;
 
