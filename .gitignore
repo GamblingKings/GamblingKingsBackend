@@ -12,3 +12,4 @@ node_modules
 vscode
 *.zip
 .DS_Store
+*.lock

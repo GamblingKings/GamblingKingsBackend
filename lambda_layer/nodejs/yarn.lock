@@ -3231,9 +3231,9 @@ serverless-dynamodb-local@^0.2.39:
     lodash "^4.17.0"
 
 serverless-offline@^6.3.1:
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-6.3.1.tgz#ccdeb2247241902d108e5cb793717077edaafaf9"
-  integrity sha512-CuVptFglgNbUy77JOHEeqv17acWCDu9X4boVAj1UHFNnmO4I+iLh1n9mu4uNRnSSbfsNUJNXh8r8NRzKpDEs6A==
+  version "6.3.2"
+  resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-6.3.2.tgz#20056598dfc2bf3afbf42c0b064fbdc5624e4534"
+  integrity sha512-tQbfCxb37m0bvPFA2IOh9eNCICW3qwNus9+WFCgbF3uBbgiwQejjRuTXWIDPCYc9EZ41uH9X3UvpWeXNHOqjTg==
   dependencies:
     "@hapi/boom" "^7.4.11"
     "@hapi/h2o2" "^8.3.2"
