@@ -18,7 +18,7 @@ yarn run dev:cleanup
 # Install dependencies
 yarn run dev:install
 
-# Uncomment the code for local dev in both serverless.yml and db.ts (under src/module/db.ts)
+# Uncomment the code for local dev in both serverless.yml and change ENVIRONMENT to local in .env
 
 # Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory)
 # Start serverless and dynamodb locally
@@ -46,7 +46,9 @@ For more details on local dev, see the following links
 aws-vault add gamblingkings-sls
 ```
 
-2. Deploy or remove AWS resources
+2. Change ENVIRONMENT to prod in .env
+
+3. Deploy or remove AWS resources
    Note： --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
 
 To deploy:
