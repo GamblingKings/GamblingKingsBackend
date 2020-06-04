@@ -4,8 +4,9 @@ import { DynamoDB } from 'aws-sdk';
 import { Handler } from 'aws-lambda';
 import DB from './module/db';
 import { WebsocketAPIGatewayEvent } from './types';
+import './env'; // Load env variables from .env
 
-const connectionDBTable = 'ConnectionsTable';
+const connectionDBTable = <string>process.env.ConnectionsTable;
 
 // eslint-disable-next-line consistent-return
 export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent) => {

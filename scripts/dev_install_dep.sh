@@ -5,7 +5,7 @@ cd ..
 yarn install
 
 # Zip main lambda layer folder if it does not exists
-MAIN_LAYER=main_layer.zip
+MAIN_LAYER=lambda_layer.zip
 if [ -f "$MAIN_LAYER" ]; then
     echo "$MAIN_LAYER exist"
 else

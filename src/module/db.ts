@@ -1,8 +1,9 @@
-import * as dotenv from 'dotenv';
 import { DynamoDB } from 'aws-sdk';
 
-// Load env variables from .env
-dotenv.config();
+// ////////////////////////////////////
+// Uncomment for local dev only
+// ////////////////////////////////////
+import '../env'; // Load env variables from .env
 
 interface DynamoDBOption {
   apiVersion: string;

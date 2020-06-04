@@ -335,10 +335,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@types/aws-lambda@^8.10.52":
-  version "8.10.52"
-  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.52.tgz#b019cc7e1819eaf86a9166383951d5ec4aa2d32e"
-  integrity sha512-Gm8hzCpdDj4/wlS8HA6nPPM5nHTF3Wjv/d6n7J2fdcJF4GtAIMbG7Wm8xKXY02K/Yqo8fzGw7PfbbkP9IeVlCg==
+"@types/aws-lambda@^8.10.53":
+  version "8.10.53"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.53.tgz#ad8d52a5f264f96b80a0d8c2e5cda1de30f2364b"
+  integrity sha512-zHIgKKqwcdeHkPMPKd47DedJ4b+Tv01VGosWtJDMa8s6cnx03IeNagFWEpoxVI+H34fOvxtbqecJddpuVFbU2w==
 
 "@types/color-name@^1.1.1":
   version "1.1.1"
@@ -374,10 +374,15 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
-"@types/node@*", "@types/node@^14.0.9":
+"@types/node@*":
   version "14.0.9"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.9.tgz#43896ab87fc82bda1dfd600cdf44a0c8a64e11d2"
   integrity sha512-0sCTiXKXELOBxvZLN4krQ0FPOAA7ij+6WwvD0k/PHd9/KAkr4dXel5J9fh6F4x1FwAQILqAWkmpeuS6mjf1iKA==
+
+"@types/node@^14.0.10":
+  version "14.0.10"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.10.tgz#dbfaa170bd9eafccccb6d7060743a761b0844afd"
+  integrity sha512-Bz23oN/5bi0rniKT24ExLf4cK0JdvN3dH/3k0whYkdN4eI4vS2ZW/2ENNn2uxHCzWcbdHIa/GRuWQytfzCjRYw==
 
 "@types/retry@^0.12.0":
   version "0.12.0"
@@ -580,7 +585,22 @@ atob@^2.1.2:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
-aws-sdk@^2.688.0, aws-sdk@^2.7.0:
+aws-sdk@^2.689.0:
+  version "2.689.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.689.0.tgz#f8833031afd773bfc9503f8d6325186a985d019c"
+  integrity sha512-l9kbgZtIbR9dux4JHoxZ3vDWAfGtp34KpDDf5cwYHC5jDTTJoe6XhBBlEDSruwKh1+5DONpSZWNVhDZ6E02ojg==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.15.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    uuid "3.3.2"
+    xml2js "0.4.19"
+
+aws-sdk@^2.7.0:
   version "2.688.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.688.0.tgz#3a045f9a75767b4c51f8c2477ef5b080532cfce1"
   integrity sha512-fu8isXKSHj4w/FG5ulzkswo0/9RC3HJPVNi1Z7z4X4nDPzMcr+nHlcu75IdG7UUBW9zp4MdlAXorky/34VtTKw==
@@ -3230,10 +3250,10 @@ serverless-dynamodb-local@^0.2.39:
     dynamodb-localhost "0.0.9"
     lodash "^4.17.0"
 
-serverless-offline@^6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-6.3.0.tgz#b323204a9f39b7fdf04f82f204feb49c8e22d53f"
-  integrity sha512-WhMOh+uwMxZQ4VpwDOTUj8W1Ik1w9TFespOss6Nh3+KBZJeJrMORDdb+ik4OILyp46HyvcfG/m27T+LLC47vxg==
+serverless-offline@^6.3.1:
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-6.3.1.tgz#ccdeb2247241902d108e5cb793717077edaafaf9"
+  integrity sha512-CuVptFglgNbUy77JOHEeqv17acWCDu9X4boVAj1UHFNnmO4I+iLh1n9mu4uNRnSSbfsNUJNXh8r8NRzKpDEs6A==
   dependencies:
     "@hapi/boom" "^7.4.11"
     "@hapi/h2o2" "^8.3.2"

@@ -72,6 +72,7 @@ provider:
       Ref: GamesDynamoDBTable
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
+    ENVIRONMENT: prod
 
 package:
   include:
@@ -85,7 +86,7 @@ layers:
   main:
     description: layer that holds all the main dependencies
     package:
-      artifact: main_layer.zip
+      artifact: lambda_layer.zip
 
 functions:
   onConnect:
@@ -121,8 +122,8 @@ resources:
           - AttributeName: connectionId
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
     GamesDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -134,5 +135,5 @@ resources:
           - AttributeName: gameId
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
