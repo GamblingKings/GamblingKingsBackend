@@ -19,7 +19,7 @@ yarn run dev:cleanup
 yarn run dev:install
 
 # Uncomment the code for local dev in both serverless.yml and db.ts
-# Change ENVIRONMENT to local in .env, and
+# Change ENVIRONMENT to local in .env
 
 # Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory)
 # Start serverless and dynamodb locally
