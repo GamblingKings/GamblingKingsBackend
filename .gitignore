@@ -1,2 +1,14 @@
-**/node_modules
+# Package directories
+node_modules
+
+# Serverless directories
 .serverless
+.build
+.dynamodb
+
+# Misc
+.env
+.idea
+vscode
+*.zip
+.DS_Store

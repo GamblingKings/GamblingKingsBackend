@@ -1,0 +1,41 @@
+{
+  "name": "GamblingKingsBackend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/yummyblabla/GamblingKingsBackend.git",
+  "author": "Vincent Wong <vwong125@my.bcit.ca>",
+  "license": "MIT",
+  "scripts": {
+    "dev:cleanup": "rm -rf .build/ .serverless/ .dynamodb/",
+    "dev:install_dep": "cd scripts/ && chmod 777 dev_install_dep.sh && ./dev_install_dep.sh",
+    "dev:run": "sls dynamodb install && sls offline start",
+    "start_local": "npm-run-all format dev:*",
+    "install_dep": "cd scripts/ && chmod 777 prod_install_dep.sh && ./prod_install_dep.sh",
+    "deploy": "aws-vault exec gamblingkings-sls --no-session -- serverless deploy",
+    "remove": "aws-vault exec gamblingkings-sls --no-session -- serverless remove",
+    "start": "npm-run-all format dev:cleanup install_dep deploy",
+    "format": "prettier --write \"**/*.{js,md}\"",
+    "lint": "eslint -c .eslintrc.json . --ext .js,.ts --fix"
+  },
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.53",
+    "@types/node": "^14.0.10",
+    "aws-sdk": "^2.689.0",
+    "dotenv": "^8.2.0",
+    "npm-run-all": "^4.1.5",
+    "serverless-plugin-typescript": "^1.1.9",
+    "typescript": "^3.9.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.1.0",
+    "@typescript-eslint/parser": "^3.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-prettier": "^3.1.3",
+    "prettier": "^2.0.5",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^6.3.1"
+  }
+}

@@ -2,6 +2,30 @@ service: gamblingkingsbackend
 
 plugins:
   - serverless-plugin-typescript
+  #######################################
+  # Uncomment this for local dev only
+  #######################################
+  # - serverless-offline
+  # - serverless-dynamodb-local
+
+#######################################
+# Uncomment this for local dev only
+#######################################
+# custom:
+#   dynamodb:
+#     # If you only want to use DynamoDB Local in some stages, declare them here
+#     stages:
+#       - dev
+#     start:
+#       port: 8000
+#       inMemory: true
+#       heapInitial: 200m
+#       heapMax: 1g
+#       migrate: true
+#       seed: true
+#       convertEmptyValues: true
+#     # Uncomment only if you already have a DynamoDB running locally
+#     # noStart: true
 
 provider:
   name: aws
@@ -16,29 +40,29 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - "execute-api:ManageConnections"
+        - 'execute-api:ManageConnections'
       Resource:
-        - "arn:aws:execute-api:*:*:**/@connections/*"
+        - 'arn:aws:execute-api:*:*:**/@connections/*'
     - Effect: Allow
       Action:
-        - "dynamodb:PutItem"
-        - "dynamodb:GetItem"
-        - "dynamodb:UpdateItem"
-        - "dynamodb:DeleteItem"
-        - "dynamodb:BatchGetItem"
-        - "dynamodb:BatchWriteItem"
-        - "dynamodb:Query"
+        - 'dynamodb:PutItem'
+        - 'dynamodb:GetItem'
+        - 'dynamodb:UpdateItem'
+        - 'dynamodb:DeleteItem'
+        - 'dynamodb:BatchGetItem'
+        - 'dynamodb:BatchWriteItem'
+        - 'dynamodb:Query'
       Resource:
         - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
         - Fn::GetAtt: [GamesDynamoDBTable, Arn]
         - Fn::Join:
-            - "/"
+            - '/'
             - - Fn::GetAtt: [ConnectionDynamoDBTable, Arn]
-              - "*"
+              - '*'
         - Fn::Join:
-            - "/"
+            - '/'
             - - Fn::GetAtt: [GamesDynamoDBTable, Arn]
-              - "*"
+              - '*'
 
   # you can define service wide environment variables here
   environment:
@@ -46,31 +70,44 @@ provider:
       Ref: ConnectionDynamoDBTable
     GamesDynamoDBTable:
       Ref: GamesDynamoDBTable
-    API_REGION: "${self:provider.region}"
+    API_REGION: '${self:provider.region}'
+    NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
+    ENVIRONMENT: prod
+
+package:
+  include:
+    - src/
+  exclude:
+    - node_modules/**
+    - .dynamodb/**
+    - layer/**
 
 layers:
-  aws:
-    description: layer that holds the aws_sdk
+  main:
+    description: layer that holds all the main dependencies
     package:
-      artifact: src/aws_sdk_layer.zip
+      artifact: lambda_layer.zip
 
 functions:
-  # manage connection and disconnection of clients
-  connectionManager:
-    handler: src/handler.connectionManager
-    layers:
-      - { Ref: AwsLambdaLayer }
+  onConnect:
+    handler: src/handler.onConnect
     events:
-      - websocket:
-          route: $connect
-      - websocket:
-          route: $disconnect
-
-  defaultMessages:
+      - websocket: $connect
+    layers:
+      - { Ref: MainLambdaLayer } # should be named as TitleCased name followed by LambdaLayer
+  onDisconnect:
+    handler: src/handler.onDisconnect
+    events:
+      - websocket: $disconnect
+    layers:
+      - { Ref: MainLambdaLayer }
+  defaultHandler:
     handler: src/handler.defaultMessage
     events:
-      - websocket:
-          route: $default
+      - websocket: $default
+    layers:
+      - { Ref: MainLambdaLayer }
+
 # you can add CloudFormation resource templates here
 resources:
   Resources:
@@ -85,8 +122,8 @@ resources:
           - AttributeName: connectionId
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
     GamesDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -98,5 +135,5 @@ resources:
           - AttributeName: gameId
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5

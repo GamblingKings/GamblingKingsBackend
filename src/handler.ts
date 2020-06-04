@@ -1,49 +1,55 @@
-import db from "./module/db";
+/* eslint-disable import/no-extraneous-dependencies */
+import { DynamoDB } from 'aws-sdk';
+// eslint-disable-next-line import/no-unresolved
+import { Handler } from 'aws-lambda';
+import DB from './module/db';
+import { WebsocketAPIGatewayEvent } from './types';
+import './env'; // Load env variables from .env
 
-interface putParamsObj {
-  TableName: string;
-  Item: {
-    connectionId: string;
+const connectionDBTable = <string>process.env.ConnectionsTable;
+
+// eslint-disable-next-line consistent-return
+export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
+  const putParams: DynamoDB.DocumentClient.PutItemInput = {
+    TableName: connectionDBTable,
+    Item: {
+      connectionId: event.requestContext.connectionId,
+    },
   };
-}
 
-interface deleteParamsObj {
-  TableName: string;
-  Key: {
-    connectionId: string;
-  };
-}
+  console.log('putParams', putParams);
+  console.log('Writing connectionId to the db table...');
 
-async function connectionManager(event: any): Promise<object> {
-  if (event.requestContext.eventType === "CONNECT") {
-    const putParams: putParamsObj = {
-      TableName: process.env.ConnectionDynamoDBTable,
-      Item: {
-        connectionId: event.requestContext.connectionId,
-      },
-    };
-
-    return await db.put(putParams).promise();
-  } else if (event.requestContext.eventType === "DISCONNECT") {
-    const deleteParams: deleteParamsObj = {
-      TableName: process.env.ConnectionDynamoDBTable,
-      Key: {
-        connectionId: event.requestContext.connectionId,
-      },
-    };
-
-    return await db.delete(deleteParams).promise();
+  try {
+    return DB.put(putParams).promise();
+  } catch (err) {
+    console.error(err);
   }
-}
+};
 
-async function defaultMessage(event: any) {
+// eslint-disable-next-line consistent-return
+export const onDisconnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
+  const deleteParams: DynamoDB.DocumentClient.DeleteItemInput = {
+    TableName: connectionDBTable,
+    Key: {
+      connectionId: event.requestContext.connectionId,
+    },
+  };
+
+  console.log('deleteParams', deleteParams);
+  console.log('Deleting connectionId from the db table...');
+
+  try {
+    return DB.delete(deleteParams).promise();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// TODO: add return type
+export const defaultMessage: Handler = async (event: WebsocketAPIGatewayEvent) => {
   return {
     status: 403,
-    event: event,
+    event,
   };
-}
-
-module.exports = {
-  connectionManager,
-  defaultMessage,
 };
