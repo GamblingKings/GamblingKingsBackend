@@ -72,7 +72,7 @@ provider:
       Ref: GamesTable
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
-    ENVIRONMENT: prod
+    ENV: prod
 
 package:
   include:
