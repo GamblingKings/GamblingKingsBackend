@@ -5,7 +5,7 @@ import { Handler } from 'aws-lambda';
 import DB from './module/db';
 import { WebsocketAPIGatewayEvent } from './types';
 
-const connectionDBTable = <string>process.env.ConnectionsTable;
+const connectionDBTable = <string>process.env.CONNECTIONS_TABLE;
 
 // eslint-disable-next-line consistent-return
 export const onConnect: Handler = async (event: WebsocketAPIGatewayEvent) => {
