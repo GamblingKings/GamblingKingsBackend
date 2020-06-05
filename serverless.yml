@@ -90,27 +90,33 @@ layers:
 
 functions:
   onConnect:
-    handler: src/handler.onConnect
+    handler: src/functions/onConnect.handler
     events:
       - websocket: $connect
     layers:
       - { Ref: MainLambdaLayer } # should be named as TitleCased name followed by LambdaLayer
   onDisconnect:
-    handler: src/handler.onDisconnect
+    handler: src/functions/onDisconnect.handler
     events:
       - websocket: $disconnect
     layers:
       - { Ref: MainLambdaLayer }
   defaultHandler:
-    handler: src/handler.defaultMessage
+    handler: src/functions/defaultMessage.handler
     events:
       - websocket: $default
     layers:
       - { Ref: MainLambdaLayer }
   setUsername:
-    handler: src/handler.onSetUsername
+    handler: src/functions/onSetUsername.handler
     events:
       - websocket: SET_USERNAME
+    layers:
+      - { Ref: MainLambdaLayer }
+  getAllUsers:
+    handler: src/functions/onGetAllUsers.handler
+    events:
+      - websocket: GET_ALL_USERS
     layers:
       - { Ref: MainLambdaLayer }
 
