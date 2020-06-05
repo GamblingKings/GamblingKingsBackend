@@ -1,19 +1,19 @@
 import { Handler } from 'aws-lambda';
-import { setUserName } from '../module/db';
+import { createGame } from '../module/db';
 import { WebSocketAPIGatewayEvent, LambdaEventBody } from '../types';
 import { response, LambdaResponse } from '../utils/response';
 
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
-  const { connectionId } = event.requestContext;
-  const body: LambdaEventBody<string> = JSON.parse(event.body);
+  const body: LambdaEventBody<string[]> = JSON.parse(event.body);
   const { payload } = body;
-  console.log('Payload', payload);
-  const { data } = payload;
 
+  console.log('Adding game to the db table...');
+  console.log('Payload data', payload.data);
+  console.log('Type of payload data', typeof payload.data);
   try {
-    await setUserName(connectionId, data);
+    await createGame(payload.data);
 
-    return response(200, `Set username to ${data}`);
+    return response(200, 'Game created successfully');
   } catch (err) {
     console.error(err);
     return response(500, err);

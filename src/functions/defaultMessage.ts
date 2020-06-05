@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { Handler } from 'aws-lambda';
 import { response, LambdaResponse } from '../utils/response';
 

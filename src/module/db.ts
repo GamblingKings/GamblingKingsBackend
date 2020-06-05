@@ -1,7 +1,8 @@
 import { DynamoDB, AWSError } from 'aws-sdk';
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { PromiseResult } from 'aws-sdk/lib/request';
-import { CONNECTIONS_TABLE } from '../constants';
+import { v4 as uuid } from 'uuid';
+import { CONNECTIONS_TABLE, GAMES_TABLE } from '../constants';
 
 type DynamoDBResponse<T> = PromiseResult<T, AWSError>;
 
@@ -10,8 +11,8 @@ export const DB = new DynamoDB.DocumentClient({
   // ////////////////////////////////////
   // Uncomment for local dev only
   // ////////////////////////////////////
-  // region: 'localhost',
-  // endpoint: 'http://localhost:8000',
+  region: 'localhost',
+  endpoint: 'http://localhost:8000',
 });
 
 export const saveConnection = async (connectionId: string): Promise<DynamoDBResponse<DocumentClient.PutItemOutput>> => {
@@ -60,6 +61,33 @@ export const setUserName = async (
 export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: CONNECTIONS_TABLE,
+    AttributesToGet: ['connectionId'], // only get connection Ids from each row
+  };
+
+  return DB.scan(scanParams).promise();
+};
+
+export const createGame = async (
+  connections: string[],
+): Promise<PromiseResult<DocumentClient.PutItemOutput, AWSError>> => {
+  const putParam: DocumentClient.PutItemInput = {
+    TableName: GAMES_TABLE,
+    Item: {
+      gameId: uuid(),
+      connections,
+    },
+  };
+
+  console.log('putParma:', putParam);
+  return DB.put(putParam).promise();
+};
+
+export const getAllGames = async (
+  attributes: string[] = ['gameId'],
+): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
+  const scanParams: DocumentClient.ScanInput = {
+    TableName: GAMES_TABLE,
+    AttributesToGet: attributes,
   };
 
   return DB.scan(scanParams).promise();

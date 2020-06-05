@@ -1,9 +1,10 @@
-// eslint-disable-next-line import/no-unresolved
 import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
 
 export interface WebSocketAPIGatewayEventRequestContext extends APIGatewayEventRequestContext {
   connectionId: string;
   connectedAt: number;
+  domainName: string;
+  stage: string;
 }
 
 export interface WebSocketAPIGatewayEvent extends APIGatewayEvent {
@@ -11,9 +12,9 @@ export interface WebSocketAPIGatewayEvent extends APIGatewayEvent {
   body: string;
 }
 
-export interface LambdaEventBody {
+export interface LambdaEventBody<T> {
   action: string;
   payload: {
-    data: string;
+    data: T;
   };
 }

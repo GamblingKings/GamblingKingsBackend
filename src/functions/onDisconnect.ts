@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { Handler } from 'aws-lambda';
 import { deleteConnection } from '../module/db';
 import { WebSocketAPIGatewayEvent } from '../types';
