@@ -1,15 +1,10 @@
-export interface LambdaResponse {
-  statusCode: number;
-  body: string | string[];
-  headers: LambdaResponseHeader;
-  isBase64Encoded: boolean;
-}
+import { LambdaResponse } from '../types';
 
-export interface LambdaResponseHeader {
-  'Content-Type': string;
-  'Access-Control-Allow-Origin': string;
-}
-
+/**
+ * Return an object as lambda function response.
+ * @param {number} statusCode status code
+ * @param {string} message response message
+ */
 export const response = (statusCode: number, message: string): LambdaResponse => {
   return {
     statusCode,

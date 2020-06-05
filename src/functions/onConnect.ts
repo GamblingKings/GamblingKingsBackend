@@ -1,8 +1,12 @@
 import { Handler } from 'aws-lambda';
 import { saveConnection } from '../module/db';
-import { WebSocketAPIGatewayEvent } from '../types';
-import { response, LambdaResponse } from '../utils/response';
+import { WebSocketAPIGatewayEvent, LambdaResponse } from '../types';
+import { response } from '../utils/response';
 
+/**
+ * Handler for websocket connection.
+ * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
+ */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   const { connectionId } = event.requestContext;
 

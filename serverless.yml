@@ -5,27 +5,27 @@ plugins:
   #######################################
   # Uncomment this for local dev only
   #######################################
-  - serverless-offline
-  - serverless-dynamodb-local
+  # - serverless-offline
+  # - serverless-dynamodb-local
 
 #######################################
 # Uncomment this for local dev only
 #######################################
-custom:
-  dynamodb:
-    # If you only want to use DynamoDB Local in some stages, declare them here
-    stages:
-      - dev
-    start:
-      port: 8000
-      inMemory: true
-      heapInitial: 200m
-      heapMax: 1g
-      migrate: true
-      seed: true
-      convertEmptyValues: true
-    # Uncomment only if you already have a DynamoDB running locally
-    # noStart: true
+# custom:
+#   dynamodb:
+#     # If you only want to use DynamoDB Local in some stages, declare them here
+#     stages:
+#       - dev
+#     start:
+#       port: 8000
+#       inMemory: true
+#       heapInitial: 200m
+#       heapMax: 1g
+#       migrate: true
+#       seed: true
+#       convertEmptyValues: true
+#     # Uncomment only if you already have a DynamoDB running locally
+#     # noStart: true
 
 provider:
   name: aws

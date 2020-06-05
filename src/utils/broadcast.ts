@@ -2,6 +2,11 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { WebSocketClient } from '../WebSocketClient';
 import { getAllConnections, getAllGames } from '../module/db';
 
+/**
+ * Broadcast all the connections to all users.
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string | string[]} msg a message as a string of array. This param is optional.
+ */
 export const broadcastConnections = async (
   ws: WebSocketClient,
   msg?: string | string[],
@@ -32,6 +37,11 @@ export const broadcastConnections = async (
   return [];
 };
 
+/**
+ * Broadcast a message to all users.
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string | string[]} msg a message as a string of array
+ */
 export const broadcastMessage = async (
   ws: WebSocketClient,
   msg: string | string,
@@ -39,6 +49,10 @@ export const broadcastMessage = async (
   return broadcastConnections(ws, msg);
 };
 
+/**
+ * Broadcast all the currently active games to all users.
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ */
 export const broadcastGames = async (ws: WebSocketClient): Promise<DocumentClient.ItemList | []> => {
   const userItems = (await getAllConnections()).Items;
   const gameItems = (await getAllGames()).Items;
