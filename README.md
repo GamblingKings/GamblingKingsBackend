@@ -68,3 +68,24 @@ aws-vault exec <PROFILE_NAME> --no-session -- sls remove
 ```shell script
 yarn start
 ```
+
+**This is a Draft**
+
+## Websocket Test Data
+
+```
+SET_USERNAME
+{"action": "SET_USERNAME", "payload": {"username": "new user"}}
+
+GET_ALL_USERS
+{"action": "GET_ALL_USERS"}
+
+CREATE_GAME
+{"action": "CREATE_GAME", "payload": {"data": ["TEST1", "TEST2", "TEST3"]}}
+
+GET_ALL_GAMES
+{"action": "GET_ALL_GAMES"}
+
+SEND_MESSAGE
+{"action": "SEND_MESSAGE", "payload": {"data": "custom message to all users"}}
+```
