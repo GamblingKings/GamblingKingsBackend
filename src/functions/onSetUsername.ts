@@ -1,6 +1,6 @@
 import { Handler } from 'aws-lambda';
 import { setUserName } from '../module/db';
-import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse } from '../types';
+import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventBodyPayloadOptions } from '../types';
 import { response } from '../utils/response';
 
 /**
@@ -9,10 +9,10 @@ import { response } from '../utils/response';
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   const { connectionId } = event.requestContext;
-  const body: LambdaEventBody = JSON.parse(event.body);
-  const { payload } = body;
+  const body = JSON.parse(event.body) as LambdaEventBody;
+  const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   console.log('Payload', payload);
-  const { username } = payload;
+  const { username } = body.payload;
 
   console.log(`Setting username to ${username}...`);
   try {

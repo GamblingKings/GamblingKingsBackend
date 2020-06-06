@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse } from '../types';
+import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventBodyPayloadOptions } from '../types';
 import { response } from '../utils/response';
 import { WebSocketClient } from '../WebSocketClient';
 import { broadcastMessage } from '../utils/broadcast';
@@ -11,12 +11,13 @@ import { broadcastMessage } from '../utils/broadcast';
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   console.log('RequestContext', event.requestContext);
   const ws = new WebSocketClient(event.requestContext);
-  const body: LambdaEventBody = JSON.parse(event.body);
+  const body = JSON.parse(event.body) as LambdaEventBody;
+  const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
 
   // Broadcast message
   console.log(body);
-  console.log(body.payload);
-  const { message } = body.payload;
+  console.log(payload);
+  const { message } = payload;
 
   try {
     if (message) {
