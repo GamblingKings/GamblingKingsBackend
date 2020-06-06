@@ -41,7 +41,7 @@ export const broadcastConnections = async (ws: WebSocketClient): Promise<Documen
 /**
  * Broadcast a message to all users.
  * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string | string[]} msg a message as a string of array
+ * @param {string} msg a message as a string of array
  */
 export const broadcastMessage = async (ws: WebSocketClient, msg: string): Promise<DocumentClient.ItemList | []> => {
   const userItems = (await getAllConnections()).Items;
@@ -72,32 +72,33 @@ export const broadcastGames = async (ws: WebSocketClient): Promise<DocumentClien
   let games: Game[];
 
   if (userItems && userItems.length > 0) {
-    await Promise.all(
-      userItems.map((connection) => {
-        // Make games an empty array if gameItems is empty
-        if (gameItems) {
-          games = gameItems.map((game) => {
-            const { gameId, users, gameName, gameType, gameVersion } = game;
-            return {
-              gameId,
-              users,
-              gameName,
-              gameType,
-              gameVersion,
-            };
-          });
-        } else {
-          games = [];
-        }
-        console.log('Games:', games);
+    // Send all the games info to all the users
+    const promises = userItems.map((connection) => {
+      // Make games an empty array if gameItems are empty
+      if (gameItems) {
+        games = gameItems.map((game) => {
+          const { gameId, users, gameName, gameType, gameVersion } = game;
+          return {
+            gameId,
+            users,
+            gameName,
+            gameType,
+            gameVersion,
+          };
+        });
+      } else {
+        games = [];
+      }
+      console.log('Games:', games);
 
-        // Create games response object
-        const jsonWsResponse = createWSAllGamesResponse(games);
+      // Create games response object
+      const jsonWsResponse = createWSAllGamesResponse(games);
 
-        // Send all games to all users
-        return ws.send(jsonWsResponse, connection.connectionId);
-      }),
-    );
+      // Send all games each user
+      return ws.send(jsonWsResponse, connection.connectionId);
+    });
+
+    await Promise.all(promises);
   }
 
   return gameItems || [];

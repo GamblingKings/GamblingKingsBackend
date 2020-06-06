@@ -96,21 +96,21 @@ export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.
  * @param {string[]} users an array of users (connectionIds)
  * @param {string} gameName game name
  * @param {string} gameType game type
- * @param {number} gameVersion game version
+ * @param {string} gameVersion game version
  an array of users (connectionIds)
  */
 export const createGame = async (
   creatorConnectionId: string,
   gameName?: string,
   gameType?: string,
-  gameVersion?: number,
+  gameVersion?: string,
 ): Promise<PromiseResult<DocumentClient.PutItemOutput, AWSError>> => {
   const game: Game = {
     gameId: uuid(),
-    users: [creatorConnectionId],
+    users: [creatorConnectionId], // put the game creator into the game initially
     gameName: gameName || ' ',
     gameType: gameType || ' ',
-    gameVersion: gameVersion || 0,
+    gameVersion: gameVersion || ' ',
   };
 
   const putParam: DocumentClient.PutItemInput = {

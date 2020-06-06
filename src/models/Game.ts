@@ -6,5 +6,5 @@ export interface Game {
   users: string[];
   gameName?: string;
   gameType?: string;
-  gameVersion?: number;
+  gameVersion?: string;
 }

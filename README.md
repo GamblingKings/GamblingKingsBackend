@@ -98,8 +98,8 @@ yarn start
   "payload": {
     "game": {
       "gameName": "Chow Yun-fat，the Mhajong King",
-      "gameType": "Japanese",
-      "gameVersion": 100
+      "gameType": "Mahjong",
+      "gameVersion": "Japanese"
     }
   }
 }

@@ -3,12 +3,15 @@ import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventB
 import { response } from '../utils/response';
 import { WebSocketClient } from '../WebSocketClient';
 import { broadcastMessage } from '../utils/broadcast';
+import { Logger } from '../utils/Logger';
 
 /**
  * Handler for sending a message to all the users (or connections).
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
+  Logger.createLogTitle(__filename);
+
   console.log('RequestContext', event.requestContext);
   const ws = new WebSocketClient(event.requestContext);
   const body = JSON.parse(event.body) as LambdaEventBody;
