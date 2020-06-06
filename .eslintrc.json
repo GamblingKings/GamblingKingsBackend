@@ -43,6 +43,15 @@
         "ts": "never",
         "tsx": "never"
       }
+    ],
+    "import/no-default-export": "error",
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": "off",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
     ]
   }
 }

@@ -5,27 +5,27 @@ plugins:
   #######################################
   # Uncomment this for local dev only
   #######################################
-  # - serverless-offline
-  # - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-dynamodb-local
 
 #######################################
 # Uncomment this for local dev only
 #######################################
-# custom:
-#   dynamodb:
-#     # If you only want to use DynamoDB Local in some stages, declare them here
-#     stages:
-#       - dev
-#     start:
-#       port: 8000
-#       inMemory: true
-#       heapInitial: 200m
-#       heapMax: 1g
-#       migrate: true
-#       seed: true
-#       convertEmptyValues: true
-#     # Uncomment only if you already have a DynamoDB running locally
-#     # noStart: true
+custom:
+  dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+    # Uncomment only if you already have a DynamoDB running locally
+    # noStart: true
 
 provider:
   name: aws
@@ -52,6 +52,7 @@ provider:
         - 'dynamodb:BatchGetItem'
         - 'dynamodb:BatchWriteItem'
         - 'dynamodb:Query'
+        - 'dynamodb:Scan'
       Resource:
         - Fn::GetAtt: [ConnectionsTable, Arn]
         - Fn::GetAtt: [GamesTable, Arn]
@@ -80,7 +81,7 @@ package:
   exclude:
     - node_modules/**
     - .dynamodb/**
-    - layer/**
+    - lambda_layer/**
 
 layers:
   main:
@@ -90,21 +91,51 @@ layers:
 
 functions:
   onConnect:
-    handler: src/handler.onConnect
+    handler: src/functions/onConnect.handler
     events:
       - websocket: $connect
     layers:
       - { Ref: MainLambdaLayer } # should be named as TitleCased name followed by LambdaLayer
   onDisconnect:
-    handler: src/handler.onDisconnect
+    handler: src/functions/onDisconnect.handler
     events:
       - websocket: $disconnect
     layers:
       - { Ref: MainLambdaLayer }
   defaultHandler:
-    handler: src/handler.defaultMessage
+    handler: src/functions/defaultMessage.handler
     events:
       - websocket: $default
+    layers:
+      - { Ref: MainLambdaLayer }
+  setUsername:
+    handler: src/functions/onSetUsername.handler
+    events:
+      - websocket: SET_USERNAME
+    layers:
+      - { Ref: MainLambdaLayer }
+  getAllUsers:
+    handler: src/functions/onGetAllUsers.handler
+    events:
+      - websocket: GET_ALL_USERS
+    layers:
+      - { Ref: MainLambdaLayer }
+  createGame:
+    handler: src/functions/onCreateGame.handler
+    events:
+      - websocket: CREATE_GAME
+    layers:
+      - { Ref: MainLambdaLayer }
+  getAllGames:
+    handler: src/functions/onGetAllGames.handler
+    events:
+      - websocket: GET_ALL_GAMES
+    layers:
+      - { Ref: MainLambdaLayer }
+  sendMessage:
+    handler: src/functions/onSendMessage.handler
+    events:
+      - websocket: SEND_MESSAGE
     layers:
       - { Ref: MainLambdaLayer }
 

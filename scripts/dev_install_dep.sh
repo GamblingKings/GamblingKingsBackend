@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Go back to root directory
 cd ..
 

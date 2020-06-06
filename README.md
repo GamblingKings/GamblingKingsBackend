@@ -68,3 +68,58 @@ aws-vault exec <PROFILE_NAME> --no-session -- sls remove
 ```shell script
 yarn start
 ```
+
+## Websocket Test Data
+
+`SET_USERNAME`
+
+```json
+{
+  "action": "SET_USERNAME",
+  "payload": {
+    "username": "new user"
+  }
+}
+```
+
+`GET_ALL_USERS`
+
+```json
+{
+  "action": "GET_ALL_USERS"
+}
+```
+
+`CREATE_GAME`
+
+```json
+{
+  "action": "CREATE_GAME",
+  "payload": {
+    "game": {
+      "gameName": "Chow Yun-fat，the Mhajong King",
+      "gameType": "Mahjong",
+      "gameVersion": "Japanese"
+    }
+  }
+}
+```
+
+`GET_ALL_GAMES`
+
+```json
+{
+  "action": "GET_ALL_GAMES"
+}
+```
+
+`SEND_MESSAGE`
+
+```json
+{
+  "action": "SEND_MESSAGE",
+  "payload": {
+    "message": "custom message to all users"
+  }
+}
+```
