@@ -14,28 +14,22 @@ export const createWSResponse = (
 
 export const createWSMessageResponse = (message: string): string => {
   // Create message response object
-  const wsPayload: LambdaEventBodyPayloadOptions = {
-    message,
-  };
+  const wsPayload = { message } as LambdaEventBodyPayloadOptions;
   const wsResponse = createWSResponse(WebSocketActions.SEND_MESSAGE, wsPayload);
   return JSON.stringify(wsResponse);
 };
 
 export const createWSAllUsersResponse = (users: User[]): string => {
-  // Create message response object
-  const wsPayload: LambdaEventBodyPayloadOptions = {
-    users,
-  };
-  const wsResponse = createWSResponse(WebSocketActions.SEND_MESSAGE, wsPayload);
+  // Create get all users response object
+  const wsPayload = { users } as LambdaEventBodyPayloadOptions;
+  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_USERS, wsPayload);
   return JSON.stringify(wsResponse);
 };
 
 export const createWSAllGamesResponse = (games: Game[]): string => {
-  // Create message response object
+  // Create get all games response object
   console.log(games);
-  const wsPayload: LambdaEventBodyPayloadOptions = {
-    games,
-  };
-  const wsResponse = createWSResponse(WebSocketActions.SEND_MESSAGE, wsPayload);
+  const wsPayload = { games } as LambdaEventBodyPayloadOptions;
+  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_GAMES, wsPayload);
   return JSON.stringify(wsResponse);
 };

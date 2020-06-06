@@ -3,7 +3,7 @@ import { WebSocketClient } from '../WebSocketClient';
 import { getAllConnections, getAllGames } from '../module/db';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
-import { createWSAllUsersResponse, createWSMessageResponse, createWSAllGamesResponse } from './websocket_actions';
+import { createWSAllUsersResponse, createWSMessageResponse, createWSAllGamesResponse } from './webSocketActions';
 
 /**
  * Broadcast all the connections to all users.
