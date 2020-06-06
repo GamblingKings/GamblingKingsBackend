@@ -10,14 +10,18 @@ import { response } from '../utils/response';
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload } = body;
-  const { games } = payload;
+  const { game } = payload;
+  console.log('Payload data', game);
+  console.log('Type of payload data', typeof game);
 
   console.log('Adding game to the db table...');
-  console.log('Payload data', games);
-  console.log('Type of payload data', typeof games);
   try {
-    if (games) await createGame(games);
-    else return response(400, 'Games attribute cannot be empty');
+    if (game) {
+      const { gameName, gameType, gameVersion } = game;
+      await createGame(event.requestContext.connectionId, gameName, gameType, gameVersion);
+    } else {
+      return response(400, 'Games attribute cannot be empty');
+    }
 
     return response(200, 'Game created successfully');
   } catch (err) {

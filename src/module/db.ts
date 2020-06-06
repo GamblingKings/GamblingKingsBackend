@@ -3,6 +3,7 @@ import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuid } from 'uuid';
 import { CONNECTIONS_TABLE, GAMES_TABLE } from '../constants';
+import { Game } from '../models/Game';
 
 /**
  * Custom DynamoDB Response type.
@@ -17,8 +18,8 @@ export const DB = new DynamoDB.DocumentClient({
   // ////////////////////////////////////
   // Uncomment for local dev only
   // ////////////////////////////////////
-  // region: 'localhost',
-  // endpoint: 'http://localhost:8000',
+  region: 'localhost',
+  endpoint: 'http://localhost:8000',
 });
 
 /**
@@ -84,7 +85,7 @@ export const setUserName = async (
 export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: CONNECTIONS_TABLE,
-    AttributesToGet: ['connectionId'], // only get connection Ids from each row
+    AttributesToGet: ['connectionId', 'username'], // only get connection Ids from each row
   };
 
   return DB.scan(scanParams).promise();
@@ -92,17 +93,29 @@ export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.
 
 /**
  * Create a game that takes in a list of connection Ids (users) and write to the GamesTable.
- * @param {string[]} connections an array of connectionIds
+ * @param {string[]} users an array of users (connectionIds)
+ * @param {string} gameName game name
+ * @param {string} gameType game type
+ * @param {number} gameVersion game version
+ an array of users (connectionIds)
  */
 export const createGame = async (
-  connections: string[],
+  creatorConnectionId: string,
+  gameName?: string,
+  gameType?: string,
+  gameVersion?: number,
 ): Promise<PromiseResult<DocumentClient.PutItemOutput, AWSError>> => {
+  const game: Game = {
+    gameId: uuid(),
+    users: [creatorConnectionId],
+    gameName: gameName || ' ',
+    gameType: gameType || ' ',
+    gameVersion: gameVersion || 0,
+  };
+
   const putParam: DocumentClient.PutItemInput = {
     TableName: GAMES_TABLE,
-    Item: {
-      gameId: uuid(),
-      connections,
-    },
+    Item: game,
   };
 
   console.log('putParma:', putParam);
@@ -113,12 +126,10 @@ export const createGame = async (
  * Get all the games (rows) from the GamesTable.
  * @param {string[]} attributes an array of attributes of a game. Default to be gameId
  */
-export const getAllGames = async (
-  attributes: string[] = ['gameId'],
-): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
+export const getAllGames = async (): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: GAMES_TABLE,
-    AttributesToGet: attributes,
+    // AttributesToGet: attributes,
   };
 
   return DB.scan(scanParams).promise();

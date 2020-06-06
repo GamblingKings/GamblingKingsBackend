@@ -12,11 +12,11 @@ export class WebSocketClient {
   constructor(requestContext: WebSocketAPIGatewayEventRequestContext) {
     this.ws = new ApiGatewayManagementApi({
       apiVersion: '2018-11-29',
-      endpoint: `https://${requestContext.domainName}/${requestContext.stage}`,
+      // endpoint: `https://${requestContext.domainName}/${requestContext.stage}`,
       // ////////////////////////////////////
       // Change endpoint to this for local dev only
       // ////////////////////////////////////
-      // endpoint: 'http://localhost:3001',
+      endpoint: 'http://localhost:3001',
     });
     this.connectionId = requestContext.connectionId;
   }

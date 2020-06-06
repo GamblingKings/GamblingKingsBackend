@@ -13,7 +13,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const ws = new WebSocketClient(event.requestContext);
   const body: LambdaEventBody = JSON.parse(event.body);
 
-  // Testing broadcast messages
+  // Broadcast message
   console.log(body);
   console.log(body.payload);
   const { message } = body.payload;

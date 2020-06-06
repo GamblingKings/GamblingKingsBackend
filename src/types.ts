@@ -1,4 +1,6 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
+import { User } from './models/User';
+import { Game } from './models/Game';
 
 /**
  * Websocket Event RequestContext interface
@@ -32,8 +34,9 @@ export interface LambdaEventBody {
 export interface LambdaEventBodyPayloadOptions {
   username?: string;
   message?: string;
-  users?: string[];
-  games?: string[];
+  game?: Game;
+  users?: User[];
+  games?: Game[];
 }
 
 /**
@@ -52,4 +55,22 @@ export interface LambdaResponse {
 export interface LambdaResponseHeader {
   'Content-Type': string;
   'Access-Control-Allow-Origin': string;
+}
+
+/**
+ * Websocket response type for the frontend client
+ */
+export interface WebSocketResponse {
+  action: WebSocketActions;
+  payload: LambdaEventBodyPayloadOptions;
+}
+
+/**
+ *  Websocket action types enum
+ */
+export enum WebSocketActions {
+  GET_ALL_GAMES = 'GET_ALL_GAMES',
+  GET_ALL_USERS = 'GET_ALL_USERS',
+  CREATE_GAME = 'CREATE_GAME',
+  SEND_MESSAGE = 'SEND_MESSAGE',
 }
