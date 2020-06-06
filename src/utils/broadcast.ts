@@ -6,10 +6,14 @@ import { Game } from '../models/Game';
 import { createWSAllUsersResponse, createWSMessageResponse, createWSAllGamesResponse } from './webSocketActions';
 
 /**
- * Broadcast all the connections to all users.
+ * Broadcast all the connections to a user.
  * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} connectionId connection Id
  */
-export const broadcastConnections = async (ws: WebSocketClient): Promise<DocumentClient.ItemList | []> => {
+export const broadcastConnections = async (
+  ws: WebSocketClient,
+  connectionId: string,
+): Promise<DocumentClient.ItemList | []> => {
   const userItems = (await getAllConnections()).Items;
 
   if (userItems && userItems.length > 0) {
@@ -27,12 +31,7 @@ export const broadcastConnections = async (ws: WebSocketClient): Promise<Documen
     const jsonWsResponse = createWSAllUsersResponse(users);
 
     // Send all the active connections to all the users
-    await Promise.all(
-      userItems.map((connection) => {
-        // Send all connections to all users
-        return ws.send(jsonWsResponse, connection.connectionId);
-      }),
-    );
+    ws.send(jsonWsResponse, connectionId);
   }
 
   return userItems || [];
@@ -63,43 +62,39 @@ export const broadcastMessage = async (ws: WebSocketClient, msg: string): Promis
 };
 
 /**
- * Broadcast all the currently active games to all users.
+ * Broadcast all the currently active games to a user.
  * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} connectionId connection Id
  */
-export const broadcastGames = async (ws: WebSocketClient): Promise<DocumentClient.ItemList | []> => {
-  const userItems = (await getAllConnections()).Items;
+export const broadcastGames = async (
+  ws: WebSocketClient,
+  connectionId: string,
+): Promise<DocumentClient.ItemList | []> => {
   const gameItems = (await getAllGames()).Items;
   let games: Game[];
 
-  if (userItems && userItems.length > 0) {
-    // Send all the games info to all the users
-    const promises = userItems.map((connection) => {
-      // Make games an empty array if gameItems are empty
-      if (gameItems) {
-        games = gameItems.map((game) => {
-          const { gameId, users, gameName, gameType, gameVersion } = game;
-          return {
-            gameId,
-            users,
-            gameName,
-            gameType,
-            gameVersion,
-          };
-        });
-      } else {
-        games = [];
-      }
-      console.log('Games:', games);
-
-      // Create games response object
-      const jsonWsResponse = createWSAllGamesResponse(games);
-
-      // Send all games each user
-      return ws.send(jsonWsResponse, connection.connectionId);
+  // Make games an empty array if gameItems are empty
+  if (gameItems) {
+    games = gameItems.map((game) => {
+      const { gameId, users, gameName, gameType, gameVersion } = game;
+      return {
+        gameId,
+        users,
+        gameName,
+        gameType,
+        gameVersion,
+      };
     });
-
-    await Promise.all(promises);
+  } else {
+    games = [];
   }
+  console.log('Games:', games);
+
+  // Create games response object
+  const jsonWsResponse = createWSAllGamesResponse(games);
+
+  // Send all games each user
+  ws.send(jsonWsResponse, connectionId);
 
   return gameItems || [];
 };

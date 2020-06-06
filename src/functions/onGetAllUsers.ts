@@ -17,7 +17,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   console.log('Getting all users...');
   try {
-    const res = await broadcastConnections(ws);
+    const res = await broadcastConnections(ws, event.requestContext.connectionId);
     return response(200, res.toString());
   } catch (err) {
     console.error(err);
