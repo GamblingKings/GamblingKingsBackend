@@ -7,10 +7,11 @@
     "strict": true,
     "target": "es5",
     "outDir": ".build/",
+    "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["es2015"],
     "rootDir": "./"
   },
-  "include": ["./**/*.ts"],
+  "include": ["./src/**/*.ts"],
   "exclude": ["node_modules/**/*", ".dynamodb/**/*", ".vscode/**/*"]
 }

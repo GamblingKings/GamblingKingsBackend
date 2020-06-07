@@ -6,6 +6,9 @@ node_modules
 .build
 .dynamodb
 
+# Webpack directories
+.webpack
+
 # Misc
 .env
 .idea
