@@ -118,7 +118,7 @@ export const createGame = async (
     Item: game,
   };
 
-  console.log('putParma:', putParam);
+  console.log('putParam:', putParam);
   return DB.put(putParam).promise();
 };
 
