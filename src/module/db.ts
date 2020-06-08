@@ -93,7 +93,7 @@ export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.
 
 /**
  * Create a game that takes in a list of connection Ids (users) and write to the GamesTable.
- * @param {string[]} users an array of users (connectionIds)
+ * @param creatorConnectionId creator's connection Id
  * @param {string} gameName game name
  * @param {string} gameType game type
  * @param {string} gameVersion game version
@@ -124,7 +124,6 @@ export const createGame = async (
 
 /**
  * Get all the games (rows) from the GamesTable.
- * @param {string[]} attributes an array of attributes of a game. Default to be gameId
  */
 export const getAllGames = async (): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
   const scanParams: DocumentClient.ScanInput = {
