@@ -31,7 +31,7 @@ export const broadcastConnections = async (
     const jsonWsResponse = createWSAllUsersResponse(users);
 
     // Send all the active connections to all the users
-    ws.send(jsonWsResponse, connectionId);
+    await ws.send(jsonWsResponse, connectionId);
   }
 
   return userItems || [];
@@ -94,7 +94,7 @@ export const broadcastGames = async (
   const jsonWsResponse = createWSAllGamesResponse(games);
 
   // Send all games each user
-  ws.send(jsonWsResponse, connectionId);
+  await ws.send(jsonWsResponse, connectionId);
 
   return gameItems || [];
 };

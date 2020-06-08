@@ -1,7 +1,11 @@
 # Package directories
 node_modules
+package.json
 
 # Serverless directories
 .serverless
 .build
 .dynamodb
+
+# Webpack
+.webpack

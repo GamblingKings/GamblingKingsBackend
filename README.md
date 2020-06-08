@@ -2,33 +2,48 @@
 
 ## Local development
 
-Prerequisite:
+**Prerequisite:**
 
 - Node.Js
 - Typescript
 - Serverless
 - Java Runtime Engine (JRE) version 6.x or newer
 
-1. Install dependencies and start serverless offline for local dev:
+**To start local dev, simply run:**
+
+```shell_script
+yarn run start_local
+```
+
+OR
+
+**Follow the steps below for detailed step breakdown:**
+
+1. Install dependencies
 
 ```shell script
 # Cleanup auto-generated folders
 yarn run dev:cleanup
 
 # Install dependencies
-yarn run dev:install
-
-# Remember to uncomment the code for local dev in both serverless.yml and db.ts
-
-# Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory)
-# Start serverless and dynamodb locally
-yarn run dev:run
-
-# Or run all three scripts at the same time
-yarn run start_local
+yarn run install_dep
 ```
 
-2. Test Connection [here](https://www.websocket.org/echo.html) by entering the websocket url (e.g. `ws://localhost:3001`)
+2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](./src/module/db.ts) and [WebSocketClient.ts](./src/WebSocketClient.ts)
+
+3. (**Important**) Increase max space size for Node (otherwise, webpack may not work in your local machine)
+
+```
+export NODE_OPTIONS="--max-old-space-size=8192"
+```
+
+4. Install dynamodb local (this will create a folder called `.dynamodb` in the project root directory) and start serverless and dynamodb locally
+
+```shell script
+yarn run dev:run
+```
+
+5. Test Connection [here](https://www.websocket.org/echo.html) by entering the websocket url (e.g. `ws://localhost:3001`)
 
 For more details on local dev, see the following links
 
@@ -36,7 +51,7 @@ For more details on local dev, see the following links
 - [Serverless DynamoDB Local](https://www.serverless.com/plugins/serverless-dynamodb-local/)
 - [Serverless Plugin Typescript](https://www.serverless.com/plugins/serverless-plugin-typescript/)
 
-3. To invoke lambda function locally see [invoke-local](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/)
+6. To invoke lambda function locally see [invoke-local](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/)
 
 ## Deploy to AWS account
 
@@ -46,9 +61,7 @@ For more details on local dev, see the following links
 aws-vault add gamblingkings-sls
 ```
 
-2. Change ENVIRONMENT to prod in .env
-
-3. Deploy or remove AWS resources
+2. Deploy or remove AWS resources
    Note： --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
 
 To deploy:
