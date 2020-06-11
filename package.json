@@ -6,7 +6,7 @@
   "author": "Vincent Wong <vwong125@my.bcit.ca>",
   "license": "MIT",
   "scripts": {
-    "dev:cleanup": "rm -rf .build/ .serverless/ .dynamodb/",
+    "dev:cleanup": "rm -rf .build/ .serverless/ .dynamodb/ .webpack/",
     "dev:run": "sls dynamodb install && sls offline start",
     "cleanup_tables": "cd scripts/ && chmod 777 dev_cleanup_tables.sh && ./dev_cleanup_tables.sh",
     "start_local": "npm-run-all format install_dep dev:*",
@@ -18,20 +18,20 @@
     "lint": "eslint -c .eslintrc.json . --ext .js,.ts --fix"
   },
   "dependencies": {
-    "@types/aws-lambda": "^8.10.53",
-    "@types/node": "^14.0.11",
+    "@types/aws-lambda": "^8.10.55",
+    "@types/node": "^14.0.13",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.691.0",
+    "aws-sdk": "^2.695.0",
     "@types/uuid": "^8.0.0",
     "npm-run-all": "^4.1.5",
-    "@typescript-eslint/eslint-plugin": "^3.1.0",
-    "@typescript-eslint/parser": "^3.1.0",
+    "@typescript-eslint/eslint-plugin": "^3.2.0",
+    "@typescript-eslint/parser": "^3.2.0",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-prettier": "^3.1.3",
     "prettier": "^2.0.5",
     "serverless-dynamodb-local": "^0.2.39",

@@ -2,6 +2,10 @@ import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
 import { User } from './models/User';
 import { Game } from './models/Game';
 
+/* ----------------------------------------------------------------------------
+ * WebSocket Event
+ * ------------------------------------------------------------------------- */
+
 /**
  * Websocket Event RequestContext interface
  */
@@ -28,6 +32,10 @@ export interface LambdaEventBody {
   payload: LambdaEventBodyPayloadOptions;
 }
 
+/* ----------------------------------------------------------------------------
+ * WebSocket Payload
+ * ------------------------------------------------------------------------- */
+
 /**
  * Payload interface for Lambda event body
  */
@@ -38,6 +46,10 @@ export interface LambdaEventBodyPayloadOptions {
   users?: User[];
   games?: Game[];
 }
+
+/* ----------------------------------------------------------------------------
+ * WebSocket Response
+ * ------------------------------------------------------------------------- */
 
 /**
  * Response interface for Lambda functions
@@ -64,6 +76,21 @@ export interface WebSocketResponse {
   action: WebSocketActions;
   payload: LambdaEventBodyPayloadOptions;
 }
+
+export interface SuccessResponse {
+  success: boolean;
+  error?: string;
+}
+
+export interface Message {
+  message: string;
+  sender: string;
+  time: string;
+}
+
+/* ----------------------------------------------------------------------------
+ * WebSocket Actions
+ * ------------------------------------------------------------------------- */
 
 /**
  *  Websocket action types enum
