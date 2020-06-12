@@ -4,15 +4,15 @@ import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventB
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { createGameResponse } from '../utils/webSocketActions';
+import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/webSocketActions';
+import { Game } from '../models/Game';
 
 /**
  * Handler for creating a game.
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
-  console.log('FILENAME:', __filename);
-  Logger.createLogTitle(__filename);
+  Logger.createLogTitle('onCreateGame.ts');
 
   const { connectionId } = event.requestContext;
   const body: LambdaEventBody = JSON.parse(event.body);
@@ -25,11 +25,10 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   console.log('Adding game to the db table...');
 
   const ws = new WebSocketClient(event.requestContext);
-  const res = createGameResponse(game);
   try {
     if (!game) {
       // Send failed response
-      const gameResponse = { success: false, ...res };
+      const gameResponse = failedWebSocketResponse('Games attribute cannot be empty');
       ws.send(JSON.stringify(gameResponse), connectionId);
 
       return response(400, 'Games attribute cannot be empty');
@@ -37,16 +36,17 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // Create game
     const { gameName, gameType, gameVersion } = game;
-    await createGame(connectionId, gameName, gameType, gameVersion);
+    const returnedGameObj: Game = await createGame(connectionId, gameName, gameType, gameVersion);
 
     // Send success response
-    const gameResponse = { success: true, ...res };
+    const res = createGameResponse(returnedGameObj);
+    const gameResponse = successWebSocketResponse(res);
     ws.send(JSON.stringify(gameResponse), connectionId);
 
     return response(200, 'Game created successfully');
   } catch (err) {
     // Send failed response
-    const gameResponse = { success: false, ...res };
+    const gameResponse = failedWebSocketResponse(err);
     ws.send(JSON.stringify(gameResponse), connectionId);
     console.error(err);
     return response(500, err);

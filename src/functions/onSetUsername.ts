@@ -17,7 +17,7 @@ import { WebSocketClient } from '../WebSocketClient';
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   // Logger
-  Logger.createLogTitle(__filename);
+  Logger.createLogTitle('onSetUsername.ts');
 
   // Parse event
   console.log('RequestContext', event.requestContext);

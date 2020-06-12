@@ -42,7 +42,9 @@ export interface LambdaEventBody {
 export interface LambdaEventBodyPayloadOptions {
   username?: string;
   message?: string;
+  user?: User;
   game?: Game;
+  gameId?: string;
   users?: User[];
   games?: Game[];
 }
@@ -72,7 +74,7 @@ export interface LambdaResponseHeader {
 /**
  * Websocket response type for the frontend client
  */
-export interface WebSocketResponse {
+export interface WebSocketResponse extends SuccessResponse {
   action: WebSocketActions;
   payload: LambdaEventBodyPayloadOptions;
 }
@@ -100,4 +102,7 @@ export enum WebSocketActions {
   GET_ALL_USERS = 'GET_ALL_USERS',
   CREATE_GAME = 'CREATE_GAME',
   SEND_MESSAGE = 'SEND_MESSAGE',
+  JOIN_GAME = 'JOIN_GAME',
+  USER_UPDATE = 'USER_UPDATE',
+  GAME_UPDATE = 'GAME_UPDATE',
 }

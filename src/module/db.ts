@@ -96,9 +96,7 @@ export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.
  * Get user attributes by connection Id
  * @param {string} connectionId connection Id
  */
-const getUserByConnectionId = async (
-  connectionId: string,
-): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
+const getUserByConnectionId = async (connectionId: string): Promise<User> => {
   const queryParam: DocumentClient.QueryInput = {
     TableName: CONNECTIONS_TABLE,
     KeyConditionExpression: '#connectionId = :connectionIdVal',
@@ -110,7 +108,10 @@ const getUserByConnectionId = async (
     },
   };
 
-  return DB.query(queryParam).promise();
+  const res = await DB.query(queryParam).promise();
+  const items = res.Items as DocumentClient.ItemList;
+  const user = items[0] as User;
+  return user || {};
 };
 
 /**
@@ -125,14 +126,9 @@ export const createGame = async (
   gameName?: string,
   gameType?: string,
   gameVersion?: string,
-): Promise<PromiseResult<DocumentClient.PutItemOutput, AWSError>> => {
+): Promise<Game> => {
   // Get user by connectionId
-  const { Items } = await getUserByConnectionId(creatorConnectionId);
-  let user;
-  if (Items) {
-    user = Items[0] as User;
-  }
-  console.log('Game creator: ', user);
+  const user = await getUserByConnectionId(creatorConnectionId);
 
   // Create game
   if (user) {
@@ -149,33 +145,36 @@ export const createGame = async (
       Item: game,
     };
 
-    return DB.put(putParam).promise();
+    DB.put(putParam).promise();
+    return game;
   }
 
   throw new AWSError('User cannot be empty');
 };
 
-export const addUserToGame = async (
-  gameId: string,
-  user: User,
-): Promise<PromiseResult<DocumentClient.UpdateItemOutput, AWSError>> => {
+export const addUserToGame = async (gameId: string, connectionId: string): Promise<Game> => {
+  // Get user by connectionId
+  const user = await getUserByConnectionId(connectionId);
+
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
     Key: {
       gameId,
     },
     // Update users list; if list is empty, append user to an empty list
-    UpdateExpression: 'set #users = list_append(if_not_exists(#users, :empty_list), :newUserVal)',
+    UpdateExpression: 'set #users = list_append(#users, :newUserVal)',
     ExpressionAttributeNames: {
       '#users': 'users',
     },
     ExpressionAttributeValues: {
-      ':newUserVal': user,
+      ':newUserVal': [user], // this needs to be a list, list_append adds to list together
     },
     ReturnValues: 'ALL_NEW',
   };
 
-  return DB.update(updateParam).promise();
+  const res = await DB.update(updateParam).promise();
+  const updatedGame = res.Attributes as Game;
+  return updatedGame;
 };
 
 /**
