@@ -4,6 +4,7 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuid } from 'uuid';
 import { CONNECTIONS_TABLE, GAMES_TABLE } from '../constants';
 import { Game } from '../models/Game';
+import { User } from '../models/User';
 
 /**
  * Custom DynamoDB Response type.
@@ -92,12 +93,32 @@ export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.
 };
 
 /**
+ * Get user attributes by connection Id
+ * @param {string} connectionId connection Id
+ */
+const getUserByConnectionId = async (
+  connectionId: string,
+): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
+  const queryParam: DocumentClient.QueryInput = {
+    TableName: CONNECTIONS_TABLE,
+    KeyConditionExpression: '#connectionId = :connectionIdVal',
+    ExpressionAttributeNames: {
+      '#connectionId': 'connectionId',
+    },
+    ExpressionAttributeValues: {
+      ':connectionIdVal': connectionId,
+    },
+  };
+
+  return DB.query(queryParam).promise();
+};
+
+/**
  * Create a game that takes in a list of connection Ids (users) and write to the GamesTable.
  * @param creatorConnectionId creator's connection Id
  * @param {string} gameName game name
  * @param {string} gameType game type
  * @param {string} gameVersion game version
- an array of users (connectionIds)
  */
 export const createGame = async (
   creatorConnectionId: string,
@@ -105,21 +126,56 @@ export const createGame = async (
   gameType?: string,
   gameVersion?: string,
 ): Promise<PromiseResult<DocumentClient.PutItemOutput, AWSError>> => {
-  const game: Game = {
-    gameId: uuid(),
-    users: [creatorConnectionId], // put the game creator into the game initially
-    gameName: gameName || ' ',
-    gameType: gameType || ' ',
-    gameVersion: gameVersion || ' ',
-  };
+  // Get user by connectionId
+  const { Items } = await getUserByConnectionId(creatorConnectionId);
+  let user;
+  if (Items) {
+    user = Items[0] as User;
+  }
+  console.log('Game creator: ', user);
 
-  const putParam: DocumentClient.PutItemInput = {
+  // Create game
+  if (user) {
+    const game: Game = {
+      gameId: uuid(),
+      users: [user], // put the game creator into the game initially
+      gameName: gameName || ' ',
+      gameType: gameType || ' ',
+      gameVersion: gameVersion || ' ',
+    };
+
+    const putParam: DocumentClient.PutItemInput = {
+      TableName: GAMES_TABLE,
+      Item: game,
+    };
+
+    return DB.put(putParam).promise();
+  }
+
+  throw new AWSError('User cannot be empty');
+};
+
+export const addUserToGame = async (
+  gameId: string,
+  user: User,
+): Promise<PromiseResult<DocumentClient.UpdateItemOutput, AWSError>> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
-    Item: game,
+    Key: {
+      gameId,
+    },
+    // Update users list; if list is empty, append user to an empty list
+    UpdateExpression: 'set #users = list_append(if_not_exists(#users, :empty_list), :newUserVal)',
+    ExpressionAttributeNames: {
+      '#users': 'users',
+    },
+    ExpressionAttributeValues: {
+      ':newUserVal': user,
+    },
+    ReturnValues: 'ALL_NEW',
   };
 
-  console.log('putParam:', putParam);
-  return DB.put(putParam).promise();
+  return DB.update(updateParam).promise();
 };
 
 /**

@@ -21,29 +21,31 @@ export const createWSResponse = (
  * Create SEND_MESSAGE response object
  * @param {string} message message
  */
-export const createWSMessageResponse = (message: string): string => {
-  const wsPayload = { message } as LambdaEventBodyPayloadOptions;
-  const wsResponse = createWSResponse(WebSocketActions.SEND_MESSAGE, wsPayload);
-  return JSON.stringify(wsResponse);
+export const createWSMessageResponse = (message: string): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActions.SEND_MESSAGE, { message });
+  return wsResponse;
 };
 
 /**
  * Create GET_ALL_USERS response object
  * @param {User[]} users an array of User objects
  */
-export const createWSAllUsersResponse = (users: User[]): string => {
-  const wsPayload = { users } as LambdaEventBodyPayloadOptions;
-  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_USERS, wsPayload);
-  return JSON.stringify(wsResponse);
+export const createWSAllUsersResponse = (users: User[]): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_USERS, { users });
+  return wsResponse;
 };
 
 /**
  * Create GET_ALL_GAMES response object
  * @param {Game[]} users an array of Game objects
  */
-export const createWSAllGamesResponse = (games: Game[]): string => {
-  console.log(games);
-  const wsPayload = { games } as LambdaEventBodyPayloadOptions;
-  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_GAMES, wsPayload);
-  return JSON.stringify(wsResponse);
+export const createWSAllGamesResponse = (games: Game[]): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_GAMES, { games });
+  return wsResponse;
+};
+
+export const createGameResponse = (game: Game | undefined): WebSocketResponse => {
+  const wsPayload = game ? { game } : {};
+  const wsResponse = createWSResponse(WebSocketActions.CREATE_GAME, wsPayload);
+  return wsResponse;
 };

@@ -78,7 +78,7 @@ export interface WebSocketResponse {
 }
 
 export interface SuccessResponse {
-  success: boolean;
+  success?: boolean;
   error?: string;
 }
 

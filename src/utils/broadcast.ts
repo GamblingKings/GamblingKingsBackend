@@ -28,7 +28,7 @@ export const broadcastConnections = async (
     console.log('Type of Connections:', typeof users);
 
     // Create users response object
-    const jsonWsResponse = createWSAllUsersResponse(users);
+    const jsonWsResponse = JSON.stringify(createWSAllUsersResponse(users));
 
     // Send all the active connections to all the users
     await ws.send(jsonWsResponse, connectionId);
@@ -47,7 +47,7 @@ export const broadcastMessage = async (ws: WebSocketClient, msg: string): Promis
 
   if (userItems && userItems.length > 0) {
     // Create message response object
-    const jsonWsResponse = createWSMessageResponse(msg);
+    const jsonWsResponse = JSON.stringify(createWSMessageResponse(msg));
 
     // Send all the active connections to all the users
     await Promise.all(
@@ -91,7 +91,7 @@ export const broadcastGames = async (
   console.log('Games:', games);
 
   // Create games response object
-  const jsonWsResponse = createWSAllGamesResponse(games);
+  const jsonWsResponse = JSON.stringify(createWSAllGamesResponse(games));
 
   // Send all games each user
   await ws.send(jsonWsResponse, connectionId);
