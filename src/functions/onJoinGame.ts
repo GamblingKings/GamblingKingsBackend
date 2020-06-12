@@ -4,7 +4,8 @@ import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventB
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/webSocketActions';
+import { successWebSocketResponse, failedWebSocketResponse, createJoinGameResponse } from '../utils/webSocketActions';
+import { broadcastJoinGameMessage } from '../utils/broadcast';
 
 /**
  * Handler for joining a game.
@@ -27,17 +28,20 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // Send success response
     const updatedGame = await addUserToGame(gameId, connectionId);
     console.log('Updated game:', updatedGame);
-    const res = createGameResponse(updatedGame);
+    const res = createJoinGameResponse(updatedGame);
     const updatedGameResponse = successWebSocketResponse(res);
-    ws.send(JSON.stringify(updatedGameResponse), connectionId);
+    await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 
-    return response(200, 'Added user to game successfully');
+    // Send message to other users in the game
+    await broadcastJoinGameMessage(ws, gameId, connectionId);
+
+    return response(200, 'Joined game successfully');
   } catch (err) {
     console.error(err);
 
     // Send failure response
     const res = failedWebSocketResponse(err);
-    ws.send(JSON.stringify(res), connectionId);
+    await ws.send(JSON.stringify(res), connectionId);
 
     return response(500, err);
   }

@@ -1,5 +1,5 @@
 import { WebSocketClient } from '../WebSocketClient';
-import { getAllConnections, getAllGames } from '../module/db';
+import { getAllConnections, getAllGames, getGameByGameId, getUserByConnectionId } from '../module/db';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
 import { createWSAllUsersResponse, createWSMessageResponse, createWSAllGamesResponse } from './webSocketActions';
@@ -68,4 +68,42 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
   await ws.send(jsonWsResponse, connectionId);
 
   return games || [];
+};
+
+/**
+ * Broadcast a message about who is joining the game
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} gameId game Id
+ * @param {string} connectionId connection Id
+ */
+export const broadcastJoinGameMessage = async (
+  ws: WebSocketClient,
+  gameId: string,
+  connectionId: string,
+): Promise<User | undefined> => {
+  const game = await getGameByGameId(gameId);
+  let users: User[] = [];
+  let user;
+
+  if (game) {
+    users = game.users;
+    const otherConnections = users.filter((connection) => connection.connectionId !== connectionId);
+
+    // Get joining user's username
+    user = await getUserByConnectionId(connectionId);
+    const { username } = user;
+
+    // Format message
+    const msg = `${username || connectionId} just joined the game.`;
+    const jsonWsResponse = JSON.stringify(createWSMessageResponse(msg));
+
+    // Send message to the other connections that are already in the game
+    await Promise.all(
+      otherConnections.map((connection) => {
+        return ws.send(jsonWsResponse, connection.connectionId);
+      }),
+    );
+  }
+
+  return user || undefined;
 };

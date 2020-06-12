@@ -118,6 +118,14 @@ functions:
     handler: src/functions/onJoinGame.handler
     events:
       - websocket: JOIN_GAME
+  updateUser:
+    handler: src/functions/onUserUpdate.handler
+    events:
+      - websocket: UPDATE_USER
+  updateGame:
+    handler: src/functions/onGameUpdate.handler
+    events:
+      - websocket: UPDATE_GAME
 
 # you can add CloudFormation resource templates here
 resources:

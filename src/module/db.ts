@@ -1,6 +1,5 @@
 import { DynamoDB, AWSError } from 'aws-sdk';
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
-import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuid } from 'uuid';
 import { CONNECTIONS_TABLE, GAMES_TABLE } from '../constants';
 import { Game } from '../models/Game';
@@ -89,7 +88,7 @@ export const getAllConnections = async (): Promise<User[]> => {
  * Get user attributes by connection Id
  * @param {string} connectionId connection Id
  */
-const getUserByConnectionId = async (connectionId: string): Promise<User> => {
+export const getUserByConnectionId = async (connectionId: string): Promise<User> => {
   const queryParam: DocumentClient.QueryInput = {
     TableName: CONNECTIONS_TABLE,
     KeyConditionExpression: '#connectionId = :connectionIdVal',
@@ -181,4 +180,22 @@ export const getAllGames = async (): Promise<Game[]> => {
 
   const res = await DB.scan(scanParams).promise();
   return res.Items as Game[];
+};
+
+export const getGameByGameId = async (gameId: string): Promise<Game> => {
+  const queryParam: DocumentClient.QueryInput = {
+    TableName: GAMES_TABLE,
+    KeyConditionExpression: '#gameId = :gameIdVal',
+    ExpressionAttributeNames: {
+      '#gameId': 'gameId',
+    },
+    ExpressionAttributeValues: {
+      ':gameIdVal': gameId,
+    },
+  };
+
+  const res = await DB.query(queryParam).promise();
+  const gameItems = res.Items as DocumentClient.ItemList;
+  const game = gameItems[0] as Game;
+  return game || {};
 };

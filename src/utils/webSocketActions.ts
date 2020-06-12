@@ -50,6 +50,12 @@ export const createGameResponse = (game: Game | undefined): WebSocketResponse =>
   return wsResponse;
 };
 
+export const createJoinGameResponse = (game: Game | undefined): WebSocketResponse => {
+  const wsPayload = game ? { game } : {};
+  const wsResponse = createWSResponse(WebSocketActions.JOIN_GAME, wsPayload);
+  return wsResponse;
+};
+
 export const successWebSocketResponse = (webSocketResponse: WebSocketResponse): WebSocketResponse => {
   return { success: true, ...webSocketResponse };
 };

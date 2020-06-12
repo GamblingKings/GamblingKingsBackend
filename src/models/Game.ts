@@ -9,4 +9,5 @@ export interface Game {
   gameName?: string;
   gameType?: string;
   gameVersion?: string;
+  started?: boolean;
 }
