@@ -40,14 +40,14 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // Send success response
     const res = createGameResponse(returnedGameObj);
-    const gameResponse = successWebSocketResponse(res);
-    ws.send(JSON.stringify(gameResponse), connectionId);
+    const jsonWsResponse = JSON.stringify(successWebSocketResponse(res));
+    ws.send(jsonWsResponse, connectionId);
 
     return response(200, 'Game created successfully');
   } catch (err) {
     // Send failed response
-    const gameResponse = failedWebSocketResponse(err);
-    ws.send(JSON.stringify(gameResponse), connectionId);
+    const jsonWsResponse = JSON.stringify(failedWebSocketResponse(err));
+    ws.send(jsonWsResponse, connectionId);
     console.error(err);
     return response(500, err);
   }

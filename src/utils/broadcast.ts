@@ -1,4 +1,3 @@
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { WebSocketClient } from '../WebSocketClient';
 import { getAllConnections, getAllGames } from '../module/db';
 import { User } from '../models/User';
@@ -10,20 +9,10 @@ import { createWSAllUsersResponse, createWSMessageResponse, createWSAllGamesResp
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} connectionId connection Id
  */
-export const broadcastConnections = async (
-  ws: WebSocketClient,
-  connectionId: string,
-): Promise<DocumentClient.ItemList | []> => {
-  const userItems = (await getAllConnections()).Items;
+export const broadcastConnections = async (ws: WebSocketClient, connectionId: string): Promise<User[] | []> => {
+  const users: User[] = await getAllConnections();
 
-  if (userItems && userItems.length > 0) {
-    // Get a list of users
-    const users: User[] = userItems.map((connection) => {
-      return {
-        connectionId: connection.connectionId,
-        username: connection.username,
-      };
-    });
+  if (users && users.length > 0) {
     console.log('Connections:', users);
     console.log('Type of Connections:', typeof users);
 
@@ -34,7 +23,7 @@ export const broadcastConnections = async (
     await ws.send(jsonWsResponse, connectionId);
   }
 
-  return userItems || [];
+  return users || [];
 };
 
 /**
@@ -42,23 +31,23 @@ export const broadcastConnections = async (
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} msg a message as a string of array
  */
-export const broadcastMessage = async (ws: WebSocketClient, msg: string): Promise<DocumentClient.ItemList | []> => {
-  const userItems = (await getAllConnections()).Items;
+export const broadcastMessage = async (ws: WebSocketClient, msg: string): Promise<User[] | []> => {
+  const users: User[] = await getAllConnections();
 
-  if (userItems && userItems.length > 0) {
+  if (users && users.length > 0) {
     // Create message response object
     const jsonWsResponse = JSON.stringify(createWSMessageResponse(msg));
 
     // Send all the active connections to all the users
     await Promise.all(
-      userItems.map((connection) => {
+      users.map((connection) => {
         // Send all connections to all users
         return ws.send(jsonWsResponse, connection.connectionId);
       }),
     );
   }
 
-  return userItems || [];
+  return users || [];
 };
 
 /**
@@ -66,28 +55,10 @@ export const broadcastMessage = async (ws: WebSocketClient, msg: string): Promis
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} connectionId connection Id
  */
-export const broadcastGames = async (
-  ws: WebSocketClient,
-  connectionId: string,
-): Promise<DocumentClient.ItemList | []> => {
-  const gameItems = (await getAllGames()).Items;
-  let games: Game[];
+export const broadcastGames = async (ws: WebSocketClient, connectionId: string): Promise<Game[] | []> => {
+  const games = await getAllGames();
 
-  // Make games an empty array if gameItems are empty
-  if (gameItems) {
-    games = gameItems.map((game) => {
-      const { gameId, users, gameName, gameType, gameVersion } = game;
-      return {
-        gameId,
-        users,
-        gameName,
-        gameType,
-        gameVersion,
-      };
-    });
-  } else {
-    games = [];
-  }
+  // Make games an empty array if games are empty
   console.log('Games:', games);
 
   // Create games response object
@@ -96,5 +67,5 @@ export const broadcastGames = async (
   // Send all games each user
   await ws.send(jsonWsResponse, connectionId);
 
-  return gameItems || [];
+  return games || [];
 };

@@ -7,11 +7,6 @@ import { Game } from '../models/Game';
 import { User } from '../models/User';
 
 /**
- * Custom DynamoDB Response type.
- */
-type DynamoDBResponse<T> = PromiseResult<T, AWSError>;
-
-/**
  * Create a DynamoDB DocumentClient instance
  */
 export const DB = new DynamoDB.DocumentClient({
@@ -27,7 +22,7 @@ export const DB = new DynamoDB.DocumentClient({
  * Save new connection with connectionId to the ConnectionsTable.
  * @param {string} connectionId connectionId from event.requestContext
  */
-export const saveConnection = async (connectionId: string): Promise<DynamoDBResponse<DocumentClient.PutItemOutput>> => {
+export const saveConnection = async (connectionId: string): Promise<User> => {
   const putParams: DocumentClient.PutItemInput = {
     TableName: CONNECTIONS_TABLE,
     Item: {
@@ -35,16 +30,15 @@ export const saveConnection = async (connectionId: string): Promise<DynamoDBResp
     },
   };
 
-  return DB.put(putParams).promise();
+  const res = await DB.put(putParams).promise();
+  return res.Attributes as User;
 };
 
 /**
  * Remove connection by connectionId from the ConnectionsTable.
  * @param {string} connectionId connectionId from event.requestContext
  */
-export const deleteConnection = async (
-  connectionId: string,
-): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
+export const deleteConnection = async (connectionId: string): Promise<void> => {
   const deleteParams: DocumentClient.DeleteItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -52,7 +46,7 @@ export const deleteConnection = async (
     },
   };
 
-  return DB.delete(deleteParams).promise();
+  await DB.delete(deleteParams).promise();
 };
 
 /**
@@ -60,10 +54,7 @@ export const deleteConnection = async (
  * @param {string} connectionId connectionId
  * @param {string} username username
  */
-export const setUserName = async (
-  connectionId: string,
-  username: string,
-): Promise<DynamoDBResponse<DocumentClient.UpdateItemOutput>> => {
+export const setUserName = async (connectionId: string, username: string): Promise<User> => {
   const updateParams: DocumentClient.UpdateItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -76,20 +67,22 @@ export const setUserName = async (
     },
   };
 
-  return DB.update(updateParams).promise();
+  const res = await DB.update(updateParams).promise();
+  return res.Attributes as User;
 };
 
 /**
  * Get all connections (rows) from the ConnectionsTable.
  * Note: only connectionId attribute is retrieved to save DB read cost.
  */
-export const getAllConnections = async (): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
+export const getAllConnections = async (): Promise<User[]> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: CONNECTIONS_TABLE,
     AttributesToGet: ['connectionId', 'username'], // only get connection Ids from each row
   };
 
-  return DB.scan(scanParams).promise();
+  const res = await DB.scan(scanParams).promise();
+  return res.Items as User[];
 };
 
 /**
@@ -180,11 +173,12 @@ export const addUserToGame = async (gameId: string, connectionId: string): Promi
 /**
  * Get all the games (rows) from the GamesTable.
  */
-export const getAllGames = async (): Promise<PromiseResult<DocumentClient.ScanOutput, AWSError>> => {
+export const getAllGames = async (): Promise<Game[]> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: GAMES_TABLE,
     // AttributesToGet: attributes,
   };
 
-  return DB.scan(scanParams).promise();
+  const res = await DB.scan(scanParams).promise();
+  return res.Items as Game[];
 };
