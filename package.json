@@ -14,7 +14,7 @@
     "deploy": "aws-vault exec gamblingkings-sls --no-session -- serverless deploy",
     "remove": "aws-vault exec gamblingkings-sls --no-session -- serverless remove",
     "start": "npm-run-all format dev:cleanup install_dep deploy",
-    "format": "prettier --write \"**/*.{js,ts,md,json}\"",
+    "format": "prettier --write \"**/*.{js,ts,md,json,yml}\"",
     "lint": "eslint -c .eslintrc.json . --ext .js,.ts --fix"
   },
   "dependencies": {
