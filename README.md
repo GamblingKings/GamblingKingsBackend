@@ -136,3 +136,27 @@ yarn start
   }
 }
 ```
+
+`JOIN_GAME`
+
+```json
+{
+   "action":"JOIN_GAME",
+   "payload":{
+      "gameId":"5938902b-2e2c-4da8-b900-5cdfbba8f10c"
+   }
+}
+```
+
+## Testing
+- [Jest framework](https://jestjs.io/) is used for testing
+- [jest-dynalite](https://github.com/freshollie/jest-dynalite) is used to run test with a mock DynamoDB instance
+- [jest-extended](https://github.com/jest-community/jest-extended) is used to add additional matchers to Jest's default ones
+
+### Configuration files
+- [jest.config.js](./jest.config.js)
+- [jest-dynalite-config.json](./jest-dynalite-config.json)
+- [global.d.ts](./src/global.d.ts): for ide or editor to recognize jest-extended library
+
+### Test folder
+See [__test__](./src/__test__)

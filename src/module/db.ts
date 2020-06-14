@@ -4,7 +4,6 @@ import { v4 as uuid } from 'uuid';
 import { CONNECTIONS_TABLE, GAMES_TABLE } from '../constants';
 import { Game } from '../models/Game';
 import { User } from '../models/User';
-import { doc } from 'prettier';
 
 /* ----------------------------------------------------------------------------
  * DocumentClient
@@ -62,7 +61,7 @@ export const saveConnection = async (connectionId: string, documentClient: Docum
   };
 
   const res = await documentClient.put(putParams).promise(); // response is empty
-  console.log('saveConnection result:', res);
+  console.log('\nsaveConnection result:', res);
   return { connectionId } as User;
 };
 
@@ -84,7 +83,7 @@ export const deleteConnection = async (
   };
 
   const res = await documentClient.delete(deleteParams).promise();
-  console.log('deleteConnection result:', res);
+  console.log('\ndeleteConnection result:', res);
 
   const { Attributes } = res;
   if (Attributes) return Attributes as User;
@@ -215,9 +214,13 @@ export const createGame = async ({
   throw new AWSError('User cannot be empty');
 };
 
-export const addUserToGame = async (gameId: string, connectionId: string): Promise<Game> => {
+export const addUserToGame = async (
+  gameId: string,
+  connectionId: string,
+  documentClient: DocumentClient = DB,
+): Promise<Game> => {
   // Get user by connectionId
-  const user = await getUserByConnectionId(connectionId);
+  const user = await getUserByConnectionId(connectionId, documentClient);
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
@@ -239,7 +242,7 @@ export const addUserToGame = async (gameId: string, connectionId: string): Promi
     ReturnValues: 'ALL_NEW',
   };
 
-  const res = await DB.update(updateParam).promise();
+  const res = await documentClient.update(updateParam).promise();
   console.log('\nUpdated game:', res);
   return res.Attributes as Game;
 };
@@ -247,15 +250,16 @@ export const addUserToGame = async (gameId: string, connectionId: string): Promi
 /**
  * Get all the games (rows) from the GamesTable.
  */
-export const getAllGames = async (): Promise<Game[]> => {
+export const getAllGames = async (documentClient: DocumentClient = DB): Promise<Game[]> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: GAMES_TABLE,
     // AttributesToGet: attributes,
   };
 
-  const res = await DB.scan(scanParams).promise();
-  console.log('All games:', res);
-  return res.Items as Game[];
+  const res = await documentClient.scan(scanParams).promise();
+  console.log('\ngetAllGames result:', res);
+  const { Items } = res;
+  return (Items as Game[]) || [];
 };
 
 export const getGameByGameId = async (gameId: string, documentClient: DocumentClient = DB): Promise<Game> => {

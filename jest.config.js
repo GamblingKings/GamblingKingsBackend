@@ -11,6 +11,6 @@ module.exports = {
     '@utils/(.*)$': '<rootDir>/src/utils/$1',
     '@models/(.*)$': '<rootDir>/src/models/$1',
   },
-  setupFilesAfterEnv: ['./jest.setup.js'],
-  preset: '@shelf/jest-dynamodb',
+  setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
+  preset: 'jest-dynalite',
 };

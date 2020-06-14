@@ -1,16 +1,20 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {
+  addUserToGame,
   createGame,
   deleteConnection,
   getAllConnections,
+  getAllGames,
   getGameByGameId,
   getUserByConnectionId,
   saveConnection,
   setUsername,
 } from '../../module/db';
+import * as dbFunctions from '../../module/db';
 
 import { ddb } from '../jestLocalDynamoDB';
-import { cleanupTestUser, cleanupTestGame } from './dbHelpers';
+import { cleanupTestGame } from './dbHelpers';
+import { Game } from '../../models/Game';
 
 /* ----------------------------------------------------------------------------
  * Constants
@@ -18,9 +22,11 @@ import { cleanupTestUser, cleanupTestGame } from './dbHelpers';
 // User
 const FAKE_CONNECTION_ID1 = 'fake-connection-id-1';
 const FAKE_CONNECTION_ID2 = 'fake-connection-id-2';
+const FAKE_CONNECTION_ID3 = 'fake-connection-id-3';
 const FAKE_USERNAME1 = 'fake-username-1';
 const TEST_USER_OBJECT1 = { connectionId: FAKE_CONNECTION_ID1 };
 const TEST_USER_OBJECT2 = { connectionId: FAKE_CONNECTION_ID2 };
+const TEST_USER_OBJECT3 = { connectionId: FAKE_CONNECTION_ID3 };
 
 // Game
 const FAKE_GAME_NAME1 = 'fake-game-name1';
@@ -41,19 +47,6 @@ const TEST_GAME_OBJECT2 = {
   gameType: FAKE_GAME_TYPE2,
   gameVersion: FAKE_GAME_VERSION2,
 };
-
-/* ----------------------------------------------------------------------------
- * Setup and Teardown
- * ------------------------------------------------------------------------- */
-beforeEach(async () => {
-  await cleanupTestUser(FAKE_CONNECTION_ID1);
-  await cleanupTestUser(FAKE_CONNECTION_ID2);
-});
-
-afterEach(async () => {
-  await cleanupTestUser(FAKE_CONNECTION_ID1);
-  await cleanupTestUser(FAKE_CONNECTION_ID2);
-});
 
 /* ----------------------------------------------------------------------------
  * Test saveConnection
@@ -141,7 +134,7 @@ describe('test getAllConnections', () => {
     // Test get all connections
     const response = await getAllConnections(ddb);
     expect(response).toHaveLength(2);
-    expect(response).toStrictEqual([TEST_USER_OBJECT1, TEST_USER_OBJECT2]);
+    expect(response).toIncludeSameMembers([TEST_USER_OBJECT1, TEST_USER_OBJECT2]);
   });
 
   test('it should get an empty list if there is no connections', async () => {
@@ -236,11 +229,6 @@ describe('test getGameByGameId', () => {
     gameId = game.gameId;
   });
 
-  afterEach(async () => {
-    await cleanupTestUser(FAKE_CONNECTION_ID1);
-    await cleanupTestGame(gameId);
-  });
-
   test('it should get a game by gameId', async () => {
     const response = await getGameByGameId(gameId, ddb);
     expect(response).toStrictEqual({ ...TEST_GAME_OBJECT1, users: [TEST_USER_OBJECT1], gameId });
@@ -255,7 +243,7 @@ describe('test getGameByGameId', () => {
 /* ----------------------------------------------------------------------------
  * Test getAllGames
  * ------------------------------------------------------------------------- */
-describe('test getAllGames', async () => {
+describe('test getAllGames', () => {
   let gameId1: string;
   let gameId2: string;
 
@@ -272,20 +260,118 @@ describe('test getAllGames', async () => {
     gameId1 = game1.gameId;
 
     const game2 = await createGame({
+      ...TEST_GAME_OBJECT2,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
+    gameId2 = game2.gameId;
+  });
+
+  test('it should get all games', async () => {
+    const response = await getAllGames(ddb);
+    const game1 = { ...TEST_GAME_OBJECT1, gameId: gameId1 };
+    const game2 = { ...TEST_GAME_OBJECT2, ...{ users: [TEST_USER_OBJECT1] }, gameId: gameId2 };
+    // Compare arrays but ignore array orders
+    expect(response).toHaveLength(2);
+    expect(response).toIncludeSameMembers([game1, game2]);
+  });
+
+  test('it should get an empty list if there is no game in db', async () => {
+    await cleanupTestGame(gameId1);
+    await cleanupTestGame(gameId2);
+
+    const response = await getAllGames(ddb);
+    expect(response).toHaveLength(0);
+    expect(response).toIncludeSameMembers([]);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test addUserToGame
+ * ------------------------------------------------------------------------- */
+describe('test addUserToGame', () => {
+  let game: Game;
+  let gameId: string;
+  let getUserByConnectionIdSpy: jest.SpyInstance;
+  let saveConnectionSpy: jest.SpyInstance;
+  let addUserToGameSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
       documentClient: ddb,
     });
-    gameId1 = game2.gameId;
+    gameId = game.gameId;
+
+    // Create spies (create after the setup above to avoid spying on the setup function calls)
+    getUserByConnectionIdSpy = jest.spyOn(dbFunctions, 'getUserByConnectionId');
+    saveConnectionSpy = jest.spyOn(dbFunctions, 'saveConnection');
+    addUserToGameSpy = jest.spyOn(dbFunctions, 'addUserToGame');
   });
 
-  afterEach(async () => {
-    await cleanupTestUser(FAKE_CONNECTION_ID1);
-    await cleanupTestGame(gameId1);
-    await cleanupTestGame(gameId2);
+  afterEach(() => {
+    getUserByConnectionIdSpy.mockRestore();
+    saveConnectionSpy.mockRestore();
+    addUserToGameSpy.mockRestore();
   });
 
-  // TODO: Add these tests
-  test('it should get all games', async () => {});
-  test('it should get an empty list if there is no game in db', async () => {});
+  test('it should add one user to a game', async () => {
+    // Create a new test user
+    await saveConnection(FAKE_CONNECTION_ID2, ddb);
+
+    // Test add one user to the game
+    const res = await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+    const actualUsersInGame = res.users;
+    const expectedUsersInGame = [TEST_USER_OBJECT1, TEST_USER_OBJECT2];
+
+    // Test function calls
+    expect(saveConnectionSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2, ddb);
+    expect(getUserByConnectionIdSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2, ddb);
+    expect(addUserToGameSpy).toHaveBeenLastCalledWith(gameId, FAKE_CONNECTION_ID2, ddb);
+    expect(saveConnectionSpy).toHaveBeenCalledTimes(1);
+    expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
+    expect(addUserToGameSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(actualUsersInGame).toHaveLength(2);
+    expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
+    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+  });
+
+  test('it should not allow to add the same user to a game', async () => {
+    const func = addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+    const errorMsg = 'An expression attribute value used in expression is not defined; attribute value: :newUserVal';
+    await expect(func).rejects.toThrow(errorMsg);
+
+    // Test function calls
+    expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
+    expect(addUserToGameSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('it should add more than one user to a game', async () => {
+    // Create a new test user
+    await saveConnection(FAKE_CONNECTION_ID2, ddb);
+    await saveConnection(FAKE_CONNECTION_ID3, ddb);
+
+    // Test add two users to the game
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+    const res = await addUserToGame(gameId, FAKE_CONNECTION_ID3, ddb);
+    const actualUsersInGame = res.users;
+    const expectedUsersInGame = [TEST_USER_OBJECT1, TEST_USER_OBJECT2, TEST_USER_OBJECT3];
+
+    // Test function calls
+    expect(saveConnectionSpy).toHaveBeenCalledTimes(2);
+    expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(2);
+    expect(addUserToGameSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(actualUsersInGame).toHaveLength(3);
+    expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
+    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+  });
 });

@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { createGame } from '../module/db';
+import { createGame, DB } from '../module/db';
 import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventBodyPayloadOptions } from '../types';
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
@@ -36,7 +36,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // Create game
     const { gameName, gameType, gameVersion } = game;
-    const returnedGameObj: Game = await createGame(connectionId, gameName, gameType, gameVersion);
+    const returnedGameObj: Game = await createGame({
+      creatorConnectionId: connectionId,
+      documentClient: DB,
+      gameName,
+      gameType,
+      gameVersion,
+    });
 
     // Send success response
     const res = createGameResponse(returnedGameObj);
@@ -47,7 +53,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   } catch (err) {
     // Send failed response
     const jsonWsResponse = JSON.stringify(failedWebSocketResponse(err));
-    ws.send(jsonWsResponse, connectionId);
+    await ws.send(jsonWsResponse, connectionId);
     console.error(err);
     return response(500, err);
   }
