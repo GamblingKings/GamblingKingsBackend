@@ -1,4 +1,4 @@
-import { LambdaEventBodyPayloadOptions, WebSocketResponse, WebSocketActions, SuccessResponse } from '../types';
+import { LambdaEventBodyPayloadOptions, SuccessResponse, WebSocketActions, WebSocketResponse } from '../types';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
 
@@ -22,8 +22,7 @@ export const createWSResponse = (
  * @param {string} message message
  */
 export const createWSMessageResponse = (message: string): WebSocketResponse => {
-  const wsResponse = createWSResponse(WebSocketActions.SEND_MESSAGE, { message });
-  return wsResponse;
+  return createWSResponse(WebSocketActions.SEND_MESSAGE, { message });
 };
 
 /**
@@ -31,29 +30,25 @@ export const createWSMessageResponse = (message: string): WebSocketResponse => {
  * @param {User[]} users an array of User objects
  */
 export const createWSAllUsersResponse = (users: User[]): WebSocketResponse => {
-  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_USERS, { users });
-  return wsResponse;
+  return createWSResponse(WebSocketActions.GET_ALL_USERS, { users });
 };
 
 /**
  * Create GET_ALL_GAMES response object
- * @param {Game[]} users an array of Game objects
+ * @param {Game[]} games a list of Game objects
  */
 export const createWSAllGamesResponse = (games: Game[]): WebSocketResponse => {
-  const wsResponse = createWSResponse(WebSocketActions.GET_ALL_GAMES, { games });
-  return wsResponse;
+  return createWSResponse(WebSocketActions.GET_ALL_GAMES, { games });
 };
 
 export const createGameResponse = (game: Game | undefined): WebSocketResponse => {
   const wsPayload = game ? { game } : {};
-  const wsResponse = createWSResponse(WebSocketActions.CREATE_GAME, wsPayload);
-  return wsResponse;
+  return createWSResponse(WebSocketActions.CREATE_GAME, wsPayload);
 };
 
 export const createJoinGameResponse = (game: Game | undefined): WebSocketResponse => {
   const wsPayload = game ? { game } : {};
-  const wsResponse = createWSResponse(WebSocketActions.JOIN_GAME, wsPayload);
-  return wsResponse;
+  return createWSResponse(WebSocketActions.JOIN_GAME, wsPayload);
 };
 
 export const successWebSocketResponse = (webSocketResponse: WebSocketResponse): WebSocketResponse => {

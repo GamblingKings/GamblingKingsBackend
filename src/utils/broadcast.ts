@@ -91,18 +91,21 @@ export const broadcastJoinGameMessage = async (
 
     // Get joining user's username
     user = await getUserByConnectionId(connectionId);
-    const { username } = user;
 
-    // Format message
-    const msg = `${username || connectionId} just joined the game.`;
-    const jsonWsResponse = JSON.stringify(createWSMessageResponse(msg));
+    if (user) {
+      const { username } = user;
 
-    // Send message to the other connections that are already in the game
-    await Promise.all(
-      otherConnections.map((connection) => {
-        return ws.send(jsonWsResponse, connection.connectionId);
-      }),
-    );
+      // Format message
+      const msg = `${username || connectionId} just joined the game.`;
+      const jsonWsResponse = JSON.stringify(createWSMessageResponse(msg));
+
+      // Send message to the other connections that are already in the game
+      await Promise.all(
+        otherConnections.map((connection) => {
+          return ws.send(jsonWsResponse, connection.connectionId);
+        }),
+      );
+    }
   }
 
   return user || undefined;

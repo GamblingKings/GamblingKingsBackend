@@ -1,4 +1,3 @@
-import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
 import { User } from './models/User';
 import { Game } from './models/Game';
 
@@ -9,17 +8,17 @@ import { Game } from './models/Game';
 /**
  * Websocket Event RequestContext interface
  */
-export interface WebSocketAPIGatewayEventRequestContext extends APIGatewayEventRequestContext {
+export interface WebSocketAPIGatewayEventRequestContext {
   connectionId: string;
-  connectedAt: number;
   domainName: string;
   stage: string;
+  connectedAt?: number;
 }
 
 /**
  * Websocket API Gateway Event interface
  */
-export interface WebSocketAPIGatewayEvent extends APIGatewayEvent {
+export interface WebSocketAPIGatewayEvent {
   requestContext: WebSocketAPIGatewayEventRequestContext;
   body: string;
 }

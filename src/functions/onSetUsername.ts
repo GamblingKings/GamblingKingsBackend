@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { setUserName } from '../module/db';
+import { setUsername } from '../module/db';
 import {
   WebSocketAPIGatewayEvent,
   LambdaEventBody,
@@ -32,7 +32,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const ws = new WebSocketClient(event.requestContext);
   try {
     if (username) {
-      await setUserName(connectionId, username);
+      await setUsername(connectionId, username);
       const res: SuccessResponse = { success: true };
       ws.send(JSON.stringify(res), connectionId);
 
