@@ -61,10 +61,10 @@ For more details on local dev, see the following links
 aws-vault add gamblingkings-sls
 ```
 
-2. Deploy or remove AWS resources
-   Note： --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
+1. Deploy or remove AWS resources \
+   **Note：** --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
 
-To deploy:
+**To deploy:**
 
 ```shell script
 aws-vault exec <PROFILE_NAME> --no-session -- sls deploy
