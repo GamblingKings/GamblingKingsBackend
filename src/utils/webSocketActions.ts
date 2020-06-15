@@ -72,7 +72,7 @@ export const successWebSocketResponse = (webSocketResponse: WebSocketResponse): 
 
 export const failedWebSocketResponse = (webSocketResponse: WebSocketResponse, error: string): WebSocketResponse => {
   const newResponse = webSocketResponse;
-  newResponse.payload.success = true;
+  newResponse.payload.success = false;
   newResponse.payload.error = error;
   return newResponse;
 };
