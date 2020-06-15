@@ -9,12 +9,14 @@ import {
   getUserByConnectionId,
   saveConnection,
   setUsername,
+  removeUserFromGame,
 } from '../../module/db';
 import * as dbFunctions from '../../module/db';
 
 import { ddb } from '../jestLocalDynamoDB';
 import { cleanupTestGame } from './dbHelpers';
 import { Game } from '../../models/Game';
+import { User } from '../../models/User';
 
 /* ----------------------------------------------------------------------------
  * Constants
@@ -35,12 +37,14 @@ const FAKE_GAME_TYPE1 = 'fake-game-type1';
 const FAKE_GAME_TYPE2 = 'fake-game-type2';
 const FAKE_GAME_VERSION1 = 'fake-game-version1';
 const FAKE_GAME_VERSION2 = 'fake-game-version2';
+const DEFAULT_VERSION = 1;
 const TEST_GAME_OBJECT1 = {
   host: TEST_USER_OBJECT1,
   users: [TEST_USER_OBJECT1],
   gameName: FAKE_GAME_NAME1,
   gameType: FAKE_GAME_TYPE1,
   gameVersion: FAKE_GAME_VERSION1,
+  version: DEFAULT_VERSION,
 };
 const TEST_GAME_OBJECT2 = {
   host: TEST_USER_OBJECT2,
@@ -48,6 +52,7 @@ const TEST_GAME_OBJECT2 = {
   gameName: FAKE_GAME_NAME2,
   gameType: FAKE_GAME_TYPE2,
   gameVersion: FAKE_GAME_VERSION2,
+  version: DEFAULT_VERSION,
 };
 
 /* ----------------------------------------------------------------------------
@@ -377,5 +382,89 @@ describe('test addUserToGame', () => {
     expect(actualUsersInGame).toHaveLength(3);
     expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
     expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test removeUserFromGame
+ * ------------------------------------------------------------------------- */
+describe('test removeUserFromGame', () => {
+  let game: Game;
+  let gameId: string;
+  let getGameByGameIdnIdSpy: jest.SpyInstance;
+  let removeUserFromGameSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
+    gameId = game.gameId;
+
+    // Create spies (create after the setup above to avoid spying on the setup function calls)
+    getGameByGameIdnIdSpy = jest.spyOn(dbFunctions, 'getGameByGameId');
+    removeUserFromGameSpy = jest.spyOn(dbFunctions, 'removeUserFromGame');
+  });
+
+  afterEach(() => {
+    getGameByGameIdnIdSpy.mockRestore();
+    removeUserFromGameSpy.mockRestore();
+  });
+
+  test('it should remove user from a game', async () => {
+    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const actualUsersList = response?.users;
+    const expectedUsersList: User[] = [];
+
+    // Test function calls
+    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(1);
+    expect(removeUserFromGameSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(actualUsersList).toHaveLength(0);
+    expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
+    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
+  });
+
+  test('it should return undefined if users list is empty', async () => {
+    // Call remove user from game twice
+    await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
+
+    // Test function calls
+    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(2);
+    expect(removeUserFromGameSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(response).toBeUndefined();
+    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers([]);
+  });
+
+  test('it should remove different users from the game', async () => {
+    // Create two more users and join the game
+    await saveConnection(FAKE_CONNECTION_ID2, ddb);
+    await saveConnection(FAKE_CONNECTION_ID3, ddb);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID3, ddb);
+
+    // Remove test user 1 and 3
+    await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID3, ddb);
+    const actualUsersList = response?.users;
+    const expectedUsersList = [TEST_USER_OBJECT2];
+
+    // Test function calls
+    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(2);
+    expect(removeUserFromGameSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(actualUsersList).toHaveLength(1);
+    expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
+    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
   });
 });

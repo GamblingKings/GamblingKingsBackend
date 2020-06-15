@@ -1,9 +1,10 @@
 import { User } from './User';
+import { HasVersion } from './Version';
 
 /**
  * Game interface
  */
-export interface Game {
+export interface Game extends HasVersion {
   gameId: string;
   host: User;
   users: User[];

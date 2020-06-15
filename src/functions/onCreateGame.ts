@@ -1,11 +1,18 @@
 import { Handler } from 'aws-lambda';
 import { createGame, DB } from '../module/db';
-import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventBodyPayloadOptions } from '../types';
+import {
+  WebSocketAPIGatewayEvent,
+  LambdaEventBody,
+  LambdaResponse,
+  LambdaEventBodyPayloadOptions,
+  GameStates,
+} from '../types';
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
 import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/webSocketActions';
 import { Game } from '../models/Game';
+import { broadcastGameUpdate } from '../utils/broadcast';
 
 /**
  * Handler for creating a game.
@@ -49,6 +56,10 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const res = createGameResponse(returnedGameObj);
     const jsonWsResponse = JSON.stringify(successWebSocketResponse(res));
     await ws.send(jsonWsResponse, connectionId);
+
+    // Send game update to user
+    const { gameId } = returnedGameObj;
+    if (gameId) await broadcastGameUpdate(ws, gameId, GameStates.CREATED);
 
     return response(200, 'Game created successfully');
   } catch (err) {

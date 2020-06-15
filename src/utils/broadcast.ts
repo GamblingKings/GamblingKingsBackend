@@ -2,7 +2,13 @@ import { WebSocketClient } from '../WebSocketClient';
 import { getAllConnections, getAllGames, getGameByGameId, getUserByConnectionId } from '../module/db';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
-import { createWSAllUsersResponse, createWSMessageResponse, createWSAllGamesResponse } from './webSocketActions';
+import {
+  createWSAllUsersResponse,
+  createWSMessageResponse,
+  createWSAllGamesResponse,
+  createUserUpdateResponse,
+  createGameUpdateResponse,
+} from './webSocketActions';
 
 /**
  * Broadcast all the connections to a user.
@@ -109,4 +115,40 @@ export const broadcastJoinGameMessage = async (
   }
 
   return user || undefined;
+};
+
+export const broadcastUserUpdate = async (
+  ws: WebSocketClient,
+  connectionId: string,
+  state: string,
+): Promise<User | undefined> => {
+  const updatedUser = await getUserByConnectionId(connectionId);
+
+  if (updatedUser) {
+    const jsonWsResponse = JSON.stringify(createUserUpdateResponse(updatedUser, state));
+    await ws.send(jsonWsResponse, connectionId);
+  }
+
+  return updatedUser;
+};
+
+export const broadcastGameUpdate = async (
+  ws: WebSocketClient,
+  gameId: string,
+  state: string,
+): Promise<Game | undefined> => {
+  const updatedGame = await getGameByGameId(gameId);
+
+  if (updatedGame) {
+    const { users } = updatedGame;
+
+    const promises = users.map((user) => {
+      const jsonWsResponse = JSON.stringify(createGameUpdateResponse(updatedGame, state));
+      return ws.send(jsonWsResponse, user.connectionId);
+    });
+
+    await Promise.all(promises);
+  }
+
+  return updatedGame;
 };

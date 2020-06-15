@@ -11,6 +11,7 @@ module.exports = {
     '@utils/(.*)$': '<rootDir>/src/utils/$1',
     '@models/(.*)$': '<rootDir>/src/models/$1',
   },
+  collectCoverage: true,
   setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
   preset: 'jest-dynalite',
 };

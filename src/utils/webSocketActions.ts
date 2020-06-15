@@ -51,6 +51,19 @@ export const createJoinGameResponse = (game: Game | undefined): WebSocketRespons
   return createWSResponse(WebSocketActions.JOIN_GAME, wsPayload);
 };
 
+export const createLeaveResponse = (game: Game | undefined): WebSocketResponse => {
+  const wsPayload = game ? { game } : {};
+  return createWSResponse(WebSocketActions.LEAVE_GAME, wsPayload);
+};
+
+export const createUserUpdateResponse = (user: User, state: string): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.USER_UPDATE, { user, state });
+};
+
+export const createGameUpdateResponse = (game: Game, state: string): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.GAME_UPDATE, { game, state });
+};
+
 export const successWebSocketResponse = (webSocketResponse: WebSocketResponse): WebSocketResponse => {
   const newResponse = webSocketResponse;
   newResponse.payload.success = true;

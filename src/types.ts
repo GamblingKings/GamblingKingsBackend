@@ -48,6 +48,7 @@ export interface LambdaEventBodyPayloadOptions {
   games?: Game[];
   success?: boolean;
   error?: string;
+  state?: string;
 }
 
 /* ----------------------------------------------------------------------------
@@ -99,7 +100,21 @@ export enum WebSocketActions {
   CREATE_GAME = 'CREATE_GAME',
   SEND_MESSAGE = 'SEND_MESSAGE',
   JOIN_GAME = 'JOIN_GAME',
+  LEAVE_GAME = 'LEAVE_GAME',
   USER_UPDATE = 'USER_UPDATE',
   GAME_UPDATE = 'GAME_UPDATE',
   LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+}
+
+/* ----------------------------------------------------------------------------
+ * States
+ * ------------------------------------------------------------------------- */
+export enum UserStates {
+  CONNECT = 'CONNECT',
+  DISCONNECT = 'DISCONNECT',
+}
+
+export enum GameStates {
+  CREATED = 'CREATED',
+  DELETED = 'DELETED',
 }

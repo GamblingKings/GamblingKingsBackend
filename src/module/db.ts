@@ -200,6 +200,7 @@ export const createGame = async ({
       gameName: gameName || '',
       gameType: gameType || '',
       gameVersion: gameVersion || '',
+      version: 1,
     };
 
     const putParam: DocumentClient.PutItemInput = {
@@ -229,7 +230,10 @@ export const addUserToGame = async (
       gameId,
     },
     // Update users list by concatenating two list (users + newUserListVal) together
-    UpdateExpression: 'SET #users = list_append(#users, :newUserListVal)',
+    UpdateExpression: `
+      SET #users = list_append(#users, :newUserListVal)
+      ADD version :incrementVersionBy
+    `,
     // Prevent adding the same user to the users list.
     // If it fails, you will get ConditionalCheckFailedException from DynamoDB
     ConditionExpression: 'attribute_not_exists(#users) OR NOT contains(#users, :newUserVal)',
@@ -239,6 +243,7 @@ export const addUserToGame = async (
     ExpressionAttributeValues: {
       ':newUserVal': user,
       ':newUserListVal': [user], // this needs to be a list, list_append adds two list together
+      ':incrementVersionBy': 1,
     },
     ReturnValues: 'ALL_NEW',
   };
@@ -278,9 +283,51 @@ export const getGameByGameId = async (gameId: string, documentClient: DocumentCl
   return (item as Game) || undefined;
 };
 
-// TODO: Implement this
 export const removeUserFromGame = async (
   gameId: string,
   connectionId: string,
   documentClient: DocumentClient = DB,
-): Promise<void> => {};
+): Promise<Game | undefined> => {
+  // Get game by gameId
+  const game = await getGameByGameId(gameId, documentClient);
+
+  if (game) {
+    const { users } = game;
+
+    // Only update when users list is not empty
+    if (users && users.length !== 0) {
+      const updatedUsers = users.filter((user) => user.connectionId !== connectionId);
+      const version = game.version || 0;
+      console.log(`Current game version for game '${gameId}' is:`, version);
+
+      const updateParam: DocumentClient.UpdateItemInput = {
+        TableName: GAMES_TABLE,
+        Key: {
+          gameId,
+        },
+        UpdateExpression: `
+          SET #users = :newUsersVal 
+          ADD version :incrementVersionBy
+        `,
+        ConditionExpression: 'version = :version',
+        ExpressionAttributeNames: {
+          '#users': 'users',
+        },
+        ExpressionAttributeValues: {
+          ':newUsersVal': updatedUsers,
+          ':version': version || 0,
+          ':incrementVersionBy': 1,
+        },
+        ReturnValues: 'ALL_NEW',
+      };
+
+      const res = await documentClient.update(updateParam).promise();
+      console.log('\nremoveUserFromGame result:', res);
+      return res.Attributes as Game;
+    }
+
+    return undefined;
+  }
+
+  throw new AWSError('LEAVE_GAME: Game does not exist');
+};
