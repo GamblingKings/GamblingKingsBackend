@@ -9,7 +9,6 @@ import {
   getUserByConnectionId,
   saveConnection,
   setUsername,
-  updateUserState,
 } from '../../module/db';
 import * as dbFunctions from '../../module/db';
 
@@ -37,12 +36,14 @@ const FAKE_GAME_TYPE2 = 'fake-game-type2';
 const FAKE_GAME_VERSION1 = 'fake-game-version1';
 const FAKE_GAME_VERSION2 = 'fake-game-version2';
 const TEST_GAME_OBJECT1 = {
+  host: TEST_USER_OBJECT1,
   users: [TEST_USER_OBJECT1],
   gameName: FAKE_GAME_NAME1,
   gameType: FAKE_GAME_TYPE1,
   gameVersion: FAKE_GAME_VERSION1,
 };
 const TEST_GAME_OBJECT2 = {
+  host: TEST_USER_OBJECT2,
   users: [TEST_USER_OBJECT2],
   gameName: FAKE_GAME_NAME2,
   gameType: FAKE_GAME_TYPE2,
@@ -173,35 +174,6 @@ describe('test setUsername', () => {
 });
 
 /* ----------------------------------------------------------------------------
- * Test updateUserState
- * ------------------------------------------------------------------------- */
-describe('test updateUserState', () => {
-  let updateUserStateSpy: jest.SpyInstance;
-
-  beforeEach(async () => {
-    // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-
-    // Spies
-    updateUserStateSpy = jest.spyOn(dbFunctions, 'updateUserState');
-  });
-
-  afterEach(() => {
-    updateUserStateSpy.mockRestore();
-  });
-
-  test('it should update user state to CONNECT', async () => {
-    const response = await updateUserState(FAKE_CONNECTION_ID1, 'CONNECT', ddb);
-    expect(response.state).toBe('CONNECT');
-    expect(updateUserStateSpy).toHaveBeenCalledTimes(1);
-    expect(updateUserStateSpy).toHaveBeenCalledWith(FAKE_CONNECTION_ID1, 'CONNECT', ddb);
-
-    const updatedUser = await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb);
-    expect(updatedUser?.state).toBe('CONNECT');
-  });
-});
-
-/* ----------------------------------------------------------------------------
  * Test createGame
  * ------------------------------------------------------------------------- */
 describe('test createGame', () => {
@@ -300,7 +272,9 @@ describe('test getAllGames', () => {
   test('it should get all games', async () => {
     const response = await getAllGames(ddb);
     const game1 = { ...TEST_GAME_OBJECT1, gameId: gameId1 };
-    const game2 = { ...TEST_GAME_OBJECT2, ...{ users: [TEST_USER_OBJECT1] }, gameId: gameId2 };
+    const game2 = { ...TEST_GAME_OBJECT2, gameId: gameId2 };
+    game2.users = [TEST_USER_OBJECT1]; // game is created by the same user
+    game2.host = TEST_USER_OBJECT1; // // game is created by the same user
     // Compare arrays but ignore array orders
     expect(response).toHaveLength(2);
     expect(response).toIncludeSameMembers([game1, game2]);

@@ -19,7 +19,7 @@ export const broadcastConnections = async (ws: WebSocketClient, connectionId: st
     // Create users response object
     const jsonWsResponse = JSON.stringify(createWSAllUsersResponse(users));
 
-    // Send all the active connections to all the users
+    // Send all the active connections to a user
     await ws.send(jsonWsResponse, connectionId);
   }
 
