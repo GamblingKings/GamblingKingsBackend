@@ -40,7 +40,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     console.error(err);
 
     // Send failure response
-    const res = failedWebSocketResponse(err);
+    const emptyGameResponse = createJoinGameResponse(undefined);
+    const res = failedWebSocketResponse(emptyGameResponse, err);
     await ws.send(JSON.stringify(res), connectionId);
 
     return response(500, err);

@@ -5,11 +5,12 @@ import {
   LambdaEventBody,
   LambdaResponse,
   LambdaEventBodyPayloadOptions,
-  SuccessResponse,
+  WebSocketResponse,
 } from '../types';
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
+import { createLoginFailureResponse, createLoginSuccessResponse } from '../utils/webSocketActions';
 
 /**
  * Handler for setting username for a user (or connection).
@@ -33,8 +34,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     if (username) {
       await setUsername(connectionId, username);
-      const res: SuccessResponse = { success: true };
-      ws.send(JSON.stringify(res), connectionId);
+      const res: WebSocketResponse = createLoginSuccessResponse();
+      await ws.send(JSON.stringify(res), connectionId);
 
       return response(200, `Set username to ${username}`);
     }
@@ -42,8 +43,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     return response(400, 'Username attribute cannot be empty');
   } catch (err) {
     console.error(err);
-    const res: SuccessResponse = { success: false, error: err };
-    ws.send(JSON.stringify(res), connectionId);
+    const res: WebSocketResponse = createLoginFailureResponse(err);
+    await ws.send(JSON.stringify(res), connectionId);
 
     return response(500, err);
   }

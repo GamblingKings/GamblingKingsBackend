@@ -9,6 +9,7 @@ import {
   getUserByConnectionId,
   saveConnection,
   setUsername,
+  updateUserState,
 } from '../../module/db';
 import * as dbFunctions from '../../module/db';
 
@@ -168,6 +169,35 @@ describe('test setUsername', () => {
     const errorMsg = 'The conditional request failed';
     const func = setUsername(FAKE_CONNECTION_ID1, '', ddb);
     await expect(() => func).rejects.toThrow(errorMsg);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test updateUserState
+ * ------------------------------------------------------------------------- */
+describe('test updateUserState', () => {
+  let updateUserStateSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Spies
+    updateUserStateSpy = jest.spyOn(dbFunctions, 'updateUserState');
+  });
+
+  afterEach(() => {
+    updateUserStateSpy.mockRestore();
+  });
+
+  test('it should update user state to CONNECT', async () => {
+    const response = await updateUserState(FAKE_CONNECTION_ID1, 'CONNECT', ddb);
+    expect(response.state).toBe('CONNECT');
+    expect(updateUserStateSpy).toHaveBeenCalledTimes(1);
+    expect(updateUserStateSpy).toHaveBeenCalledWith(FAKE_CONNECTION_ID1, 'CONNECT', ddb);
+
+    const updatedUser = await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb);
+    expect(updatedUser?.state).toBe('CONNECT');
   });
 });
 

@@ -1,4 +1,4 @@
-import { LambdaEventBodyPayloadOptions, SuccessResponse, WebSocketActions, WebSocketResponse } from '../types';
+import { LambdaEventBodyPayloadOptions, WebSocketActions, WebSocketResponse } from '../types';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
 
@@ -52,9 +52,24 @@ export const createJoinGameResponse = (game: Game | undefined): WebSocketRespons
 };
 
 export const successWebSocketResponse = (webSocketResponse: WebSocketResponse): WebSocketResponse => {
-  return { success: true, ...webSocketResponse };
+  const newResponse = webSocketResponse;
+  newResponse.payload.success = true;
+  return newResponse;
 };
 
-export const failedWebSocketResponse = (error: string): SuccessResponse => {
-  return { success: false, error };
+export const failedWebSocketResponse = (webSocketResponse: WebSocketResponse, error: string): WebSocketResponse => {
+  const newResponse = webSocketResponse;
+  newResponse.payload.success = true;
+  newResponse.payload.error = error;
+  return newResponse;
+};
+
+export const createLoginSuccessResponse = (): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActions.LOGIN_SUCCESS, {});
+  return successWebSocketResponse(wsResponse);
+};
+
+export const createLoginFailureResponse = (errorMessage: string): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActions.LOGIN_SUCCESS, {});
+  return failedWebSocketResponse(wsResponse, errorMessage);
 };

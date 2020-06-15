@@ -163,6 +163,31 @@ export const getUserByConnectionId = async (
   return (item as User) || undefined;
 };
 
+export const updateUserState = async (
+  connectionId: string,
+  state = 'CONNECT',
+  documentClient: DocumentClient = DB,
+): Promise<User> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: CONNECTIONS_TABLE,
+    Key: {
+      connectionId,
+    },
+    UpdateExpression: 'SET #state = :stateVal',
+    ExpressionAttributeNames: {
+      '#state': 'state',
+    },
+    ExpressionAttributeValues: {
+      ':stateVal': state,
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await documentClient.update(updateParam).promise();
+  console.log('\nUpdated state for user:', res);
+  return res.Attributes as User;
+};
+
 /* ----------------------------------------------------------------------------
  * Game
  * ------------------------------------------------------------------------- */

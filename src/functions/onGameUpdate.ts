@@ -9,6 +9,7 @@ import { response } from '../utils/response';
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
+  // TODO: Implement this route
   Logger.createLogTitle('onGameUpdate.ts');
 
   console.log('RequestContext', event.requestContext);
