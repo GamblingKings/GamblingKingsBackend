@@ -20,11 +20,11 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   // Broadcast message
   console.log(body);
   console.log(payload);
-  const { message } = payload;
+  const { username, message } = payload;
 
   try {
-    if (message) {
-      const res = await broadcastMessage(ws, message);
+    if (username && message) {
+      const res = await broadcastMessage(ws, username, message);
       return response(200, res.toString());
     }
 

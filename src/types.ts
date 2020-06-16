@@ -81,12 +81,6 @@ export interface WebSocketResponse {
   payload: LambdaEventBodyPayloadOptions;
 }
 
-export interface Message {
-  message: string;
-  sender: string;
-  time: string;
-}
-
 /* ----------------------------------------------------------------------------
  * WebSocket Actions
  * ------------------------------------------------------------------------- */
@@ -104,6 +98,8 @@ export enum WebSocketActions {
   USER_UPDATE = 'USER_UPDATE',
   GAME_UPDATE = 'GAME_UPDATE',
   LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+  IN_GAME_UPDATE = 'IN_GAME_UPDATE',
+  IN_GAME_MESSAGE = 'IN_GAME_MESSAGE',
 }
 
 /* ----------------------------------------------------------------------------

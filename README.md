@@ -174,3 +174,8 @@ yarn start
 ### Test folder
 
 See [**test**](./src/__test__)
+
+## TODOs on Optimization and Future Refactoring
+
+- [ ] Refactor and optimize addUserToGame call to DynamoDB
+- [ ] Refactor and optimize removeUserFromGame call to DynamoDB

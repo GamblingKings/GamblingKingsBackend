@@ -1,10 +1,8 @@
 import { Handler } from 'aws-lambda';
-import { deleteConnection } from '../module/db';
-import { WebSocketAPIGatewayEvent, LambdaResponse, UserStates } from '../types';
+import { deleteConnection } from '../module/userDBService';
+import { WebSocketAPIGatewayEvent, LambdaResponse } from '../types';
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
-import { broadcastUserUpdate } from '../utils/broadcast';
-import { WebSocketClient } from '../WebSocketClient';
 
 /**
  * Handler for websocket disconnect.
@@ -16,13 +14,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const { connectionId } = event.requestContext;
 
   console.log('Deleting connectionId from the db table...');
-  const ws = new WebSocketClient(event.requestContext);
   try {
     // Delete user from ConnectionsTable
     await deleteConnection(connectionId);
-
-    // Send user update with state
-    await broadcastUserUpdate(ws, connectionId, UserStates.DISCONNECT);
 
     return response(200, 'Connection deleted successfully');
   } catch (err) {

@@ -19,10 +19,16 @@ export const createWSResponse = (
 
 /**
  * Create SEND_MESSAGE response object
- * @param {string} message message
+ * @param {string} username caller username
+ * @param {string} message message to send to all users
  */
-export const createWSMessageResponse = (message: string): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.SEND_MESSAGE, { message });
+export const createWSMessageResponse = (username: string, message: string): WebSocketResponse => {
+  const wsPayload = {
+    username,
+    message,
+    time: new Date().toISOString(),
+  };
+  return createWSResponse(WebSocketActions.SEND_MESSAGE, wsPayload);
 };
 
 /**
@@ -85,4 +91,8 @@ export const createLoginSuccessResponse = (): WebSocketResponse => {
 export const createLoginFailureResponse = (errorMessage: string): WebSocketResponse => {
   const wsResponse = createWSResponse(WebSocketActions.LOGIN_SUCCESS, {});
   return failedWebSocketResponse(wsResponse, errorMessage);
+};
+
+export const createInGameMessageResponse = (message: string): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.IN_GAME_MESSAGE, { message });
 };

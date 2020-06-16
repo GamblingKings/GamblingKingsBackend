@@ -1,11 +1,19 @@
 import { Handler } from 'aws-lambda';
-import { addUserToGame } from '../module/db';
-import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventBodyPayloadOptions } from '../types';
+import { addUserToGame } from '../module/gameDBService';
+import {
+  LambdaEventBody,
+  LambdaEventBodyPayloadOptions,
+  LambdaResponse,
+  WebSocketActions,
+  WebSocketAPIGatewayEvent,
+} from '../types';
 import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { successWebSocketResponse, failedWebSocketResponse, createJoinGameResponse } from '../utils/webSocketActions';
-import { broadcastJoinGameMessage } from '../utils/broadcast';
+import { createJoinGameResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/webSocketActions';
+import { broadcastInGameMessage } from '../utils/broadcast';
+import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { Game } from '../models/Game';
 
 /**
  * Handler for joining a game.
@@ -27,14 +35,15 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     // Send success response
     const updatedGame = await addUserToGame(gameId, connectionId);
+    removeGameDocumentVersion<Game>(updatedGame);
     console.log('Updated game:', updatedGame);
+
     const res = createJoinGameResponse(updatedGame);
     const updatedGameResponse = successWebSocketResponse(res);
     await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 
-    // TODO: Maybe Call IN_GAME_UPDATE here instead of broadcastJoinGameMessage
     // Send message to other users in the game
-    await broadcastJoinGameMessage(ws, gameId, connectionId);
+    await broadcastInGameMessage(ws, gameId, connectionId, WebSocketActions.JOIN_GAME);
 
     return response(200, 'Joined game successfully');
   } catch (err) {

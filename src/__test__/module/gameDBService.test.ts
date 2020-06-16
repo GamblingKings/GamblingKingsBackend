@@ -1,186 +1,34 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import {
-  addUserToGame,
-  createGame,
-  deleteConnection,
-  getAllConnections,
-  getAllGames,
-  getGameByGameId,
-  getUserByConnectionId,
-  saveConnection,
-  setUsername,
-  removeUserFromGame,
-} from '../../module/db';
-import * as dbFunctions from '../../module/db';
-
-import { ddb } from '../jestLocalDynamoDB';
-import { cleanupTestGame } from './dbHelpers';
-import { Game } from '../../models/Game';
-import { User } from '../../models/User';
-
-/* ----------------------------------------------------------------------------
- * Constants
- * ------------------------------------------------------------------------- */
-// User
-const FAKE_CONNECTION_ID1 = 'fake-connection-id-1';
-const FAKE_CONNECTION_ID2 = 'fake-connection-id-2';
-const FAKE_CONNECTION_ID3 = 'fake-connection-id-3';
-const FAKE_USERNAME1 = 'fake-username-1';
-const TEST_USER_OBJECT1 = { connectionId: FAKE_CONNECTION_ID1 };
-const TEST_USER_OBJECT2 = { connectionId: FAKE_CONNECTION_ID2 };
-const TEST_USER_OBJECT3 = { connectionId: FAKE_CONNECTION_ID3 };
-
-// Game
-const FAKE_GAME_NAME1 = 'fake-game-name1';
-const FAKE_GAME_NAME2 = 'fake-game-name2';
-const FAKE_GAME_TYPE1 = 'fake-game-type1';
-const FAKE_GAME_TYPE2 = 'fake-game-type2';
-const FAKE_GAME_VERSION1 = 'fake-game-version1';
-const FAKE_GAME_VERSION2 = 'fake-game-version2';
-const DEFAULT_VERSION = 1;
-const TEST_GAME_OBJECT1 = {
-  host: TEST_USER_OBJECT1,
-  users: [TEST_USER_OBJECT1],
-  gameName: FAKE_GAME_NAME1,
-  gameType: FAKE_GAME_TYPE1,
-  gameVersion: FAKE_GAME_VERSION1,
-  version: DEFAULT_VERSION,
-};
-const TEST_GAME_OBJECT2 = {
-  host: TEST_USER_OBJECT2,
-  users: [TEST_USER_OBJECT2],
-  gameName: FAKE_GAME_NAME2,
-  gameType: FAKE_GAME_TYPE2,
-  gameVersion: FAKE_GAME_VERSION2,
-  version: DEFAULT_VERSION,
-};
-
-/* ----------------------------------------------------------------------------
- * Test saveConnection
- * ------------------------------------------------------------------------- */
-describe('test saveConnection', () => {
-  test('it should save user with connectionId to db', async () => {
-    // Test response
-    const response = await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(response).toStrictEqual(TEST_USER_OBJECT1);
-
-    // Check if newly created user is in the table
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
-  });
-
-  test('it should throw ValidationException error if connectionId is empty', async () => {
-    // Test error
-    const func = () => saveConnection('', ddb);
-    const errorMsg =
-      'One or more parameter values are not valid. The AttributeValue for ' +
-      'a key attribute cannot contain an empty string value. Key: connectionId';
-    await expect(func).rejects.toThrow(errorMsg);
-  });
-});
-
-/* ----------------------------------------------------------------------------
- * Test getConnectionById
- * ------------------------------------------------------------------------- */
-describe('test getConnectionById', () => {
-  test('it should get user by connectionId', async () => {
-    // Create a test user
-    expect(await saveConnection(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
-
-    // Test get user by connection id
-    const response = await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb);
-    expect(response).toStrictEqual(TEST_USER_OBJECT1);
-  });
-
-  test('it should return undefined if the connectionId does not exist', async () => {
-    // Test get user by connection id
-    const response = await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb);
-    expect(response).toBeUndefined();
-  });
-});
-
-/* ----------------------------------------------------------------------------
- * Test deleteConnection
- * ------------------------------------------------------------------------- */
-describe('test deleteConnection', () => {
-  test('it should delete user', async () => {
-    // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
-
-    // Test delete user
-    const response = await deleteConnection(FAKE_CONNECTION_ID1, ddb);
-
-    // Test response
-    expect(response).toStrictEqual(TEST_USER_OBJECT1);
-
-    // Check user is gone
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toBeUndefined();
-  });
-
-  test('it should return undefined if user does not exist', async () => {
-    // Make sure test user does not exist before testing deleteConnection
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toBeUndefined();
-
-    // Test delete non-existing user
-    const response = await deleteConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(response).toBeUndefined();
-  });
-});
-
-/* ----------------------------------------------------------------------------
- * Test getAllConnections
- * ------------------------------------------------------------------------- */
-describe('test getAllConnections', () => {
-  test('it should get all the connections', async () => {
-    // Create test users
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
-    await saveConnection(FAKE_CONNECTION_ID2, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID2, ddb)).toStrictEqual(TEST_USER_OBJECT2);
-
-    // Test get all connections
-    const response = await getAllConnections(ddb);
-    expect(response).toHaveLength(2);
-    expect(response).toIncludeSameMembers([TEST_USER_OBJECT1, TEST_USER_OBJECT2]);
-  });
-
-  test('it should get an empty list if there is no connections', async () => {
-    // Test get all connections
-    const response = await getAllConnections(ddb);
-    expect(response).toHaveLength(0);
-    expect(response).toStrictEqual([]);
-  });
-});
-
-/* ----------------------------------------------------------------------------
- * Test setUsername
- * ------------------------------------------------------------------------- */
-describe('test setUsername', () => {
-  test('it should set username', async () => {
-    // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
-
-    // Test set username
-    const response = await setUsername(FAKE_CONNECTION_ID1, FAKE_USERNAME1, ddb);
-    expect(response).toStrictEqual({ ...TEST_USER_OBJECT1, username: FAKE_USERNAME1 });
-  });
-
-  test('it should throw error if username is an empty string', async () => {
-    // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
-
-    // Test set username
-    const errorMsg = 'The conditional request failed';
-    const func = setUsername(FAKE_CONNECTION_ID1, '', ddb);
-    await expect(() => func).rejects.toThrow(errorMsg);
-  });
-});
-
 /* ----------------------------------------------------------------------------
  * Test createGame
  * ------------------------------------------------------------------------- */
+import { getUserByConnectionId, saveConnection } from '../../module/userDBService';
+import {
+  addUserToGame,
+  createGame,
+  getAllGames,
+  getGameByGameId,
+  removeUserFromGame,
+} from '../../module/gameDBService';
+import { ddb } from '../jestLocalDynamoDB';
+import { cleanupTestGame } from './dbTestHelpers';
+import { Game } from '../../models/Game';
+import * as userDBFunctions from '../../module/userDBService';
+import * as gameDBFunctions from '../../module/gameDBService';
+import { User } from '../../models/User';
+import {
+  FAKE_CONNECTION_ID1,
+  FAKE_CONNECTION_ID2,
+  FAKE_CONNECTION_ID3,
+  FAKE_GAME_NAME1,
+  FAKE_GAME_TYPE1,
+  FAKE_GAME_VERSION1,
+  TEST_GAME_OBJECT1,
+  TEST_GAME_OBJECT2,
+  TEST_USER_OBJECT1,
+  TEST_USER_OBJECT2,
+  TEST_USER_OBJECT3,
+} from '../testConstants';
+
 describe('test createGame', () => {
   test('create a game and save the game to db', async () => {
     // Create a test user
@@ -303,6 +151,7 @@ describe('test addUserToGame', () => {
   let gameId: string;
   let getUserByConnectionIdSpy: jest.SpyInstance;
   let saveConnectionSpy: jest.SpyInstance;
+  let getGameByGameIdSpy: jest.SpyInstance;
   let addUserToGameSpy: jest.SpyInstance;
 
   beforeEach(async () => {
@@ -318,14 +167,16 @@ describe('test addUserToGame', () => {
     gameId = game.gameId;
 
     // Create spies (create after the setup above to avoid spying on the setup function calls)
-    getUserByConnectionIdSpy = jest.spyOn(dbFunctions, 'getUserByConnectionId');
-    saveConnectionSpy = jest.spyOn(dbFunctions, 'saveConnection');
-    addUserToGameSpy = jest.spyOn(dbFunctions, 'addUserToGame');
+    getUserByConnectionIdSpy = jest.spyOn(userDBFunctions, 'getUserByConnectionId');
+    saveConnectionSpy = jest.spyOn(userDBFunctions, 'saveConnection');
+    getGameByGameIdSpy = jest.spyOn(gameDBFunctions, 'getGameByGameId');
+    addUserToGameSpy = jest.spyOn(gameDBFunctions, 'addUserToGame');
   });
 
   afterEach(() => {
     getUserByConnectionIdSpy.mockRestore();
     saveConnectionSpy.mockRestore();
+    getGameByGameIdSpy.mockRestore();
     addUserToGameSpy.mockRestore();
   });
 
@@ -341,9 +192,11 @@ describe('test addUserToGame', () => {
     // Test function calls
     expect(saveConnectionSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2, ddb);
     expect(getUserByConnectionIdSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2, ddb);
+    expect(getGameByGameIdSpy).toHaveBeenLastCalledWith(gameId, ddb);
     expect(addUserToGameSpy).toHaveBeenLastCalledWith(gameId, FAKE_CONNECTION_ID2, ddb);
     expect(saveConnectionSpy).toHaveBeenCalledTimes(1);
     expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
+    expect(getGameByGameIdSpy).toHaveBeenCalledTimes(1);
     expect(addUserToGameSpy).toHaveBeenCalledTimes(1);
 
     // Test response
@@ -353,12 +206,13 @@ describe('test addUserToGame', () => {
   });
 
   test('it should not allow to add the same user to a game', async () => {
-    const func = addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
-    const errorMsg = 'An expression attribute value used in expression is not defined; attribute value: :newUserVal';
+    const func = addUserToGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const errorMsg = 'addUserToGame: user is already in the game';
     await expect(func).rejects.toThrow(errorMsg);
 
     // Test function calls
     expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
+    expect(getGameByGameIdSpy).toHaveBeenCalledTimes(1);
     expect(addUserToGameSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -376,6 +230,7 @@ describe('test addUserToGame', () => {
     // Test function calls
     expect(saveConnectionSpy).toHaveBeenCalledTimes(2);
     expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(2);
+    expect(getGameByGameIdSpy).toHaveBeenCalledTimes(2);
     expect(addUserToGameSpy).toHaveBeenCalledTimes(2);
 
     // Test response
@@ -407,8 +262,8 @@ describe('test removeUserFromGame', () => {
     gameId = game.gameId;
 
     // Create spies (create after the setup above to avoid spying on the setup function calls)
-    getGameByGameIdnIdSpy = jest.spyOn(dbFunctions, 'getGameByGameId');
-    removeUserFromGameSpy = jest.spyOn(dbFunctions, 'removeUserFromGame');
+    getGameByGameIdnIdSpy = jest.spyOn(gameDBFunctions, 'getGameByGameId');
+    removeUserFromGameSpy = jest.spyOn(gameDBFunctions, 'removeUserFromGame');
   });
 
   afterEach(() => {
@@ -459,7 +314,7 @@ describe('test removeUserFromGame', () => {
     const expectedUsersList = [TEST_USER_OBJECT2];
 
     // Test function calls
-    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(2);
+    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(4);
     expect(removeUserFromGameSpy).toHaveBeenCalledTimes(2);
 
     // Test response

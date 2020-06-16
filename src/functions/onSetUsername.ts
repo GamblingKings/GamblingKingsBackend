@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { setUsername } from '../module/db';
+import { setUsername } from '../module/userDBService';
 import {
   WebSocketAPIGatewayEvent,
   LambdaEventBody,

@@ -1,5 +1,6 @@
 import { Handler } from 'aws-lambda';
-import { createGame, DB } from '../module/db';
+import { DB } from '../module/db';
+import { createGame } from '../module/gameDBService';
 import {
   WebSocketAPIGatewayEvent,
   LambdaEventBody,
@@ -13,6 +14,7 @@ import { WebSocketClient } from '../WebSocketClient';
 import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/webSocketActions';
 import { Game } from '../models/Game';
 import { broadcastGameUpdate } from '../utils/broadcast';
+import { removeGameDocumentVersion } from '../utils/dbHelper';
 
 /**
  * Handler for creating a game.
@@ -25,12 +27,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const { game } = payload;
-
-  console.log('Payload data', game);
-  console.log('Type of payload data', typeof game);
+  console.log('Payload data', payload);
 
   console.log('Adding game to the db table...');
-
   const ws = new WebSocketClient(event.requestContext);
   const emptyGameResponse = createGameResponse(undefined);
   try {
@@ -51,15 +50,16 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       gameType,
       gameVersion,
     });
+    removeGameDocumentVersion<Game>(returnedGameObj);
 
     // Send success response
     const res = createGameResponse(returnedGameObj);
     const jsonWsResponse = JSON.stringify(successWebSocketResponse(res));
     await ws.send(jsonWsResponse, connectionId);
 
-    // Send game update to user
+    // Send game update to users
     const { gameId } = returnedGameObj;
-    if (gameId) await broadcastGameUpdate(ws, gameId, GameStates.CREATED);
+    if (gameId) await broadcastGameUpdate(ws, gameId, GameStates.CREATED, connectionId);
 
     return response(200, 'Game created successfully');
   } catch (err) {
