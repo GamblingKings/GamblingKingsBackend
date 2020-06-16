@@ -22,9 +22,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // Send all users to the caller
     const res: User[] = await broadcastConnections(ws, connectionId);
 
-    // Broadcast the caller info to all the other users
-    const connections = res.map((user) => user.connectionId);
-    await broadcastUserUpdate(ws, connectionId, UserStates.CONNECT, connections);
+    // Broadcast the updated users list to all the other users in the game
+    const connectionIds = res.map((user) => user.connectionId);
+    await broadcastUserUpdate(ws, connectionId, UserStates.CONNECT, connectionIds);
 
     return response(200, res.toString());
   } catch (err) {

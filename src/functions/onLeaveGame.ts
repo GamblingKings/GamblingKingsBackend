@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { removeUserFromGame } from '../module/gameDBService';
+import { deleteGame, removeUserFromGame } from '../module/gameDBService';
 import {
   GameStates,
   LambdaEventBody,
@@ -12,7 +12,7 @@ import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
 import { createLeaveResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/webSocketActions';
-import { broadcastGameUpdate, broadcastInGameMessage } from '../utils/broadcast';
+import { broadcastGameUpdate, broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
 import { Game } from '../models/Game';
 import { removeGameDocumentVersion } from '../utils/dbHelper';
 
@@ -34,24 +34,34 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   console.log('Leaving a game...');
   const ws = new WebSocketClient(event.requestContext);
   try {
-    // Send success response
+    // Remove user from game
     const updatedGame = (await removeUserFromGame(gameId, connectionId)) as Game;
     removeGameDocumentVersion<Game>(updatedGame);
     console.log('Updated game after leaving a game:', updatedGame);
 
+    // Send success response
     const res = createLeaveResponse(updatedGame);
     const updatedGameResponse = successWebSocketResponse(res);
     await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 
     // Send message to other users in the game
+    // 1. If the host leaves the game,
+    // send GAME_UPDATE with DELETE state to other user in the game and also delete the game in the table
     const { host } = updatedGame;
-    if (host) {
+    if (host.connectionId === connectionId) {
       await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
+      await deleteGame(gameId);
     } else {
-      await broadcastInGameMessage(ws, gameId, connectionId, WebSocketActions.LEAVE_GAME);
+      // 2. If the other user leaves the game,
+      // send IN_GAME_MESSAGE, IN_GAME_UPDATE to other users in the game
+      const connectionIds = updatedGame.users.map((user) => user.connectionId);
+      await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds);
+
+      // Send updated users list to other users in the game
+      await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
     }
 
-    return response(200, 'Joined game successfully');
+    return response(200, 'Left game successfully');
   } catch (err) {
     console.error(err);
 

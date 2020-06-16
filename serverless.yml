@@ -44,30 +44,30 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - 'execute-api:ManageConnections'
+        - "execute-api:ManageConnections"
       Resource:
-        - 'arn:aws:execute-api:*:*:**/@connections/*'
+        - "arn:aws:execute-api:*:*:**/@connections/*"
     - Effect: Allow
       Action:
-        - 'dynamodb:PutItem'
-        - 'dynamodb:GetItem'
-        - 'dynamodb:UpdateItem'
-        - 'dynamodb:DeleteItem'
-        - 'dynamodb:BatchGetItem'
-        - 'dynamodb:BatchWriteItem'
-        - 'dynamodb:Query'
-        - 'dynamodb:Scan'
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:BatchGetItem"
+        - "dynamodb:BatchWriteItem"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
       Resource:
         - Fn::GetAtt: [ConnectionsTable, Arn]
         - Fn::GetAtt: [GamesTable, Arn]
         - Fn::Join:
-            - '/'
+            - "/"
             - - Fn::GetAtt: [ConnectionsTable, Arn]
-              - '*'
+              - "*"
         - Fn::Join:
-            - '/'
+            - "/"
             - - Fn::GetAtt: [GamesTable, Arn]
-              - '*'
+              - "*"
 
   # you can define service wide environment variables here
   environment:
@@ -75,7 +75,7 @@ provider:
       Ref: ConnectionsTable
     GAMES_TABLE:
       Ref: GamesTable
-    API_REGION: '${self:provider.region}'
+    API_REGION: "${self:provider.region}"
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
 
 package:

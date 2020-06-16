@@ -1,10 +1,9 @@
-/* ----------------------------------------------------------------------------
- * Test createGame
- * ------------------------------------------------------------------------- */
+import { v4 as uuid } from 'uuid';
 import { getUserByConnectionId, saveConnection } from '../../module/userDBService';
 import {
   addUserToGame,
   createGame,
+  deleteGame,
   getAllGames,
   getGameByGameId,
   removeUserFromGame,
@@ -29,6 +28,9 @@ import {
   TEST_USER_OBJECT3,
 } from '../testConstants';
 
+/* ----------------------------------------------------------------------------
+ * Test createGame
+ * ------------------------------------------------------------------------- */
 describe('test createGame', () => {
   test('create a game and save the game to db', async () => {
     // Create a test user
@@ -63,6 +65,8 @@ describe('test createGame', () => {
     expect(gameType).toBe(FAKE_GAME_TYPE1);
     expect(gameVersion).toBe(FAKE_GAME_VERSION1);
   });
+
+  // TODO: Test Errors for createGame
 });
 
 /* ----------------------------------------------------------------------------
@@ -238,6 +242,8 @@ describe('test addUserToGame', () => {
     expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
     expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
   });
+
+  // TODO: Test Errors for addUserToGame
 });
 
 /* ----------------------------------------------------------------------------
@@ -321,5 +327,77 @@ describe('test removeUserFromGame', () => {
     expect(actualUsersList).toHaveLength(1);
     expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
     expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
+  });
+
+  // TODO: Test Errors for removeUserFromGame
+});
+
+/* ----------------------------------------------------------------------------
+ * Test deleteGame
+ * ------------------------------------------------------------------------- */
+describe('test deleteGame', () => {
+  let game: Game;
+  let gameId: string;
+  let deleteGameSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
+    gameId = game.gameId;
+
+    // Create spies (create after the setup above to avoid spying on the setup function calls)
+    deleteGameSpy = jest.spyOn(gameDBFunctions, 'deleteGame');
+  });
+
+  afterEach(() => {
+    deleteGameSpy.mockRestore();
+  });
+
+  test('it should delete a game successfully', async () => {
+    const response = await deleteGame(gameId, ddb);
+
+    // Test function call
+    expect(deleteGameSpy).toHaveBeenCalledWith(gameId, ddb);
+    expect(deleteGameSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response).toStrictEqual(game);
+    expect(await getGameByGameId(gameId, ddb)).toBeUndefined();
+  });
+
+  test('it should return undefined if a game is already deleted', async () => {
+    // Delete the same game twice
+    await deleteGame(gameId, ddb);
+    const response = await deleteGame(gameId, ddb);
+
+    // Test function call
+    expect(deleteGameSpy).toHaveBeenLastCalledWith(gameId, ddb);
+    expect(deleteGameSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(response).toBeUndefined();
+    expect(await getGameByGameId(gameId, ddb)).toBeUndefined();
+  });
+
+  test('it should return undefined if a game does not exist', async () => {
+    const randomGameId = uuid();
+
+    // Try to delete a random game that does not exist
+    const response = await deleteGame(randomGameId, ddb);
+
+    // Test function call
+    expect(deleteGameSpy).toHaveBeenLastCalledWith(randomGameId, ddb);
+    expect(deleteGameSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response).toBeUndefined();
+    expect(await getGameByGameId(randomGameId, ddb)).toBeUndefined();
   });
 });

@@ -11,7 +11,7 @@ import { response } from '../utils/response';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
 import { createJoinGameResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/webSocketActions';
-import { broadcastInGameMessage } from '../utils/broadcast';
+import { broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
 import { removeGameDocumentVersion } from '../utils/dbHelper';
 import { Game } from '../models/Game';
 
@@ -33,17 +33,22 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   console.log('Updating a game in the db table...');
   const ws = new WebSocketClient(event.requestContext);
   try {
-    // Send success response
+    // Add user to game
     const updatedGame = await addUserToGame(gameId, connectionId);
     removeGameDocumentVersion<Game>(updatedGame);
     console.log('Updated game:', updatedGame);
 
+    // Send success response
     const res = createJoinGameResponse(updatedGame);
     const updatedGameResponse = successWebSocketResponse(res);
     await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 
     // Send message to other users in the game
-    await broadcastInGameMessage(ws, gameId, connectionId, WebSocketActions.JOIN_GAME);
+    const connectionIds = updatedGame.users.map((user) => user.connectionId);
+    await broadcastInGameMessage(ws, connectionId, WebSocketActions.JOIN_GAME, connectionIds);
+
+    // Send updated users list to other users in the game
+    await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
 
     return response(200, 'Joined game successfully');
   } catch (err) {

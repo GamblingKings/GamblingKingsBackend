@@ -231,3 +231,19 @@ export const removeUserFromGame = async (
   // Remove version attribute from game
   return res.Attributes as Game;
 };
+
+export const deleteGame = async (gameId: string, documentClient: DocumentClient = DB): Promise<Game | undefined> => {
+  const deleteParams: DocumentClient.DeleteItemInput = {
+    TableName: GAMES_TABLE,
+    Key: {
+      gameId,
+    },
+    ReturnValues: 'ALL_OLD',
+  };
+
+  const res = await documentClient.delete(deleteParams).promise();
+  console.log('\ndeleteGame result:', res);
+
+  const { Attributes } = res;
+  return (Attributes as Game) || undefined;
+};
