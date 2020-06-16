@@ -88,10 +88,16 @@ export const createGameUpdateResponse = (game: Game, state: GameStates): WebSock
 
 /**
  * Create IN_GAME_MESSAGE response object.
+ * @param {string} username user who joins or leave a game
  * @param {string} message in game message
  */
-export const createInGameMessageResponse = (message: string): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.IN_GAME_MESSAGE, { message });
+export const createInGameMessageResponse = (username: string, message: string): WebSocketResponse => {
+  const wsPayload = {
+    username,
+    message,
+    time: new Date().toISOString(),
+  };
+  return createWSResponse(WebSocketActions.IN_GAME_MESSAGE, wsPayload);
 };
 
 /**

@@ -140,7 +140,7 @@ export const broadcastGameUpdate = async (
 };
 
 /**
- * Broadcast a message about who is joining the game
+ * Broadcast a message about who is joining the game with the IN_GAME_MESSAGE action
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} callConnectionId caller's connection Id
  * @param {WebSocketActions.JOIN_GAME | WebSocketActions.LEAVE_GAME} action join or leave game action
@@ -156,7 +156,7 @@ export const broadcastInGameMessage = async (
   const user = await getUserByConnectionId(callConnectionId);
 
   if (user) {
-    const { username } = user;
+    const username = user.username || 'Unknown User'; // TODO: change to a more appropriate name
 
     // Format message
     const actionWord: string = action === WebSocketActions.JOIN_GAME ? 'joined' : 'left';
@@ -164,7 +164,7 @@ export const broadcastInGameMessage = async (
 
     // Send message to the other connectionIds that are already in the game
     const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callConnectionId);
-    const jsonWsResponse = JSON.stringify(createInGameMessageResponse(msg));
+    const jsonWsResponse = JSON.stringify(createInGameMessageResponse(username, msg));
     await Promise.all(
       otherConnectionIds.map((otherConnectionId) => {
         return ws.send(jsonWsResponse, otherConnectionId);
