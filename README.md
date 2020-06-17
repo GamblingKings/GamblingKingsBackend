@@ -61,10 +61,10 @@ For more details on local dev, see the following links
 aws-vault add gamblingkings-sls
 ```
 
-2. Deploy or remove AWS resources
-   Note： --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
+1. Deploy or remove AWS resources \
+   **Note：** --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
 
-To deploy:
+**To deploy:**
 
 ```shell script
 aws-vault exec <PROFILE_NAME> --no-session -- sls deploy
@@ -136,3 +136,46 @@ yarn start
   }
 }
 ```
+
+`JOIN_GAME`
+
+```json
+{
+  "action": "JOIN_GAME",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
+  }
+}
+```
+
+`LEAVE_GAME`
+
+```json
+{
+  "action": "LEAVE_GAME",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
+  }
+}
+```
+
+## Testing
+
+- [Jest framework](https://jestjs.io/) is used for testing
+- [jest-dynalite](https://github.com/freshollie/jest-dynalite) is used to run test with a mock DynamoDB instance
+- [jest-extended](https://github.com/jest-community/jest-extended) is used to add additional matchers to Jest's default ones
+
+### Configuration files
+
+- [jest.config.js](./jest.config.js)
+- [jest-dynalite-config.json](./jest-dynalite-config.json)
+- [global.d.ts](./src/global.d.ts): for ide or editor to recognize jest-extended library
+
+### Test folder
+
+See [**test**](./src/__test__)
+
+## TODOs on Optimization and Future Refactoring
+
+- [ ] Refactor and optimize addUserToGame call to DynamoDB
+- [ ] Refactor and optimize removeUserFromGame call to DynamoDB

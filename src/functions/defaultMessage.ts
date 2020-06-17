@@ -7,7 +7,7 @@ import { Logger } from '../utils/Logger';
  * Default handler.
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
-  Logger.createLogTitle(__filename);
+  Logger.createLogTitle('defaultMessage.ts');
 
   console.log('Event requestContext:', event.requestContext);
   console.log('Event body:', event.body);

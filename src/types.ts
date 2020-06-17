@@ -1,21 +1,24 @@
-import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
 import { User } from './models/User';
 import { Game } from './models/Game';
+
+/* ----------------------------------------------------------------------------
+ * WebSocket Event
+ * ------------------------------------------------------------------------- */
 
 /**
  * Websocket Event RequestContext interface
  */
-export interface WebSocketAPIGatewayEventRequestContext extends APIGatewayEventRequestContext {
+export interface WebSocketAPIGatewayEventRequestContext {
   connectionId: string;
-  connectedAt: number;
   domainName: string;
   stage: string;
+  connectedAt?: string;
 }
 
 /**
  * Websocket API Gateway Event interface
  */
-export interface WebSocketAPIGatewayEvent extends APIGatewayEvent {
+export interface WebSocketAPIGatewayEvent {
   requestContext: WebSocketAPIGatewayEventRequestContext;
   body: string;
 }
@@ -28,16 +31,29 @@ export interface LambdaEventBody {
   payload: LambdaEventBodyPayloadOptions;
 }
 
+/* ----------------------------------------------------------------------------
+ * WebSocket Payload
+ * ------------------------------------------------------------------------- */
+
 /**
  * Payload interface for Lambda event body
  */
 export interface LambdaEventBodyPayloadOptions {
   username?: string;
   message?: string;
+  user?: User;
   game?: Game;
+  gameId?: string;
   users?: User[];
   games?: Game[];
+  success?: boolean;
+  error?: string;
+  state?: string;
 }
+
+/* ----------------------------------------------------------------------------
+ * WebSocket Response
+ * ------------------------------------------------------------------------- */
 
 /**
  * Response interface for Lambda functions
@@ -65,6 +81,10 @@ export interface WebSocketResponse {
   payload: LambdaEventBodyPayloadOptions;
 }
 
+/* ----------------------------------------------------------------------------
+ * WebSocket Actions
+ * ------------------------------------------------------------------------- */
+
 /**
  *  Websocket action types enum
  */
@@ -73,4 +93,24 @@ export enum WebSocketActions {
   GET_ALL_USERS = 'GET_ALL_USERS',
   CREATE_GAME = 'CREATE_GAME',
   SEND_MESSAGE = 'SEND_MESSAGE',
+  JOIN_GAME = 'JOIN_GAME',
+  LEAVE_GAME = 'LEAVE_GAME',
+  USER_UPDATE = 'USER_UPDATE',
+  GAME_UPDATE = 'GAME_UPDATE',
+  LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+  IN_GAME_UPDATE = 'IN_GAME_UPDATE',
+  IN_GAME_MESSAGE = 'IN_GAME_MESSAGE',
+}
+
+/* ----------------------------------------------------------------------------
+ * States
+ * ------------------------------------------------------------------------- */
+export enum UserStates {
+  CONNECT = 'CONNECT',
+  DISCONNECT = 'DISCONNECT',
+}
+
+export enum GameStates {
+  CREATED = 'CREATED',
+  DELETED = 'DELETED',
 }

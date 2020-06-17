@@ -9,3 +9,6 @@ package.json
 
 # Webpack
 .webpack
+
+# Test
+coverage

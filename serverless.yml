@@ -11,6 +11,8 @@ plugins:
 custom:
   webpack:
     includeModules: true
+  serverless-offline:
+    useChildProcesses: true
   #######################################
   # Uncomment this for local dev only
   #######################################
@@ -112,6 +114,14 @@ functions:
     handler: src/functions/onSendMessage.handler
     events:
       - websocket: SEND_MESSAGE
+  joinGame:
+    handler: src/functions/onJoinGame.handler
+    events:
+      - websocket: JOIN_GAME
+  leaveGame:
+    handler: src/functions/onLeaveGame.handler
+    events:
+      - websocket: LEAVE_GAME
 
 # you can add CloudFormation resource templates here
 resources:

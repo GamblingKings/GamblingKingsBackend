@@ -20,7 +20,9 @@
     "plugin:prettier/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
-    "plugin:import/typescript"
+    "plugin:import/typescript",
+    "plugin:jest/recommended",
+    "plugin:jest/style"
   ],
   "settings": {
     "settings": {
@@ -53,6 +55,7 @@
       {
         "endOfLine": "auto"
       }
-    ]
+    ],
+    "jest/prefer-strict-equal": "error"
   }
 }
