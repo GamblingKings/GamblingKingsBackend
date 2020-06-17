@@ -1,8 +1,10 @@
 import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../functions/defaultMessage';
 import { response } from '../../utils/response';
-import { createEvent, DEFAULT_MESSAGE } from './functionsTestConstants';
+import { createEvent } from './functionsTestHelpers';
 import { LambdaResponse } from '../../types';
+
+const DEFAULT_MESSAGE = 'Default message';
 
 describe('test defaultMessage', () => {
   test('it should return 200 as response', async () => {

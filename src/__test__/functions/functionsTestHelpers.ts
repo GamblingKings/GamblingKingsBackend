@@ -37,8 +37,3 @@ export const createEvent = ({
     body: JSON.stringify(eventBodyJSON),
   };
 };
-
-/* ----------------------------------------------------------------------------
- * defaultMessage
- * ------------------------------------------------------------------------- */
-export const DEFAULT_MESSAGE = 'Default message';
