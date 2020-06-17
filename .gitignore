@@ -16,6 +16,7 @@ vscode
 *.zip
 .DS_Store
 *.lock
+*.log
 
 # Test
 coverage

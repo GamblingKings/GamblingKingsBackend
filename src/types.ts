@@ -12,7 +12,7 @@ export interface WebSocketAPIGatewayEventRequestContext {
   connectionId: string;
   domainName: string;
   stage: string;
-  connectedAt?: number;
+  connectedAt?: string;
 }
 
 /**
