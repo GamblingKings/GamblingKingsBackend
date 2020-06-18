@@ -1,5 +1,5 @@
 import { ApiGatewayManagementApi } from 'aws-sdk';
-import { WebSocketAPIGatewayEventRequestContext } from './types';
+import { WebSocketAPIGatewayEventRequestContext } from './types/event';
 
 const getApiGatewayManagementApiEndpoint = (
   requestContext: WebSocketAPIGatewayEventRequestContext,

@@ -8,12 +8,13 @@ import {
   createInGameMessageResponse,
   createInGameUpdateResponse,
   createUserUpdateResponse,
-  createWSAllGamesResponse,
-  createWSAllUsersResponse,
-  createWSMessageResponse,
-} from './webSocketActions';
-import { GameStates, UserStates, WebSocketActions } from '../types';
+  createGetAllGamesResponse,
+  createGetAllUsersResponse,
+  createSendMessageResponse,
+} from './createWSResponse';
 import { removeGameDocumentVersion } from './dbHelper';
+import { WebSocketActions } from '../types/WebSocketActions';
+import { GameStates, UserStates } from '../types/states';
 
 /* ----------------------------------------------------------------------------
  * User
@@ -32,7 +33,11 @@ export const broadcastConnections = async (ws: WebSocketClient, connectionId: st
     console.log('Type of Connections:', typeof users);
 
     // Create users response object
-    const jsonWsResponse = JSON.stringify(createWSAllUsersResponse(users));
+    const jsonWsResponse = JSON.stringify(
+      createGetAllUsersResponse({
+        users,
+      }),
+    );
 
     // Send all the active connections to a user
     await ws.send(jsonWsResponse, connectionId);
@@ -57,7 +62,12 @@ export const broadcastUserUpdate = async (
   const currentUser = await getUserByConnectionId(callerConnectionId);
 
   if (currentUser) {
-    const jsonWsResponse = JSON.stringify(createUserUpdateResponse(currentUser, state));
+    const jsonWsResponse = JSON.stringify(
+      createUserUpdateResponse({
+        user: currentUser,
+        state,
+      }),
+    );
 
     const promises = allConnectionIds.map(async (otherConnectionId) => {
       if (otherConnectionId !== callerConnectionId) {
@@ -92,7 +102,11 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
   console.log('Games:', games);
 
   // Create games response object
-  const jsonWsResponse = JSON.stringify(createWSAllGamesResponse(games));
+  const jsonWsResponse = JSON.stringify(
+    createGetAllGamesResponse({
+      games,
+    }),
+  );
 
   // Send all games each user
   await ws.send(jsonWsResponse, connectionId);
@@ -125,7 +139,12 @@ export const broadcastGameUpdate = async (
     // Send game update to all other users (except the caller or the game creator)
     const promises = connections.map((otherConnectionId) => {
       if (otherConnectionId !== callerConnectionId) {
-        const jsonWsResponse = JSON.stringify(createGameUpdateResponse(updatedGame, state));
+        const jsonWsResponse = JSON.stringify(
+          createGameUpdateResponse({
+            game: updatedGame,
+            state,
+          }),
+        );
         return ws.send(jsonWsResponse, otherConnectionId);
       }
 
@@ -160,11 +179,11 @@ export const broadcastInGameMessage = async (
 
     // Format message
     const actionWord: string = action === WebSocketActions.JOIN_GAME ? 'joined' : 'left';
-    const msg = `${username || callConnectionId} just ${actionWord} the game.`;
+    const message = `${username || callConnectionId} just ${actionWord} the game.`;
 
     // Send message to the other connectionIds that are already in the game
     const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callConnectionId);
-    const jsonWsResponse = JSON.stringify(createInGameMessageResponse(username, msg));
+    const jsonWsResponse = JSON.stringify(createInGameMessageResponse(username, message));
     await Promise.all(
       otherConnectionIds.map((otherConnectionId) => {
         return ws.send(jsonWsResponse, otherConnectionId);
@@ -188,7 +207,11 @@ export const broadcastInGameUpdate = async (
 ): Promise<User[]> => {
   // Send users list to the other connectionIds that are already in the game
   const otherConnectionIds = usersInGame.filter((user) => user.connectionId !== callConnectionId);
-  const jsonWsResponse = JSON.stringify(createInGameUpdateResponse(usersInGame));
+  const jsonWsResponse = JSON.stringify(
+    createInGameUpdateResponse({
+      users: usersInGame,
+    }),
+  );
   await Promise.all(
     otherConnectionIds.map((otherUser) => {
       return ws.send(jsonWsResponse, otherUser.connectionId);
@@ -205,14 +228,23 @@ export const broadcastInGameUpdate = async (
 /**
  * Broadcast a message to all users.
  * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string} username
- * @param {string} msg
+ * @param {string} username username of the user who send the message to all other users
+ * @param {string} message message content
  */
-export const broadcastMessage = async (ws: WebSocketClient, username: string, msg: string): Promise<User[] | []> => {
+export const broadcastMessage = async (
+  ws: WebSocketClient,
+  username: string,
+  message: string,
+): Promise<User[] | []> => {
   const users: User[] = await getAllConnections();
 
   if (users && users.length > 0) {
-    const jsonWsResponse = JSON.stringify(createWSMessageResponse(username, msg));
+    const jsonWsResponse = JSON.stringify(
+      createSendMessageResponse({
+        username,
+        message,
+      }),
+    );
 
     // Send all the active connections to all the users
     await Promise.all(

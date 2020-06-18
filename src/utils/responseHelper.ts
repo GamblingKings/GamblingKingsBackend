@@ -1,4 +1,4 @@
-import { LambdaResponse } from '../types';
+import { LambdaResponse } from '../types/response';
 
 /**
  * Return an object as lambda function response.

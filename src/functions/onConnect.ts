@@ -1,8 +1,9 @@
 import { Handler } from 'aws-lambda';
 import { saveConnection } from '../module/userDBService';
-import { WebSocketAPIGatewayEvent, LambdaResponse } from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
+import { WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaResponse } from '../types/response';
 
 /**
  * Handler for websocket connection.

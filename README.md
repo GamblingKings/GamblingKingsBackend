@@ -1,3 +1,5 @@
+[![GamblingKings](https://circleci.com/gh/GamblingKings/GamblingKingsBackend.svg?style=svg)](https://app.circleci.com/pipelines/github/GamblingKings/GamblingKingsBackend?branch=master)
+
 # Mahjong Application
 
 ## Local development

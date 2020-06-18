@@ -1,20 +1,17 @@
 import { Handler } from 'aws-lambda';
 import { DB } from '../module/db';
 import { createGame } from '../module/gameDBService';
-import {
-  WebSocketAPIGatewayEvent,
-  LambdaEventBody,
-  LambdaResponse,
-  LambdaEventBodyPayloadOptions,
-  GameStates,
-} from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/webSocketActions';
+import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/createWSResponse';
 import { Game } from '../models/Game';
 import { broadcastGameUpdate } from '../utils/broadcast';
 import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaEventBodyPayloadOptions } from '../types/payload';
+import { LambdaResponse } from '../types/response';
+import { GameStates } from '../types/states';
 
 /**
  * Handler for creating a game.
@@ -53,7 +50,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     removeGameDocumentVersion<Game>(returnedGameObj);
 
     // Send success response
-    const res = createGameResponse(returnedGameObj);
+    const res = createGameResponse({ game: returnedGameObj });
     const jsonWsResponse = JSON.stringify(successWebSocketResponse(res));
     await ws.send(jsonWsResponse, connectionId);
 

@@ -1,9 +1,11 @@
 import { Handler } from 'aws-lambda';
-import { WebSocketAPIGatewayEvent, LambdaEventBody, LambdaResponse, LambdaEventBodyPayloadOptions } from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { WebSocketClient } from '../WebSocketClient';
 import { broadcastMessage } from '../utils/broadcast';
 import { Logger } from '../utils/Logger';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaEventBodyPayloadOptions } from '../types/payload';
+import { LambdaResponse } from '../types/response';
 
 /**
  * Handler for sending a message to all the users (or connections).
@@ -25,7 +27,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     if (username && message) {
       const res = await broadcastMessage(ws, username, message);
-      return response(200, res.toString());
+      return response(200, JSON.stringify(res));
     }
 
     return response(400, 'Message attribute cannot be empty');

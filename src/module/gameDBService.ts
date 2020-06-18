@@ -1,10 +1,10 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { v4 as uuid } from 'uuid';
 import { Game } from '../models/Game';
-import { GameStates } from '../types';
 import { DEFAULT_DOCUMENT_VERSION, GAMES_TABLE } from '../constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
+import { GameStates } from '../types/states';
 
 /* ----------------------------------------------------------------------------
  * Interface

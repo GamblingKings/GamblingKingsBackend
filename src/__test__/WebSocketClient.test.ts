@@ -3,7 +3,7 @@ import * as AWS from 'aws-sdk';
 
 import { PostToConnectionRequest } from 'aws-sdk/clients/apigatewaymanagementapi';
 import { WebSocketClient } from '../WebSocketClient';
-import { WebSocketAPIGatewayEventRequestContext } from '../types';
+import { WebSocketAPIGatewayEventRequestContext } from '../types/event';
 
 const FAKE_CONNECTION_ID = 'FAKE_ID';
 const LOCALHOST_URL = 'ws://localhost:1234';
