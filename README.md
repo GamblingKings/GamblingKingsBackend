@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg)](https://github.com/GamblingKings/GamblingKingsBackend/actions)
+![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg?branch=master)
 
 # Mahjong Application
 
