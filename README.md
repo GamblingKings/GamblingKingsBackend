@@ -1,4 +1,4 @@
-[![GamblingKings](https://circleci.com/gh/GamblingKings/GamblingKingsBackend.svg?style=svg)](https://app.circleci.com/pipelines/github/GamblingKings/GamblingKingsBackend?branch=master)
+[![Actions Status](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg)](https://github.com/GamblingKings/GamblingKingsBackend/actions)
 
 # Mahjong Application
 
