@@ -5,7 +5,7 @@ import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
 import { createJoinGameResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/createWSResponse';
 import { broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
-import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { Game } from '../models/Game';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
@@ -32,7 +32,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     // Add user to game
     const updatedGame = await addUserToGame(gameId, connectionId);
-    removeGameDocumentVersion<Game>(updatedGame);
+    removeDynamoDocumentVersion<Game>(updatedGame);
     console.log('Updated game:', updatedGame);
 
     // Send success response

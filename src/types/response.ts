@@ -2,7 +2,7 @@ import { LambdaEventBodyPayloadOptions } from './payload';
 import { WebSocketActions } from './WebSocketActions';
 
 /* ----------------------------------------------------------------------------
- * Lambda/WebSocket Response
+ * Lambda
  * ------------------------------------------------------------------------- */
 
 /**
@@ -22,6 +22,10 @@ export interface LambdaResponseHeader {
   'Content-Type': string;
   'Access-Control-Allow-Origin': string;
 }
+
+/* ----------------------------------------------------------------------------
+ * WebSocket Response
+ * ------------------------------------------------------------------------- */
 
 /**
  * Websocket response type for the frontend client

@@ -12,7 +12,7 @@ import {
   createGetAllUsersResponse,
   createSendMessageResponse,
 } from './createWSResponse';
-import { removeGameDocumentVersion } from './dbHelper';
+import { removeDynamoDocumentVersion } from './dbHelper';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates, UserStates } from '../types/states';
 
@@ -95,7 +95,7 @@ export const broadcastUserUpdate = async (
 export const broadcastGames = async (ws: WebSocketClient, connectionId: string): Promise<Game[] | []> => {
   const games = await getAllGames();
   games.forEach((game) => {
-    removeGameDocumentVersion<Game>(game);
+    removeDynamoDocumentVersion<Game>(game);
   });
 
   // Make games an empty array if games are empty
@@ -129,7 +129,7 @@ export const broadcastGameUpdate = async (
 ): Promise<Game | undefined> => {
   // Get updated game info
   const updatedGame = await getGameByGameId(gameId);
-  removeGameDocumentVersion<Game>(updatedGame);
+  removeDynamoDocumentVersion<Game>(updatedGame);
 
   if (updatedGame) {
     // Get all connection Ids

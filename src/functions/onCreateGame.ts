@@ -7,7 +7,7 @@ import { WebSocketClient } from '../WebSocketClient';
 import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/createWSResponse';
 import { Game } from '../models/Game';
 import { broadcastGameUpdate } from '../utils/broadcast';
-import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
@@ -47,7 +47,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       gameType,
       gameVersion,
     });
-    removeGameDocumentVersion<Game>(returnedGameObj);
+    removeDynamoDocumentVersion<Game>(returnedGameObj);
 
     // Send success response
     const res = createGameResponse({ game: returnedGameObj });

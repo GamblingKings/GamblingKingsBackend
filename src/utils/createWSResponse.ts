@@ -6,6 +6,7 @@ import {
   InGameMessagePayload,
   InGameUpdatePayload,
   JoinGamePayload,
+  LambdaEventBodyPayloadOptions,
   LeaveGamePayload,
   SendMessagePayload,
   UserUpdatePayload,
@@ -18,7 +19,10 @@ import { WebSocketActions } from '../types/WebSocketActions';
  * @param {WebSocketActions} action one of the actions from WebSocketActions
  * @param {LambdaEventBodyPayloadOptions} payload one of the payload options from LambdaEventBodyPayloadOptions
  */
-const createWSResponse = <T>(action: WebSocketActions, payload: T): WebSocketResponse => {
+const createWSResponse = <T extends LambdaEventBodyPayloadOptions>(
+  action: WebSocketActions,
+  payload: T,
+): WebSocketResponse => {
   return {
     action,
     payload,
@@ -79,7 +83,7 @@ export const createJoinGameResponse = (payload: JoinGamePayload | undefined): We
  * Create LEAVE_GAME response object.
  * @param {JoinGamePayload | undefined} payload payload object
  */
-export const createLeaveResponse = (payload: JoinGamePayload | undefined): WebSocketResponse => {
+export const createLeaveResponse = (payload: LeaveGamePayload | undefined): WebSocketResponse => {
   const wsPayload = payload || {};
   return createWSResponse(WebSocketActions.LEAVE_GAME, wsPayload);
 };
@@ -90,6 +94,14 @@ export const createLeaveResponse = (payload: JoinGamePayload | undefined): WebSo
  */
 export const createGameUpdateResponse = (payload: GameUpdatePayload): WebSocketResponse => {
   return createWSResponse(WebSocketActions.GAME_UPDATE, payload);
+};
+
+/**
+ * Create IN_GAME_UPDATE response object.
+ * @param {InGameUpdatePayload} payload payload object
+ */
+export const createInGameUpdateResponse = (payload: InGameUpdatePayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.IN_GAME_UPDATE, payload);
 };
 
 /**
@@ -106,17 +118,10 @@ export const createInGameMessageResponse = (username: string, message: string): 
   return createWSResponse(WebSocketActions.IN_GAME_MESSAGE, wsPayload);
 };
 
-/**
- * Create IN_GAME_UPDATE response object.
- * @param {InGameUpdatePayload} payload payload object
- */
-export const createInGameUpdateResponse = (payload: InGameUpdatePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.IN_GAME_UPDATE, payload);
-};
-
 /* ----------------------------------------------------------------------------
  * Success and Failure Response
  * ------------------------------------------------------------------------- */
+
 /**
  * Add success key-value pair to the response payload object.
  * @param {WebSocketResponse} webSocketResponse websocket response object

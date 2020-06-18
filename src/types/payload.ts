@@ -20,6 +20,7 @@ export interface LambdaEventBodyPayloadOptions {
   success?: boolean;
   error?: string;
   state?: string;
+  time?: string;
 }
 
 export interface UserUpdatePayload {

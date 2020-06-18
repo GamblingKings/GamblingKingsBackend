@@ -6,7 +6,7 @@ import { WebSocketClient } from '../WebSocketClient';
 import { createLeaveResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/createWSResponse';
 import { broadcastGameUpdate, broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
 import { Game } from '../models/Game';
-import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
@@ -33,7 +33,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     // Remove user from game
     const updatedGame = (await removeUserFromGame(gameId, connectionId)) as Game;
-    removeGameDocumentVersion<Game>(updatedGame);
+    removeDynamoDocumentVersion<Game>(updatedGame);
     console.log('Updated game after leaving a game:', updatedGame);
 
     // Send success response
