@@ -1,16 +1,12 @@
 import { Handler } from 'aws-lambda';
 import { setUsername } from '../module/userDBService';
-import {
-  WebSocketAPIGatewayEvent,
-  LambdaEventBody,
-  LambdaResponse,
-  LambdaEventBodyPayloadOptions,
-  WebSocketResponse,
-} from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { createLoginFailureResponse, createLoginSuccessResponse } from '../utils/webSocketActions';
+import { createLoginFailureResponse, createLoginSuccessResponse } from '../utils/createWSResponse';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaEventBodyPayloadOptions } from '../types/payload';
+import { LambdaResponse, WebSocketResponse } from '../types/response';
 
 /**
  * Handler for setting username for a user (or connection).

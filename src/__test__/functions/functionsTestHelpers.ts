@@ -1,4 +1,4 @@
-import { LambdaEventBody, WebSocketAPIGatewayEvent, WebSocketAPIGatewayEventRequestContext } from '../../types';
+import { LambdaEventBody, WebSocketAPIGatewayEvent, WebSocketAPIGatewayEventRequestContext } from '../../types/event';
 
 /* ----------------------------------------------------------------------------
  * Interface

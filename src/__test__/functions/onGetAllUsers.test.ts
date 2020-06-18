@@ -1,31 +1,49 @@
-import { getAllConnections } from '../../module/userDBService';
-import * as userFunctions from '../../module/userDBService';
-import { WebSocketClient } from '../../WebSocketClient';
+import * as LambdaTester from 'lambda-tester';
+import { handler } from '../../functions/onGetAllUsers';
+import * as broadcastFunctions from '../../utils/broadcast';
 import { createEvent } from './functionsTestHelpers';
+import { TEST_USER_OBJECT1, TEST_USER_OBJECT2 } from '../testConstants';
+import { response } from '../../utils/responseHelper';
+import { LambdaResponse } from '../../types/response';
 
 const TEST_CONNECTION_ID = 'test-onGetAllUsers-connection-id';
+const TEST_USERS = [TEST_USER_OBJECT1, TEST_USER_OBJECT2];
 
 describe('test onGetAllUsers', () => {
-  const mockResponseJSON = { action: '', payload: { message: ' ' } };
+  // Mock event
+  const mockResponseJSON = { action: '', payload: { users: TEST_USERS } };
   const event = createEvent({
     connectionId: TEST_CONNECTION_ID,
     eventBodyJSON: mockResponseJSON,
   });
-  const webSocketClient: WebSocketClient = new WebSocketClient(event.requestContext);
-  let webSocketClientSpy: jest.SpyInstance;
-  let getAllConnectionsSpy: jest.SpyInstance;
+
+  // Spies
+  let broadcastConnectionsSpy: jest.SpyInstance;
+  let broadcastUserUpdateSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    getAllConnectionsSpy = jest.spyOn(userFunctions, 'getAllConnections');
-    webSocketClientSpy = jest.spyOn(webSocketClient, 'send');
+    broadcastConnectionsSpy = jest.spyOn(broadcastFunctions, 'broadcastConnections');
+    broadcastUserUpdateSpy = jest.spyOn(broadcastFunctions, 'broadcastUserUpdate');
   });
 
   afterEach(() => {
-    getAllConnectionsSpy.mockRestore();
-    webSocketClientSpy.mockRestore();
+    broadcastConnectionsSpy.mockRestore();
+    broadcastUserUpdateSpy.mockRestore();
   });
 
-  test('placeholder', () => {
-    expect(1).toBe(1);
+  test('should get all users', async () => {
+    const expectedResponse = response(200, JSON.stringify(TEST_USERS));
+    broadcastConnectionsSpy.mockReturnValue(TEST_USERS);
+    broadcastUserUpdateSpy.mockReturnValue(TEST_USERS);
+    // getAllConnectionsSpy.mockReturnValue(TEST_USERS);
+
+    await LambdaTester(handler)
+      .event(event)
+      .expectResult((result: LambdaResponse) => {
+        expect(result).toStrictEqual(expectedResponse);
+      });
+
+    expect(broadcastConnectionsSpy).toHaveBeenCalledTimes(1);
+    expect(broadcastUserUpdateSpy).toHaveBeenCalledTimes(1);
   });
 });

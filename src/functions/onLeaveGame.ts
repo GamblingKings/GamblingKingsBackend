@@ -1,20 +1,17 @@
 import { Handler } from 'aws-lambda';
 import { deleteGame, removeUserFromGame } from '../module/gameDBService';
-import {
-  GameStates,
-  LambdaEventBody,
-  LambdaEventBodyPayloadOptions,
-  LambdaResponse,
-  WebSocketActions,
-  WebSocketAPIGatewayEvent,
-} from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { createLeaveResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/webSocketActions';
+import { createLeaveResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/createWSResponse';
 import { broadcastGameUpdate, broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
 import { Game } from '../models/Game';
-import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../utils/dbHelper';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaEventBodyPayloadOptions } from '../types/payload';
+import { LambdaResponse } from '../types/response';
+import { WebSocketActions } from '../types/WebSocketActions';
+import { GameStates } from '../types/states';
 
 /**
  * Handler for leaving a game.
@@ -36,11 +33,11 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     // Remove user from game
     const updatedGame = (await removeUserFromGame(gameId, connectionId)) as Game;
-    removeGameDocumentVersion<Game>(updatedGame);
+    removeDynamoDocumentVersion<Game>(updatedGame);
     console.log('Updated game after leaving a game:', updatedGame);
 
     // Send success response
-    const res = createLeaveResponse(updatedGame);
+    const res = createLeaveResponse({ game: updatedGame });
     const updatedGameResponse = successWebSocketResponse(res);
     await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 

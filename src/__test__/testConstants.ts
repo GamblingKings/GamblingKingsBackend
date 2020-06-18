@@ -1,5 +1,5 @@
-import { GameStates } from '../types';
 import { DEFAULT_DOCUMENT_VERSION } from '../constants';
+import { GameStates } from '../types/states';
 
 /* ----------------------------------------------------------------------------
  * User

@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg)](https://github.com/GamblingKings/GamblingKingsBackend/actions)
+
 # Mahjong Application
 
 ## Local development

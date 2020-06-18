@@ -1,9 +1,9 @@
 import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../functions/onConnect';
 import * as userFunctions from '../../module/userDBService';
-import { response } from '../../utils/response';
+import { response } from '../../utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
-import { LambdaResponse } from '../../types';
+import { LambdaResponse } from '../../types/response';
 
 const TEST_CONNECTION_ID = 'test-onConnect-connectionId';
 

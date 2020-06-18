@@ -1,19 +1,16 @@
 import { Handler } from 'aws-lambda';
 import { addUserToGame } from '../module/gameDBService';
-import {
-  LambdaEventBody,
-  LambdaEventBodyPayloadOptions,
-  LambdaResponse,
-  WebSocketActions,
-  WebSocketAPIGatewayEvent,
-} from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
-import { createJoinGameResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/webSocketActions';
+import { createJoinGameResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/createWSResponse';
 import { broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
-import { removeGameDocumentVersion } from '../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { Game } from '../models/Game';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaEventBodyPayloadOptions } from '../types/payload';
+import { LambdaResponse } from '../types/response';
+import { WebSocketActions } from '../types/WebSocketActions';
 
 /**
  * Handler for joining a game.
@@ -35,11 +32,11 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     // Add user to game
     const updatedGame = await addUserToGame(gameId, connectionId);
-    removeGameDocumentVersion<Game>(updatedGame);
+    removeDynamoDocumentVersion<Game>(updatedGame);
     console.log('Updated game:', updatedGame);
 
     // Send success response
-    const res = createJoinGameResponse(updatedGame);
+    const res = createJoinGameResponse({ game: updatedGame });
     const updatedGameResponse = successWebSocketResponse(res);
     await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 

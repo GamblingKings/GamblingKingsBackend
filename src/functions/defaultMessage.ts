@@ -1,7 +1,8 @@
 import { Handler } from 'aws-lambda';
-import { response } from '../utils/response';
-import { LambdaResponse, WebSocketAPIGatewayEvent } from '../types';
+import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
+import { WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaResponse } from '../types/response';
 
 /**
  * Default handler.

@@ -1,10 +1,12 @@
 import { Handler } from 'aws-lambda';
-import { LambdaResponse, UserStates, WebSocketAPIGatewayEvent } from '../types';
-import { response } from '../utils/response';
+import { response } from '../utils/responseHelper';
 import { WebSocketClient } from '../WebSocketClient';
 import { broadcastConnections, broadcastUserUpdate } from '../utils/broadcast';
 import { Logger } from '../utils/Logger';
 import { User } from '../models/User';
+import { WebSocketAPIGatewayEvent } from '../types/event';
+import { LambdaResponse } from '../types/response';
+import { UserStates } from '../types/states';
 
 /**
  * Handler for getting all the users (or connections).
@@ -26,7 +28,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const connectionIds = res.map((user) => user.connectionId);
     await broadcastUserUpdate(ws, connectionId, UserStates.CONNECT, connectionIds);
 
-    return response(200, res.toString());
+    return response(200, JSON.stringify(res));
   } catch (err) {
     console.error(err);
     return response(500, err);
