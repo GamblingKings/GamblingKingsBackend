@@ -13,6 +13,7 @@ import {
 } from '../../module/userDBService';
 import { ddb } from '../jestLocalDynamoDB';
 import {
+  CONDITIONAL_FAILED_MSG,
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_USERNAME1,
@@ -141,9 +142,8 @@ describe('test setUsername', () => {
     expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
 
     // Test set username
-    const errorMsg = 'The conditional request failed';
     const func = setUsername(FAKE_CONNECTION_ID1, '', ddb);
-    await expect(() => func).rejects.toThrow(errorMsg);
+    await expect(() => func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 });
 
@@ -179,13 +179,13 @@ describe('test setGameIdForUser', () => {
 
   test('it should throw error if update with non-existing connection id', async () => {
     const func = setGameIdForUser('NON-EXISTING-ID', gameId, ddb);
-    await expect(func).rejects.toThrow('The conditional request failed');
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 
   test('it should throw error gameId is already set in the user', async () => {
     await setGameIdForUser(FAKE_CONNECTION_ID1, gameId, ddb);
     const func = setGameIdForUser(FAKE_CONNECTION_ID1, gameId, ddb);
-    await expect(func).rejects.toThrow('The conditional request failed');
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 });
 
@@ -219,12 +219,12 @@ describe('test removeGameIdFromUser', () => {
 
   test('it should throw error if remove gameId with non-existing connection id', async () => {
     const func = removeGameIdFromUser('NON-EXISTING-ID', ddb);
-    await expect(func).rejects.toThrow('The conditional request failed');
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 
   test('it should throw error if gameId is not in the user', async () => {
     await removeGameIdFromUser(FAKE_CONNECTION_ID1, ddb);
     const func = removeGameIdFromUser(FAKE_CONNECTION_ID1, ddb);
-    await expect(func).rejects.toThrow('The conditional request failed');
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 });

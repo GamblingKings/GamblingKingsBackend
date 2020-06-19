@@ -249,3 +249,43 @@ export const deleteGame = async (gameId: string, documentClient: DocumentClient 
 
   return parseDynamoDBAttribute<Game>(res);
 };
+
+/**
+ * Set game started flag to true.
+ * @param {string} gameId game Id
+ * @param {DocumentClient} documentClient DynamoDB DocumentClient
+ */
+export const startGame = async (gameId: string, documentClient: DocumentClient = DB): Promise<Game | undefined> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAMES_TABLE,
+    Key: {
+      gameId,
+    },
+    /**
+     * 1. game must exist (to prevent creating a new game if the game does not exist with the given gameId)
+     * 2. started attribute should be either not exist or its value should be false before setting it to true
+     *    (to prevent duplicate write to the game)
+     */
+    ConditionExpression: `
+      attribute_exists(#gameIdKey) 
+      AND (attribute_not_exists(#startedKey) 
+      OR #startedKey = :notStartedVal)
+    `,
+    UpdateExpression: 'SET #startedKey = :startedVal',
+    ExpressionAttributeNames: {
+      '#gameIdKey': 'gameId',
+      '#startedKey': 'started',
+    },
+    ExpressionAttributeValues: {
+      ':startedVal': true,
+      ':notStartedVal': false,
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  // Update game
+  const res = await documentClient.update(updateParam).promise();
+  console.log('\nstartGame result:', res);
+
+  return parseDynamoDBAttribute<Game>(res);
+};

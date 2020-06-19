@@ -68,14 +68,13 @@ export const setUsername = async (
     },
     // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
     // and username cannot be empty string
-    ConditionExpression: '#connectionIdKey = :connectionIdVal and :usernameVal <> :emptyString',
+    ConditionExpression: 'attribute_exists(#connectionIdKey) and :usernameVal <> :emptyString',
     UpdateExpression: 'SET #usernameKey = :usernameVal',
     ExpressionAttributeNames: {
       '#connectionIdKey': 'connectionId',
       '#usernameKey': 'username',
     },
     ExpressionAttributeValues: {
-      ':connectionIdVal': connectionId,
       ':usernameVal': username,
       ':emptyString': '',
     },
@@ -138,14 +137,13 @@ export const setGameIdForUser = async (
     },
     // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
     // and the gameId attribute must not exist before adding it
-    ConditionExpression: '#connectionIdKey = :connectionIdVal AND attribute_not_exists(#gameIdKey)',
+    ConditionExpression: 'attribute_exists(#connectionIdKey) AND attribute_not_exists(#gameIdKey)',
     UpdateExpression: 'SET #gameIdKey = :gameIdVal',
     ExpressionAttributeNames: {
       '#connectionIdKey': 'connectionId',
       '#gameIdKey': 'gameId',
     },
     ExpressionAttributeValues: {
-      ':connectionIdVal': connectionId,
       ':gameIdVal': gameId,
     },
     ReturnValues: 'ALL_NEW',
@@ -168,14 +166,11 @@ export const removeGameIdFromUser = async (
     },
     // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
     // and the gameId attribute must exist before removing it
-    ConditionExpression: '#connectionIdKey = :connectionIdVal AND attribute_exists(#gameIdKey)',
+    ConditionExpression: 'attribute_exists(#connectionIdKey) AND attribute_exists(#gameIdKey)',
     UpdateExpression: 'REMOVE #gameIdKey',
     ExpressionAttributeNames: {
       '#connectionIdKey': 'connectionId',
       '#gameIdKey': 'gameId',
-    },
-    ExpressionAttributeValues: {
-      ':connectionIdVal': connectionId,
     },
     ReturnValues: 'ALL_NEW',
   };

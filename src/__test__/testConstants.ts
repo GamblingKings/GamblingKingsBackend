@@ -41,3 +41,8 @@ export const TEST_GAME_OBJECT2 = {
   state: GameStates.CREATED,
   version: DEFAULT_DOCUMENT_VERSION,
 };
+
+/* ----------------------------------------------------------------------------
+ * Error
+ * ------------------------------------------------------------------------- */
+export const CONDITIONAL_FAILED_MSG = 'The conditional request failed';

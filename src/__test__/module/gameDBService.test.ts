@@ -7,6 +7,7 @@ import {
   getAllGames,
   getGameByGameId,
   removeUserFromGame,
+  startGame,
 } from '../../module/gameDBService';
 import { ddb } from '../jestLocalDynamoDB';
 import { cleanupTestGame } from './dbTestHelpers';
@@ -15,6 +16,7 @@ import * as userDBFunctions from '../../module/userDBService';
 import * as gameDBFunctions from '../../module/gameDBService';
 import { User } from '../../models/User';
 import {
+  CONDITIONAL_FAILED_MSG,
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_CONNECTION_ID3,
@@ -399,5 +401,43 @@ describe('test deleteGame', () => {
     // Test response
     expect(response).toBeUndefined();
     expect(await getGameByGameId(randomGameId, ddb)).toBeUndefined();
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test startGame
+ * ------------------------------------------------------------------------- */
+describe('test startGame', () => {
+  let game: Game;
+  let gameId: string;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
+    gameId = game.gameId;
+  });
+
+  test('it should set the started game flag on the game to true', async () => {
+    const response = (await startGame(gameId, ddb)) as Game;
+    expect(response.started).toBeTruthy();
+    expect(((await getGameByGameId(gameId, ddb)) as Game).started).toBeTruthy();
+  });
+
+  test('it should throw error if the game does not exist', async () => {
+    const func = startGame('NON-EXISTING-GAME-ID', ddb);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
+  });
+
+  test('It should throw error if the started flag is already set to true', async () => {
+    await startGame(gameId, ddb);
+    const func = startGame(gameId, ddb);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 });
