@@ -13,6 +13,57 @@ import { LambdaResponse } from '../types/response';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates } from '../types/states';
 
+/* ----------------------------------------------------------------------------
+ * Handler Helper Functions
+ * ------------------------------------------------------------------------- */
+/**
+ * Helper function for a user to leaves a game.
+ * @param {WebSocketClient} ws WebSocketClient
+ * @param {string} connectionId connection id
+ * @param {string} gameId game id
+ */
+const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game> => {
+  // Remove user from game
+  const updatedGame = (await removeUserFromGame(gameId, connectionId)) as Game;
+  removeDynamoDocumentVersion<Game>(updatedGame);
+  console.log('Updated game after leaving a game:', updatedGame);
+
+  // Send success response
+  const res = createLeaveResponse({ game: updatedGame });
+  const updatedGameResponse = successWebSocketResponse(res);
+  await ws.send(JSON.stringify(updatedGameResponse), connectionId);
+
+  return updatedGame;
+};
+
+/**
+ * Helper function to send updates to other users in the game when a new user leaves the game.
+ * @param {WebSocketClient} ws WebSocketClient
+ * @param {string} connectionId connection id
+ * @param {Game} updatedGame updated game object
+ */
+const sendUpdates = async (ws: WebSocketClient, connectionId: string, updatedGame: Game): Promise<void> => {
+  const connectionIds = updatedGame.users.map((user) => user.connectionId);
+  await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds);
+
+  // 1. If the host leaves the game,
+  // send GAME_UPDATE with DELETE state to other users in the game,
+  // and also delete the game in the table
+  const { host, gameId } = updatedGame;
+  if (host.connectionId === connectionId) {
+    await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
+    await deleteGame(gameId);
+  } else {
+    // 2. If other user leaves the game,
+    // send IN_GAME_UPDATE to other users in the game
+    await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
+  }
+};
+
+/* ----------------------------------------------------------------------------
+ * Handler
+ * ------------------------------------------------------------------------- */
+
 /**
  * Handler for leaving a game.
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
@@ -31,35 +82,19 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   console.log('Leaving a game...');
   const ws = new WebSocketClient(event.requestContext);
   try {
-    // Remove user from game
-    const updatedGame = (await removeUserFromGame(gameId, connectionId)) as Game;
-    removeDynamoDocumentVersion<Game>(updatedGame);
-    console.log('Updated game after leaving a game:', updatedGame);
+    /**
+     * Leaves game
+     * 1. Remove user from game
+     * 2. Send success response
+     */
+    const updatedGame: Game = await leaveGame(ws, connectionId, gameId);
 
-    // Send success response
-    const res = createLeaveResponse({ game: updatedGame });
-    const updatedGameResponse = successWebSocketResponse(res);
-    await ws.send(JSON.stringify(updatedGameResponse), connectionId);
-
-    // Send message to other users in the game
-
-    // send IN_GAME_MESSAGE when a user leaves a game,
-    // no matter the user is a host or not
-    const connectionIds = updatedGame.users.map((user) => user.connectionId);
-    await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds);
-
-    // 1. If the host leaves the game,
-    // send GAME_UPDATE with DELETE state to other users in the game,
-    // and also delete the game in the table
-    const { host } = updatedGame;
-    if (host.connectionId === connectionId) {
-      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
-      await deleteGame(gameId);
-    } else {
-      // 2. If other user leaves the game,
-      // send IN_GAME_UPDATE to other users in the game
-      await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
-    }
+    /**
+     * Send message to other users in the game
+     * 1. Send IN_GAME_MESSAGE when a user leaves a game, no matter the user is a host or not
+     * 2. Send GAME_UPDATE to other users in the game
+     */
+    await sendUpdates(ws, connectionId, updatedGame);
 
     return response(200, 'Left game successfully');
   } catch (err) {

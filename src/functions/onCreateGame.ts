@@ -12,6 +12,7 @@ import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { GameStates } from '../types/states';
+import { setGameIdForUser } from '../module/userDBService';
 
 /**
  * Handler for creating a game.
@@ -48,6 +49,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       gameVersion,
     });
     removeDynamoDocumentVersion<Game>(returnedGameObj);
+
+    // Add gameId as a reference to the current user
+    await setGameIdForUser(connectionId, returnedGameObj.gameId);
 
     // Send success response
     const res = createGameResponse({ game: returnedGameObj });

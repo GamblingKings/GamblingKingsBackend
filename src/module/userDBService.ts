@@ -47,7 +47,8 @@ export const deleteConnection = async (
   console.log('\ndeleteConnection result:', res);
 
   const { Attributes } = res;
-  return (Attributes as User) || undefined;
+  if (!Attributes || Attributes === {}) return undefined;
+  return Attributes as User;
 };
 
 /**
@@ -60,17 +61,22 @@ export const setUsername = async (
   connectionId: string,
   username: string,
   documentClient: DocumentClient = DB,
-): Promise<User> => {
+): Promise<User | undefined> => {
   const updateParams: DocumentClient.UpdateItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
       connectionId,
     },
-    ExpressionAttributeNames: { '#usernameKey': 'username' },
-    // username cannot be empty string
-    ConditionExpression: ':usernameVal <> :emptyString',
+    // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
+    // and username cannot be empty string
+    ConditionExpression: '#connectionIdKey = :connectionIdVal and :usernameVal <> :emptyString',
     UpdateExpression: 'SET #usernameKey = :usernameVal',
+    ExpressionAttributeNames: {
+      '#connectionIdKey': 'connectionId',
+      '#usernameKey': 'username',
+    },
     ExpressionAttributeValues: {
+      ':connectionIdVal': connectionId,
       ':usernameVal': username,
       ':emptyString': '',
     },
@@ -81,7 +87,8 @@ export const setUsername = async (
   console.log('\nsetUserName result:', res);
 
   const { Attributes } = res;
-  return (Attributes as User) || undefined;
+  if (!Attributes || Attributes === {}) return undefined;
+  return Attributes as User;
 };
 
 /**
@@ -98,7 +105,8 @@ export const getAllConnections = async (documentClient: DocumentClient = DB): Pr
   console.log('\ngetAllConnections result:', res);
 
   const { Items } = res;
-  return (Items as User[]) || [];
+  if (Items && Items.length > 0) return Items as User[];
+  return [];
 };
 
 /**
@@ -121,5 +129,70 @@ export const getUserByConnectionId = async (
   console.log('\ngetUserByConnectionId result:', res);
 
   const { Item } = res;
-  return (Item as User) || undefined;
+  if (Item) return Item as User;
+  return undefined;
+};
+
+export const setGameIdForUser = async (
+  connectionId: string,
+  gameId: string,
+  documentClient: DocumentClient = DB,
+): Promise<User | undefined> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: CONNECTIONS_TABLE,
+    Key: {
+      connectionId,
+    },
+    // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
+    // and the gameId attribute must not exist before adding it
+    ConditionExpression: '#connectionIdKey = :connectionIdVal AND attribute_not_exists(#gameIdKey)',
+    UpdateExpression: 'SET #gameIdKey = :gameIdVal',
+    ExpressionAttributeNames: {
+      '#connectionIdKey': 'connectionId',
+      '#gameIdKey': 'gameId',
+    },
+    ExpressionAttributeValues: {
+      ':connectionIdVal': connectionId,
+      ':gameIdVal': gameId,
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await documentClient.update(updateParam).promise();
+  console.log('\nsetGameIdForUser result:', res);
+
+  const { Attributes } = res;
+  if (!Attributes || Attributes === {}) return undefined;
+  return Attributes as User;
+};
+
+export const removeGameIdFromUser = async (
+  connectionId: string,
+  documentClient: DocumentClient = DB,
+): Promise<User | undefined> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: CONNECTIONS_TABLE,
+    Key: {
+      connectionId,
+    },
+    // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
+    // and the gameId attribute must exist before removing it
+    ConditionExpression: '#connectionIdKey = :connectionIdVal AND attribute_exists(#gameIdKey)',
+    UpdateExpression: 'REMOVE #gameIdKey',
+    ExpressionAttributeNames: {
+      '#connectionIdKey': 'connectionId',
+      '#gameIdKey': 'gameId',
+    },
+    ExpressionAttributeValues: {
+      ':connectionIdVal': connectionId,
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await documentClient.update(updateParam).promise();
+  console.log('\nremoveGameIdFromUser result:', res);
+
+  const { Attributes } = res;
+  if (!Attributes || Attributes === {}) return undefined;
+  return Attributes as User;
 };

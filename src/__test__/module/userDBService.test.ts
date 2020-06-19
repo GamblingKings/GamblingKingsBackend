@@ -6,7 +6,9 @@ import {
   deleteConnection,
   getAllConnections,
   getUserByConnectionId,
+  removeGameIdFromUser,
   saveConnection,
+  setGameIdForUser,
   setUsername,
 } from '../../module/userDBService';
 import { ddb } from '../jestLocalDynamoDB';
@@ -14,9 +16,13 @@ import {
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_USERNAME1,
+  TEST_GAME_OBJECT1,
   TEST_USER_OBJECT1,
   TEST_USER_OBJECT2,
 } from '../testConstants';
+import { createGame } from '../../module/gameDBService';
+import { Game } from '../../models/Game';
+import { User } from '../../models/User';
 
 /* ----------------------------------------------------------------------------
  * Test saveConnection
@@ -138,5 +144,87 @@ describe('test setUsername', () => {
     const errorMsg = 'The conditional request failed';
     const func = setUsername(FAKE_CONNECTION_ID1, '', ddb);
     await expect(() => func).rejects.toThrow(errorMsg);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test setGameIdForUser
+ * ------------------------------------------------------------------------- */
+describe('test setGameIdForUser', () => {
+  let game: Game;
+  let gameId: string;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
+    gameId = game.gameId;
+  });
+
+  test('it should set gameId for the user successfully', async () => {
+    const response = await setGameIdForUser(FAKE_CONNECTION_ID1, gameId, ddb);
+    const expectedResponse: User = {
+      ...TEST_USER_OBJECT1,
+      gameId,
+    };
+
+    expect(response).toStrictEqual(expectedResponse);
+  });
+
+  test('it should throw error if update with non-existing connection id', async () => {
+    const func = setGameIdForUser('NON-EXISTING-ID', gameId, ddb);
+    await expect(func).rejects.toThrow('The conditional request failed');
+  });
+
+  test('it should throw error gameId is already set in the user', async () => {
+    await setGameIdForUser(FAKE_CONNECTION_ID1, gameId, ddb);
+    const func = setGameIdForUser(FAKE_CONNECTION_ID1, gameId, ddb);
+    await expect(func).rejects.toThrow('The conditional request failed');
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test removeGameIdFromUser
+ * ------------------------------------------------------------------------- */
+describe('test removeGameIdFromUser', () => {
+  let game: Game;
+  let gameId: string;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
+    gameId = game.gameId;
+
+    // Set game Id for the user
+    await setGameIdForUser(FAKE_CONNECTION_ID1, gameId, ddb);
+  });
+
+  test('it should remove gameId from the user successfully', async () => {
+    const response = await removeGameIdFromUser(FAKE_CONNECTION_ID1, ddb);
+    expect(response).toStrictEqual(TEST_USER_OBJECT1);
+  });
+
+  test('it should throw error if remove gameId with non-existing connection id', async () => {
+    const func = removeGameIdFromUser('NON-EXISTING-ID', ddb);
+    await expect(func).rejects.toThrow('The conditional request failed');
+  });
+
+  test('it should throw error if gameId is not in the user', async () => {
+    await removeGameIdFromUser(FAKE_CONNECTION_ID1, ddb);
+    const func = removeGameIdFromUser(FAKE_CONNECTION_ID1, ddb);
+    await expect(func).rejects.toThrow('The conditional request failed');
   });
 });
