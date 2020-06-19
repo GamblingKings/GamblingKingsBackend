@@ -2,6 +2,7 @@ import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { User } from '../models/User';
 import { CONNECTIONS_TABLE } from '../constants';
 import { DB } from './db';
+import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from '../utils/dbHelper';
 
 /* ----------------------------------------------------------------------------
  * User DB Service
@@ -46,9 +47,7 @@ export const deleteConnection = async (
   const res = await documentClient.delete(deleteParams).promise();
   console.log('\ndeleteConnection result:', res);
 
-  const { Attributes } = res;
-  if (!Attributes || Attributes === {}) return undefined;
-  return Attributes as User;
+  return parseDynamoDBAttribute<User>(res);
 };
 
 /**
@@ -86,9 +85,7 @@ export const setUsername = async (
   const res = await documentClient.update(updateParams).promise();
   console.log('\nsetUserName result:', res);
 
-  const { Attributes } = res;
-  if (!Attributes || Attributes === {}) return undefined;
-  return Attributes as User;
+  return parseDynamoDBAttribute<User>(res);
 };
 
 /**
@@ -104,9 +101,7 @@ export const getAllConnections = async (documentClient: DocumentClient = DB): Pr
   const res = await documentClient.scan(scanParams).promise();
   console.log('\ngetAllConnections result:', res);
 
-  const { Items } = res;
-  if (Items && Items.length > 0) return Items as User[];
-  return [];
+  return parseDynamoDBItemList<User>(res);
 };
 
 /**
@@ -128,9 +123,7 @@ export const getUserByConnectionId = async (
   const res = await documentClient.get(getParam).promise();
   console.log('\ngetUserByConnectionId result:', res);
 
-  const { Item } = res;
-  if (Item) return Item as User;
-  return undefined;
+  return parseDynamoDBItem<User>(res);
 };
 
 export const setGameIdForUser = async (
@@ -161,9 +154,7 @@ export const setGameIdForUser = async (
   const res = await documentClient.update(updateParam).promise();
   console.log('\nsetGameIdForUser result:', res);
 
-  const { Attributes } = res;
-  if (!Attributes || Attributes === {}) return undefined;
-  return Attributes as User;
+  return parseDynamoDBAttribute<User>(res);
 };
 
 export const removeGameIdFromUser = async (
@@ -192,7 +183,5 @@ export const removeGameIdFromUser = async (
   const res = await documentClient.update(updateParam).promise();
   console.log('\nremoveGameIdFromUser result:', res);
 
-  const { Attributes } = res;
-  if (!Attributes || Attributes === {}) return undefined;
-  return Attributes as User;
+  return parseDynamoDBAttribute<User>(res);
 };

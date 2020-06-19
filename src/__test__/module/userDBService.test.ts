@@ -48,7 +48,7 @@ describe('test saveConnection', () => {
 });
 
 /* ----------------------------------------------------------------------------
- * Test getConnectionById
+ * Test getUserByConnectionId
  * ------------------------------------------------------------------------- */
 describe('test getConnectionById', () => {
   test('it should get user by connectionId', async () => {
