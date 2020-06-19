@@ -189,7 +189,7 @@ describe('test addUserToGame', () => {
     await saveConnection(FAKE_CONNECTION_ID2, ddb);
 
     // Test add one user to the game
-    const res = await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+    const res = (await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb)) as Game;
     const actualUsersInGame = res.users;
     const expectedUsersInGame = [TEST_USER_OBJECT1, TEST_USER_OBJECT2];
 
@@ -206,7 +206,7 @@ describe('test addUserToGame', () => {
     // Test response
     expect(actualUsersInGame).toHaveLength(2);
     expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+    expect(((await getGameByGameId(gameId, ddb)) as Game).users).toIncludeSameMembers(expectedUsersInGame);
   });
 
   test('it should not allow to add the same user to a game', async () => {
@@ -227,7 +227,7 @@ describe('test addUserToGame', () => {
 
     // Test add two users to the game
     await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
-    const res = await addUserToGame(gameId, FAKE_CONNECTION_ID3, ddb);
+    const res = (await addUserToGame(gameId, FAKE_CONNECTION_ID3, ddb)) as Game;
     const actualUsersInGame = res.users;
     const expectedUsersInGame = [TEST_USER_OBJECT1, TEST_USER_OBJECT2, TEST_USER_OBJECT3];
 
@@ -240,7 +240,7 @@ describe('test addUserToGame', () => {
     // Test response
     expect(actualUsersInGame).toHaveLength(3);
     expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+    expect(((await getGameByGameId(gameId, ddb)) as Game).users).toIncludeSameMembers(expectedUsersInGame);
   });
 
   // TODO: Test Errors for addUserToGame
@@ -289,7 +289,7 @@ describe('test removeUserFromGame', () => {
     // Test response
     expect(actualUsersList).toHaveLength(0);
     expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
+    expect(((await getGameByGameId(gameId, ddb)) as Game).users).toIncludeSameMembers(expectedUsersList);
   });
 
   test('it should return undefined if users list is empty', async () => {
@@ -303,7 +303,7 @@ describe('test removeUserFromGame', () => {
 
     // Test response
     expect(response).toBeUndefined();
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers([]);
+    expect(((await getGameByGameId(gameId, ddb)) as Game).users).toIncludeSameMembers([]);
   });
 
   test('it should remove different users from the game', async () => {
@@ -326,7 +326,7 @@ describe('test removeUserFromGame', () => {
     // Test response
     expect(actualUsersList).toHaveLength(1);
     expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
+    expect(((await getGameByGameId(gameId, ddb)) as Game).users).toIncludeSameMembers(expectedUsersList);
   });
 
   // TODO: Test Errors for removeUserFromGame
