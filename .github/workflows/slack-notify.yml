@@ -1,0 +1,29 @@
+on: push
+name: Slack Notification
+jobs:
+  slack-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: slack-notice-failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:
+          SLACK_CHANNEL: ci-cd
+          SLACK_COLOR: '#FF0000'
+          SLACK_MESSAGE: 'Deploy failure :umbrella_with_rain_drops:'
+          SLACK_TITLE: failure
+          SLACK_USERNAME: ci_bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: slack-notice-success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:
+          SLACK_CHANNEL: ci-cd
+          SLACK_COLOR: '#008000'
+          SLACK_MESSAGE: 'Deploy success :sunny:'
+          SLACK_TITLE: success
+          SLACK_USERNAME: ci_bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
