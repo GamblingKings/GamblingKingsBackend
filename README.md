@@ -1,4 +1,6 @@
 ![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg?branch=master)
+[![Build Status](https://travis-ci.com/GamblingKings/GamblingKingsBackend.svg?branch=master)](https://travis-ci.com/GamblingKings/GamblingKingsBackend)
+[![codecov](https://codecov.io/gh/GamblingKings/GamblingKingsBackend/branch/master/graph/badge.svg)](https://codecov.io/gh/GamblingKings/GamblingKingsBackend)
 
 # Mahjong Application
 

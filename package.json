@@ -16,7 +16,7 @@
     "start": "npm-run-all format dev:cleanup install_dep deploy",
     "format": "prettier --write \"**/*.{js,ts,md,json,yml}\"",
     "lint": "eslint -c .eslintrc.json . --ext .js,.ts --fix",
-    "test": "jest"
+    "test": "jest && codecov"
   },
   "dependencies": {
     "@types/aws-lambda": "^8.10.56",
