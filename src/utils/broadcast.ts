@@ -33,14 +33,12 @@ export const broadcastConnections = async (ws: WebSocketClient, connectionId: st
     console.log('Type of Connections:', typeof users);
 
     // Create users response object
-    const jsonWsResponse = JSON.stringify(
-      createGetAllUsersResponse({
-        users,
-      }),
-    );
+    const wsResponse = createGetAllUsersResponse({
+      users,
+    });
 
     // Send all the active connections to a user
-    await ws.send(jsonWsResponse, connectionId);
+    await ws.send(wsResponse, connectionId);
   }
 
   return users || [];
@@ -62,16 +60,14 @@ export const broadcastUserUpdate = async (
   const currentUser = await getUserByConnectionId(callerConnectionId);
 
   if (currentUser) {
-    const jsonWsResponse = JSON.stringify(
-      createUserUpdateResponse({
-        user: currentUser,
-        state,
-      }),
-    );
+    const wsResponse = createUserUpdateResponse({
+      user: currentUser,
+      state,
+    });
 
     const promises = allConnectionIds.map(async (otherConnectionId) => {
       if (otherConnectionId !== callerConnectionId) {
-        return ws.send(jsonWsResponse, otherConnectionId);
+        return ws.send(wsResponse, otherConnectionId);
       }
       // Do nothing
       return null;
@@ -103,14 +99,12 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
   console.log('Games:', games);
 
   // Create games response object
-  const jsonWsResponse = JSON.stringify(
-    createGetAllGamesResponse({
-      games,
-    }),
-  );
+  const wsResponse = createGetAllGamesResponse({
+    games,
+  });
 
   // Send all games each user
-  await ws.send(jsonWsResponse, connectionId);
+  await ws.send(wsResponse, connectionId);
 
   return games || [];
 };
@@ -142,13 +136,12 @@ export const broadcastGameUpdate = async (
     // Send game update to all other users (except the caller or the game creator)
     const promises = connections.map((otherConnectionId) => {
       if (otherConnectionId !== callerConnectionId) {
-        const jsonWsResponse = JSON.stringify(
-          createGameUpdateResponse({
-            game: updatedGame,
-            state,
-          }),
-        );
-        return ws.send(jsonWsResponse, otherConnectionId);
+        const wsResponse = createGameUpdateResponse({
+          game: updatedGame,
+          state,
+        });
+
+        return ws.send(wsResponse, otherConnectionId);
       }
 
       // Do nothing
@@ -186,10 +179,10 @@ export const broadcastInGameMessage = async (
 
     // Send message to the other connectionIds that are already in the game
     const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callConnectionId);
-    const jsonWsResponse = JSON.stringify(createInGameMessageResponse(username, message));
+    const wsResponse = createInGameMessageResponse(username, message);
     await Promise.all(
       otherConnectionIds.map((otherConnectionId) => {
-        return ws.send(jsonWsResponse, otherConnectionId);
+        return ws.send(wsResponse, otherConnectionId);
       }),
     );
   }
@@ -210,14 +203,12 @@ export const broadcastInGameUpdate = async (
 ): Promise<User[]> => {
   // Send users list to the other connectionIds that are already in the game
   const otherConnectionIds = usersInGame.filter((user) => user.connectionId !== callConnectionId);
-  const jsonWsResponse = JSON.stringify(
-    createInGameUpdateResponse({
-      users: usersInGame,
-    }),
-  );
+  const wsResponse = createInGameUpdateResponse({
+    users: usersInGame,
+  });
   await Promise.all(
     otherConnectionIds.map((otherUser) => {
-      return ws.send(jsonWsResponse, otherUser.connectionId);
+      return ws.send(wsResponse, otherUser.connectionId);
     }),
   );
 
@@ -240,20 +231,19 @@ export const broadcastMessage = async (
   message: string,
 ): Promise<User[] | []> => {
   const users: User[] = await getAllConnections();
+  console.log('broadcastMessage to connections:', users);
 
   if (users && users.length > 0) {
-    const jsonWsResponse = JSON.stringify(
-      createSendMessageResponse({
-        username,
-        message,
-      }),
-    );
+    const wsResponse = createSendMessageResponse({
+      username,
+      message,
+    });
 
-    // Send all the active connections to all the users
+    // Send a message to all the active connections
     await Promise.all(
       users.map((connection) => {
         // Send all connections to all users
-        return ws.send(jsonWsResponse, connection.connectionId);
+        return ws.send(wsResponse, connection.connectionId);
       }),
     );
   }

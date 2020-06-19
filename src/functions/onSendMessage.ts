@@ -26,13 +26,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   try {
     if (username && message) {
-      const res = await broadcastMessage(ws, username, message);
-      return response(200, JSON.stringify(res));
+      const wsResponse = await broadcastMessage(ws, username, message);
+      return response(200, JSON.stringify(wsResponse));
     }
 
     return response(400, 'Message attribute cannot be empty');
   } catch (err) {
-    console.error(err);
-    return response(500, err);
+    console.error(JSON.stringify(err));
+    return response(500, JSON.stringify(err));
   }
 };

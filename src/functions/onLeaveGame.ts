@@ -22,19 +22,22 @@ import { GameStates } from '../types/states';
  * @param {string} connectionId connection id
  * @param {string} gameId game id
  */
-const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game> => {
+const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game | undefined> => {
   // Remove user from game
   const updatedGame = await removeUserFromGame(gameId, connectionId);
-  // Remove document version on game object
-  if (updatedGame) removeDynamoDocumentVersion<Game>(updatedGame);
-  console.log('Updated game after leaving a game:', updatedGame);
 
-  // Send success response
-  const res = createLeaveResponse({ game: updatedGame });
-  const updatedGameResponse = successWebSocketResponse(res);
-  await ws.send(JSON.stringify(updatedGameResponse), connectionId);
+  if (updatedGame) {
+    // Remove document version on game object
+    removeDynamoDocumentVersion<Game>(updatedGame);
+    console.log('Updated game after leaving a game:', updatedGame);
 
-  return updatedGame as Game;
+    // Send success response
+    const res = createLeaveResponse({ game: updatedGame });
+    const updatedGameResponse = successWebSocketResponse(res);
+    await ws.send(updatedGameResponse, connectionId);
+  }
+
+  return updatedGame;
 };
 
 /**
@@ -88,24 +91,24 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
      * 1. Remove user from game
      * 2. Send success response
      */
-    const updatedGame: Game = await leaveGame(ws, connectionId, gameId);
+    const updatedGame = await leaveGame(ws, connectionId, gameId);
 
     /**
      * Send message to other users in the game
      * 1. Send IN_GAME_MESSAGE when a user leaves a game, no matter the user is a host or not
      * 2. Send GAME_UPDATE to other users in the game
      */
-    await sendUpdates(ws, connectionId, updatedGame);
+    if (updatedGame) await sendUpdates(ws, connectionId, updatedGame);
 
     return response(200, 'Left game successfully');
   } catch (err) {
-    console.error(err);
+    console.error(JSON.stringify(err));
 
     // Send failure response
     const emptyGameResponse = createLeaveResponse(undefined);
-    const res = failedWebSocketResponse(emptyGameResponse, err);
-    await ws.send(JSON.stringify(res), connectionId);
+    const wsResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
+    await ws.send(wsResponse, connectionId);
 
-    return response(500, err);
+    return response(500, JSON.stringify(err));
   }
 };

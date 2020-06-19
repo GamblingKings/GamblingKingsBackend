@@ -135,6 +135,7 @@ yarn start
 {
   "action": "SEND_MESSAGE",
   "payload": {
+    "username": "test user",
     "message": "custom message to all users"
   }
 }
@@ -156,6 +157,17 @@ yarn start
 ```json
 {
   "action": "LEAVE_GAME",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
+  }
+}
+```
+
+`START_GAME`
+
+```json
+{
+  "action": "START_GAME",
   "payload": {
     "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
   }

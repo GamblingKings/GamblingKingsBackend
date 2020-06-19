@@ -1,5 +1,6 @@
 import { ApiGatewayManagementApi } from 'aws-sdk';
 import { WebSocketAPIGatewayEventRequestContext } from './types/event';
+import { WebSocketResponse } from './types/response';
 
 const getApiGatewayManagementApiEndpoint = (
   requestContext: WebSocketAPIGatewayEventRequestContext,
@@ -26,9 +27,9 @@ export class WebSocketClient {
     this.connectionId = requestContext ? requestContext.connectionId : '';
   }
 
-  async send(msg: string | string[], id?: string): Promise<unknown> {
+  async send(msg: WebSocketResponse | string, id?: string): Promise<unknown> {
     // If passed msg is object, it's parsed to JSON
-    const parsedMsg = typeof msg === 'string' ? msg : JSON.stringify(msg);
+    const parsedMsg: string = typeof msg !== 'string' ? JSON.stringify(msg) : msg;
 
     const connectionId = id || this.connectionId;
     console.log(`Sending ${parsedMsg} to ${connectionId}`);

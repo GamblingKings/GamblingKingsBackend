@@ -34,7 +34,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     if (!game) {
       // Send failed response
       const gameResponse = failedWebSocketResponse(emptyGameResponse, 'Games attribute cannot be empty');
-      await ws.send(JSON.stringify(gameResponse), connectionId);
+      await ws.send(gameResponse, connectionId);
 
       return response(400, 'Games attribute cannot be empty');
     }
@@ -57,8 +57,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // Send success response
     const res = createGameResponse({ game: returnedGameObj });
-    const jsonWsResponse = JSON.stringify(successWebSocketResponse(res));
-    await ws.send(jsonWsResponse, connectionId);
+    const wsResponse = successWebSocketResponse(res);
+    await ws.send(wsResponse, connectionId);
 
     // Send game update to users
     const { gameId } = returnedGameObj;
@@ -67,9 +67,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     return response(200, 'Game created successfully');
   } catch (err) {
     // Send failed response
-    const jsonWsResponse = JSON.stringify(failedWebSocketResponse(emptyGameResponse, err));
-    await ws.send(jsonWsResponse, connectionId);
-    console.error(err);
-    return response(500, err);
+    const wsResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
+    await ws.send(wsResponse, connectionId);
+    console.error(JSON.stringify(err));
+    return response(500, JSON.stringify(err));
   }
 };

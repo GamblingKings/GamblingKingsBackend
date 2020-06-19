@@ -126,10 +126,11 @@ functions:
     handler: src/functions/onStartGame.handler
     events:
       - websocket: START_GAME
-  game_page_load:
-    handler: src/functions/onGamePageLoad.handler
-    events:
-      - websocket: GAME_PAGE_LOAD
+  # To be implemented
+  # game_page_load:
+  #   handler: src/functions/onGamePageLoad.handler
+  #   events:
+  #     - websocket: GAME_PAGE_LOAD
 
 # you can add CloudFormation resource templates here
 resources:

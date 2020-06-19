@@ -55,7 +55,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Connection deleted successfully');
   } catch (err) {
-    console.error(err);
-    return response(500, err);
+    console.error(JSON.stringify(err));
+    return response(500, JSON.stringify(err));
   }
 };

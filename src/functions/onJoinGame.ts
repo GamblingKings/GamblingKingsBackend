@@ -38,7 +38,7 @@ const joinGame = async (ws: WebSocketClient, connectionId: string, gameId: strin
     // Send success response
     const res = createJoinGameResponse({ game: updatedGame });
     const updatedGameResponse = successWebSocketResponse(res);
-    await ws.send(JSON.stringify(updatedGameResponse), connectionId);
+    await ws.send(updatedGameResponse, connectionId);
 
     return updatedGame;
   }
@@ -98,13 +98,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Joined game successfully');
   } catch (err) {
-    console.error(err);
+    console.error(JSON.stringify(err));
 
     // Send failure response
     const emptyGameResponse = createJoinGameResponse(undefined);
-    const res = failedWebSocketResponse(emptyGameResponse, err);
-    await ws.send(JSON.stringify(res), connectionId);
+    const wsResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
+    await ws.send(wsResponse, connectionId);
 
-    return response(500, err);
+    return response(500, JSON.stringify(err));
   }
 };
