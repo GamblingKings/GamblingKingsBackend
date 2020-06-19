@@ -70,6 +70,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const wsResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
     await ws.send(wsResponse, connectionId);
     console.error(JSON.stringify(err));
-    return response(500, JSON.stringify(err));
+    return response(500, err);
   }
 };

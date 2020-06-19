@@ -22,6 +22,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     return response(200, 'Connection added successfully');
   } catch (err) {
     console.error(JSON.stringify(err));
-    return response(500, JSON.stringify(err));
+    return response(500, err);
   }
 };
