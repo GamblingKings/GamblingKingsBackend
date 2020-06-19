@@ -24,8 +24,9 @@ import { GameStates } from '../types/states';
  */
 const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game> => {
   // Remove user from game
-  const updatedGame = (await removeUserFromGame(gameId, connectionId)) as Game;
-  removeDynamoDocumentVersion<Game>(updatedGame);
+  const updatedGame = await removeUserFromGame(gameId, connectionId);
+  // Remove document version on game object
+  if (updatedGame) removeDynamoDocumentVersion<Game>(updatedGame);
   console.log('Updated game after leaving a game:', updatedGame);
 
   // Send success response
@@ -33,7 +34,7 @@ const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: stri
   const updatedGameResponse = successWebSocketResponse(res);
   await ws.send(JSON.stringify(updatedGameResponse), connectionId);
 
-  return updatedGame;
+  return updatedGame as Game;
 };
 
 /**

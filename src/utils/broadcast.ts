@@ -95,6 +95,7 @@ export const broadcastUserUpdate = async (
 export const broadcastGames = async (ws: WebSocketClient, connectionId: string): Promise<Game[] | []> => {
   const games = await getAllGames();
   games.forEach((game) => {
+    // Remove document version on game object
     removeDynamoDocumentVersion<Game>(game);
   });
 
@@ -129,9 +130,11 @@ export const broadcastGameUpdate = async (
 ): Promise<Game | undefined> => {
   // Get updated game info
   const updatedGame = await getGameByGameId(gameId);
-  removeDynamoDocumentVersion<Game>(updatedGame);
 
   if (updatedGame) {
+    // Remove document version on game object
+    removeDynamoDocumentVersion<Game>(updatedGame);
+
     // Get all connection Ids
     const users = await getAllConnections();
     const connections = users.map((user) => user.connectionId);

@@ -48,6 +48,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       gameType,
       gameVersion,
     });
+
+    // Remove document version on game object
     removeDynamoDocumentVersion<Game>(returnedGameObj);
 
     // Add gameId as a reference to the current user

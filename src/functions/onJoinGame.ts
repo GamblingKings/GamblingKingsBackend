@@ -22,21 +22,28 @@ import { setGameIdForUser } from '../module/userDBService';
  * @param {string} connectionId connection id
  * @param {string} gameId game id
  */
-const joinGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game> => {
+const joinGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game | undefined> => {
   // Add user to game
   const updatedGame = await addUserToGame(gameId, connectionId);
-  removeDynamoDocumentVersion<Game>(updatedGame);
-  console.log('Updated game:', updatedGame);
 
-  // Add gameId as a reference to the current user
-  await setGameIdForUser(connectionId, gameId);
+  if (updatedGame) {
+    // Remove document version on game object
+    removeDynamoDocumentVersion<Game>(updatedGame);
 
-  // Send success response
-  const res = createJoinGameResponse({ game: updatedGame });
-  const updatedGameResponse = successWebSocketResponse(res);
-  await ws.send(JSON.stringify(updatedGameResponse), connectionId);
+    console.log('Updated game:', updatedGame);
 
-  return updatedGame;
+    // Add gameId as a reference to the current user
+    await setGameIdForUser(connectionId, gameId);
+
+    // Send success response
+    const res = createJoinGameResponse({ game: updatedGame });
+    const updatedGameResponse = successWebSocketResponse(res);
+    await ws.send(JSON.stringify(updatedGameResponse), connectionId);
+
+    return updatedGame;
+  }
+
+  return undefined;
 };
 
 /**
@@ -80,14 +87,14 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
      * 1. Add the current user to a game
      * 2. Add gameId as a reference to the current user
      */
-    const updatedGame: Game = await joinGame(ws, connectionId, gameId);
+    const updatedGame = await joinGame(ws, connectionId, gameId);
 
     /**
      * Send update to users
      * 1. Send IN_GAME_MESSAGE to other users in the game
      * 2. Send IN_GAME_UPDATE with the updated users list to other users in the game
      */
-    await sendUpdates(ws, connectionId, updatedGame);
+    if (updatedGame) await sendUpdates(ws, connectionId, updatedGame);
 
     return response(200, 'Joined game successfully');
   } catch (err) {
