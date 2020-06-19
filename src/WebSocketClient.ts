@@ -27,6 +27,11 @@ export class WebSocketClient {
     this.connectionId = requestContext ? requestContext.connectionId : '';
   }
 
+  /**
+   * Send websocket response or message to user by connection id.
+   * @param {WebSocketResponse | string} msg response (or message) content
+   * @param {string} id connection id
+   */
   async send(msg: WebSocketResponse | string, id?: string): Promise<unknown> {
     // If passed msg is object, it's parsed to JSON
     const parsedMsg: string = typeof msg !== 'string' ? JSON.stringify(msg) : msg;
