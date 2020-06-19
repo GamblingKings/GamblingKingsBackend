@@ -1,29 +1,41 @@
 on: push
+
 name: Slack Notification
+
 jobs:
   slack-notification:
     runs-on: ubuntu-latest
+
+    env:
+      SLACK_CHANNEL: ci-cd
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      SLACK_ICON: https://avatars2.githubusercontent.com/u/44036562?s=400&v=4
+      SLACK_USERNAME: CI Bot
+      SLACK_MESSAGE_TEMPLATE: <https://github.com/${{github.repository}}/pull/${{github.event.number}}| Link to PR ${{github.event.number}}>
+
     steps:
       - uses: actions/checkout@v1
 
-      - name: slack-notice-failure
-        if: failure()
-        uses: rtCamp/action-slack-notify@v2.0.2
-        env:
-          SLACK_CHANNEL: ci-cd
-          SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: 'Deploy failure :umbrella_with_rain_drops:'
-          SLACK_TITLE: failure
-          SLACK_USERNAME: ci_bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-
-      - name: slack-notice-success
+      - uses: rtCamp/action-slack-notify@v2.0.2
+        name: Slack Success Notification
         if: success()
-        uses: rtCamp/action-slack-notify@v2.0.2
         env:
-          SLACK_CHANNEL: ci-cd
-          SLACK_COLOR: '#008000'
-          SLACK_MESSAGE: 'Deploy success :sunny:'
-          SLACK_TITLE: success
-          SLACK_USERNAME: ci_bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: Success
+          SLACK_COLOR: '#1E824C'
+          SLACK_MESSAGE: Success ☀️! ${{ env.SLACK_MESSAGE_TEMPLATE }}
+
+      - uses: rtCamp/action-slack-notify@v2.0.2
+        name: Slack Failure Notification
+        if: failure()
+        env:
+          SLACK_TITLE: Fail
+          SLACK_COLOR: '#F83535'
+          SLACK_MESSAGE: Build Failed 🌧️ ${{ env.SLACK_MESSAGE_TEMPLATE }}
+
+      - uses: rtCamp/action-slack-notify@v2.0.2
+        name: Slack Stopped Notification
+        if: cancelled()
+        env:
+          SLACK_TITLE: Cancel
+          SLACK_COLOR: '#ADADAD'
+          SLACK_MESSAGE: Build Stopped ✋🏻 ${{ env.SLACK_MESSAGE_TEMPLATE }}
