@@ -425,19 +425,30 @@ describe('test startGame', () => {
   });
 
   test('it should set the started game flag on the game to true', async () => {
-    const response = (await startGame(gameId, ddb)) as Game;
+    const response = (await startGame(gameId, FAKE_CONNECTION_ID1, ddb)) as Game;
     expect(response.started).toBeTruthy();
     expect(((await getGameByGameId(gameId, ddb)) as Game).started).toBeTruthy();
   });
 
   test('it should throw error if the game does not exist', async () => {
-    const func = startGame('NON-EXISTING-GAME-ID', ddb);
+    const func = startGame('NON-EXISTING-GAME-ID', FAKE_CONNECTION_ID1, ddb);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 
   test('It should throw error if the started flag is already set to true', async () => {
-    await startGame(gameId, ddb);
-    const func = startGame(gameId, ddb);
+    await startGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const func = startGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
+  });
+
+  test('It should throw error if the user who requests to start a game is not host', async () => {
+    // Create another user
+    await saveConnection(FAKE_CONNECTION_ID2, ddb);
+
+    // Add the user to the game
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+
+    const func = startGame(gameId, FAKE_CONNECTION_ID2, ddb);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 });

@@ -4,8 +4,10 @@ import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
-import { deleteGame, removeUserFromGame } from '../module/gameDBService';
+import { removeUserFromGame } from '../module/gameDBService';
 import { User } from '../models/User';
+import { WebSocketClient } from '../WebSocketClient';
+import { sendUpdates } from './functionsHelper';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -13,9 +15,10 @@ import { User } from '../models/User';
 
 /**
  * Additional cleanup when user disconnect
- * @param deletedUser
+ * @param {WebSocketClient} ws
+ * @param {User} deletedUser
  */
-const cleanupUserWhenDisconnect = async (deletedUser: User) => {
+const cleanupUserWhenDisconnect = async (ws: WebSocketClient, deletedUser: User) => {
   // TODO: Optimize this cleanup process
   const { gameId, connectionId } = deletedUser;
 
@@ -23,10 +26,8 @@ const cleanupUserWhenDisconnect = async (deletedUser: User) => {
   if (gameId) {
     const updatedGame = await removeUserFromGame(gameId, connectionId);
 
-    // 2. Delete the game if the user is the host of the game
-    if (updatedGame && updatedGame.host.connectionId === connectionId) {
-      await deleteGame(gameId);
-    }
+    // 2. Delete the game if the user is the host of the game and send updates to other users
+    if (updatedGame) await sendUpdates(ws, deletedUser.connectionId, updatedGame);
   }
 };
 
@@ -44,13 +45,14 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const { connectionId } = event.requestContext;
 
   console.log('Deleting connectionId from the db table...');
+  const ws = new WebSocketClient(event.requestContext);
   try {
     // Delete user from ConnectionsTable
     const deletedUser = await deleteConnection(connectionId);
 
     // Additional cleanup when user disconnect
     if (deletedUser) {
-      await cleanupUserWhenDisconnect(deletedUser);
+      await cleanupUserWhenDisconnect(ws, deletedUser);
     }
 
     return response(200, 'Connection deleted successfully');

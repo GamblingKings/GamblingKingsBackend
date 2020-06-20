@@ -8,8 +8,10 @@ import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { WebSocketClient } from '../WebSocketClient';
 import { createStartGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/createWSResponse';
 
+const REQUIRED_NUMBER_OF_USERS = 4;
+
 /**
- * Handler for setting username for a user (or connection).
+ * Handler for starting a new game.
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
@@ -26,11 +28,25 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const emptyGameResponse = createStartGameResponse();
   try {
     // Start game
-    await startGame(gameId);
+    const updatedGame = await startGame(gameId, connectionId);
 
-    // Send success message
-    const res: WebSocketResponse = successWebSocketResponse(emptyGameResponse);
-    await ws.send(res, connectionId);
+    if (updatedGame) {
+      const { users } = updatedGame;
+      const connectionsInGame = users.map((user) => user.connectionId);
+
+      // Check if the game has enough users to get started
+      if (!connectionsInGame || connectionsInGame.length < REQUIRED_NUMBER_OF_USERS) {
+        throw new Error(`Require ${REQUIRED_NUMBER_OF_USERS} users to start the game.`);
+      }
+
+      // Send start game message to users in the game
+      await Promise.all(
+        connectionsInGame.map((connection) => {
+          const res: WebSocketResponse = successWebSocketResponse(emptyGameResponse);
+          return ws.send(res, connectionId);
+        }),
+      );
+    }
 
     return response(200, 'Game started successfully');
   } catch (err) {

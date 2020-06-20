@@ -253,9 +253,14 @@ export const deleteGame = async (gameId: string, documentClient: DocumentClient 
 /**
  * Set game started flag to true.
  * @param {string} gameId game Id
+ * @param {string} callerConnectionId caller's connection id
  * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const startGame = async (gameId: string, documentClient: DocumentClient = DB): Promise<Game | undefined> => {
+export const startGame = async (
+  gameId: string,
+  callerConnectionId: string,
+  documentClient: DocumentClient = DB,
+): Promise<Game | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
     Key: {
@@ -265,11 +270,14 @@ export const startGame = async (gameId: string, documentClient: DocumentClient =
      * 1. game must exist (to prevent creating a new game if the game does not exist with the given gameId)
      * 2. started attribute should be either not exist or its value should be false before setting it to true
      *    (to prevent duplicate write to the game)
+     * 3. the user calling the function must be the host of the game
      */
     ConditionExpression: `
       attribute_exists(#gameIdKey) 
-      AND (attribute_not_exists(#startedKey) 
-      OR #startedKey = :notStartedVal)
+      AND 
+      (attribute_not_exists(#startedKey) OR #startedKey = :notStartedVal)
+      AND
+      host.connectionId = :callerConnectionIdVal
     `,
     UpdateExpression: 'SET #startedKey = :startedVal',
     ExpressionAttributeNames: {
@@ -279,6 +287,7 @@ export const startGame = async (gameId: string, documentClient: DocumentClient =
     ExpressionAttributeValues: {
       ':startedVal': true,
       ':notStartedVal': false,
+      ':callerConnectionIdVal': callerConnectionId,
     },
     ReturnValues: 'ALL_NEW',
   };
