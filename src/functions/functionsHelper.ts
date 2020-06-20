@@ -1,9 +1,15 @@
 import { WebSocketClient } from '../WebSocketClient';
 import { Game } from '../models/Game';
-import { broadcastGameUpdate, broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
+import {
+  broadcastGameUpdate,
+  broadcastInGameMessage,
+  broadcastInGameUpdate,
+  broadcastUserUpdate,
+} from '../utils/broadcast';
 import { WebSocketActions } from '../types/WebSocketActions';
-import { GameStates } from '../types/states';
+import { GameStates, UserStates } from '../types/states';
 import { deleteGame } from '../module/gameDBService';
+import { User } from '../models/User';
 
 /**
  * Helper function to send updates to other users in the game when a user leaves the game.
@@ -24,22 +30,27 @@ export const sendUpdates = async (ws: WebSocketClient, connectionId: string, upd
    * else, 1) send IN_GAME_UPDATE
    *
    * 2. game.started = true
-   * 1) DON'T delete the game send IN_GAME_UPDATE
+   * DON'T delete the game
+   * 1) send IN_GAME_UPDATE
    */
 
   // If the game is not started yet
   if (!started) {
     // If the host leaves the game,
-    // send GAME_UPDATE with DELETE state to other users in the game,
-    // and also delete the game in the table
+    // 1) send GAME_UPDATE with DELETE state to other users in the game,
+    // 2) and delete the game in the table
     if (host.connectionId === connectionId) {
-      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
       await deleteGame(gameId);
+      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
       return;
     }
   }
 
-  // If other user leaves the game, don't delete the game and
-  // send IN_GAME_UPDATE to other users in the game
+  // If other user leaves the game, DON'T delete the game and
+  // 1) send IN_GAME_UPDATE to other users in the game,
   await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
+};
+
+export const getConnectionIdsFromUsers = (usersList: User[]): string[] => {
+  return usersList.map((user) => user.connectionId);
 };

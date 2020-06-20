@@ -3,8 +3,8 @@
  * ------------------------------------------------------------------------- */
 
 export enum UserStates {
-  CONNECT = 'CONNECT',
-  DISCONNECT = 'DISCONNECT',
+  CONNECTED = 'CONNECTED',
+  DISCONNECTED = 'DISCONNECTED',
 }
 
 export enum GameStates {

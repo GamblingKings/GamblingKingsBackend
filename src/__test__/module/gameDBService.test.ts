@@ -40,7 +40,10 @@ describe('test createGame', () => {
     expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
 
     // Test create a game
-    const response = await createGame({ creatorConnectionId: FAKE_CONNECTION_ID1, documentClient: ddb });
+    const response = await createGame({
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+      documentClient: ddb,
+    });
     console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
     expect(users).toStrictEqual([TEST_USER_OBJECT1]);
