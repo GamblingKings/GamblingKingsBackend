@@ -12,6 +12,7 @@ import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates } from '../types/states';
+import { removeGameIdFromUser } from '../module/userDBService';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -25,6 +26,9 @@ import { GameStates } from '../types/states';
 const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: string): Promise<Game | undefined> => {
   // Remove user from game
   const updatedGame = await removeUserFromGame(gameId, connectionId);
+
+  // Remove gameId from the user
+  await removeGameIdFromUser(connectionId);
 
   if (updatedGame) {
     // Remove document version on game object
