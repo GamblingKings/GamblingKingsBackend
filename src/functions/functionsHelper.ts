@@ -15,16 +15,31 @@ export const sendUpdates = async (ws: WebSocketClient, connectionId: string, upd
   const connectionIds = updatedGame.users.map((user) => user.connectionId);
   await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds);
 
-  // 1. If the host leaves the game,
-  // send GAME_UPDATE with DELETE state to other users in the game,
-  // and also delete the game in the table
-  const { host, gameId } = updatedGame;
-  if (host.connectionId === connectionId) {
-    await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
-    await deleteGame(gameId);
-  } else {
-    // 2. If other user leaves the game,
-    // send IN_GAME_UPDATE to other users in the game
-    await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
+  const { host, gameId, started } = updatedGame;
+
+  /**
+   * Current implementation
+   * 1. game.started = false
+   * if user is the host, 1) delete the game and 2) send GAME_UPDATE
+   * else, 1) send IN_GAME_UPDATE
+   *
+   * 2. game.started = true
+   * 1) DON'T delete the game send IN_GAME_UPDATE
+   */
+
+  // If the game is not started yet
+  if (!started) {
+    // If the host leaves the game,
+    // send GAME_UPDATE with DELETE state to other users in the game,
+    // and also delete the game in the table
+    if (host.connectionId === connectionId) {
+      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
+      await deleteGame(gameId);
+      return;
+    }
   }
+
+  // If other user leaves the game, don't delete the game and
+  // send IN_GAME_UPDATE to other users in the game
+  await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
 };
