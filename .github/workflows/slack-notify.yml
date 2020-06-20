@@ -22,7 +22,7 @@ jobs:
         env:
           SLACK_TITLE: Success
           SLACK_COLOR: '#1E824C'
-          SLACK_MESSAGE: Success ☀️! ${{ env.SLACK_MESSAGE_TEMPLATE }}
+          SLACK_MESSAGE: `Success ☀️!` ${{ env.SLACK_MESSAGE_TEMPLATE }}
 
       - uses: rtCamp/action-slack-notify@v2.0.2
         name: Slack Failure Notification
@@ -30,7 +30,7 @@ jobs:
         env:
           SLACK_TITLE: Fail
           SLACK_COLOR: '#F83535'
-          SLACK_MESSAGE: Build Failed 🌧️ ${{ env.SLACK_MESSAGE_TEMPLATE }}
+          SLACK_MESSAGE: `Build Failed 🌧️` ${{ env.SLACK_MESSAGE_TEMPLATE }}
 
       - uses: rtCamp/action-slack-notify@v2.0.2
         name: Slack Stopped Notification
@@ -38,4 +38,4 @@ jobs:
         env:
           SLACK_TITLE: Cancel
           SLACK_COLOR: '#ADADAD'
-          SLACK_MESSAGE: Build Stopped ✋🏻 ${{ env.SLACK_MESSAGE_TEMPLATE }}
+          SLACK_MESSAGE: `Build Stopped ✋🏻` ${{ env.SLACK_MESSAGE_TEMPLATE }}
