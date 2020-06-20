@@ -1,10 +1,9 @@
 import { Handler } from 'aws-lambda';
-import { deleteGame, removeUserFromGame } from '../module/gameDBService';
+import { removeUserFromGame } from '../module/gameDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
 import { createLeaveResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/createWSResponse';
-import { broadcastGameUpdate, broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
 import { Game } from '../models/Game';
 import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
@@ -53,7 +52,7 @@ const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: stri
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   // Logger
-  Logger.createLogTitle('onJoinGame.ts');
+  Logger.createLogTitle('onLeaveGame.ts');
 
   // Parse event
   const { connectionId } = event.requestContext;
