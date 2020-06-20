@@ -43,7 +43,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       await Promise.all(
         connectionsInGame.map((connection) => {
           const res: WebSocketResponse = successWebSocketResponse(emptyGameResponse);
-          return ws.send(res, connectionId);
+          return ws.send(res, connection);
         }),
       );
     }
@@ -52,7 +52,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   } catch (err) {
     console.error(JSON.stringify(err));
 
-    // Send failure messag
+    // Send failure message
     const res: WebSocketResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
     await ws.send(res, connectionId);
 
