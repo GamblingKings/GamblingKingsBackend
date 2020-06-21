@@ -1,4 +1,5 @@
 import { DynamoDB } from 'aws-sdk';
+import { ddb } from '../__test__/jestLocalDynamoDB';
 
 /* ----------------------------------------------------------------------------
  * DocumentClient
@@ -17,13 +18,18 @@ const DEFAULT_OPTION = {
  * Create a DynamoDB DocumentClient instance
  */
 export const getDynamoDocumentClient = (): DynamoDB.DocumentClient => {
-  // For local dev
+  // For local dev using serverless
   if (process.env.IS_OFFLINE) {
     return new DynamoDB.DocumentClient({
       ...DEFAULT_OPTION,
       region: 'localhost',
       endpoint: 'http://localhost:8000',
     });
+  }
+
+  // For testing using jest-dynalite
+  if (process.env.MOCK_DYNAMODB_ENDPOINT) {
+    return ddb;
   }
 
   // For prod

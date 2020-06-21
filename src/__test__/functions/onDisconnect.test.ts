@@ -4,6 +4,7 @@ import * as userFunctions from '../../module/userDBService';
 import { response } from '../../utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
 import { LambdaResponse } from '../../types/response';
+import { FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2 } from '../testConstants';
 
 const TEST_CONNECTION_ID = 'test-onDisconnect-connectionId';
 
@@ -24,8 +25,12 @@ describe('test onDisconnect', () => {
   });
 
   test('it should delete a connection successfully', async () => {
+    const getAllConnectionsSpy: jest.SpyInstance = jest.spyOn(userFunctions, 'getAllConnections');
+
+    deleteConnectionSpy.mockReturnValue(FAKE_CONNECTION_ID1);
+    getAllConnectionsSpy.mockReturnValue([FAKE_CONNECTION_ID2]);
+
     const expectedResponse = response(200, 'Connection deleted successfully');
-    deleteConnectionSpy.mockReturnValue(expectedResponse);
 
     await LambdaTester(handler)
       .event(event)
@@ -34,7 +39,10 @@ describe('test onDisconnect', () => {
       });
 
     expect(deleteConnectionSpy).toHaveBeenCalledTimes(1);
+    expect(getAllConnectionsSpy).toHaveBeenCalledTimes(1);
     expect(deleteConnectionSpy).toHaveBeenCalledWith(TEST_CONNECTION_ID);
+
+    getAllConnectionsSpy.mockRestore();
   });
 
   test('it should fail to delete a connection', async () => {
