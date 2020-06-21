@@ -12,7 +12,6 @@ import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from
  * ------------------------------------------------------------------------- */
 interface CreateGameParams {
   creatorConnectionId: string;
-  documentClient: DocumentClient;
   gameName?: string;
   gameType?: string;
   gameVersion?: string;
@@ -27,17 +26,15 @@ interface CreateGameParams {
  * @param {string} gameName game name
  * @param {string} gameType game type
  * @param {string} gameVersion game version
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
 export const createGame = async ({
   creatorConnectionId,
   gameName,
   gameType,
   gameVersion,
-  documentClient = DB,
 }: CreateGameParams): Promise<Game> => {
   // Get user by connectionId
-  const user = await getUserByConnectionId(creatorConnectionId, documentClient);
+  const user = await getUserByConnectionId(creatorConnectionId);
 
   // Create game
   if (!user) {
@@ -65,20 +62,19 @@ export const createGame = async ({
     ReturnValues: 'ALL_OLD',
   };
 
-  await documentClient.put(putParam).promise(); // response is empty
+  await DB.put(putParam).promise(); // response is empty
   return game;
 };
 
 /**
  * Get all the games (rows) from the GamesTable.
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const getAllGames = async (documentClient: DocumentClient = DB): Promise<Game[]> => {
+export const getAllGames = async (): Promise<Game[]> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: GAMES_TABLE,
   };
 
-  const res = await documentClient.scan(scanParams).promise();
+  const res = await DB.scan(scanParams).promise();
   console.log('\ngetAllGames result:', res);
 
   return parseDynamoDBItemList<Game>(res);
@@ -87,12 +83,8 @@ export const getAllGames = async (documentClient: DocumentClient = DB): Promise<
 /**
  * Get game by the game Id.
  * @param {string} gameId game Id
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const getGameByGameId = async (
-  gameId: string,
-  documentClient: DocumentClient = DB,
-): Promise<Game | undefined> => {
+export const getGameByGameId = async (gameId: string): Promise<Game | undefined> => {
   const getParam: DocumentClient.GetItemInput = {
     TableName: GAMES_TABLE,
     Key: {
@@ -100,7 +92,7 @@ export const getGameByGameId = async (
     },
   };
 
-  const res = await documentClient.get(getParam).promise();
+  const res = await DB.get(getParam).promise();
   console.log('\ngetGameByGameId result:', res);
 
   return parseDynamoDBItem<Game>(res);
@@ -110,16 +102,11 @@ export const getGameByGameId = async (
  * Add a user to an existing game.
  * @param {string} gameId game Id
  * @param {string} connectionId connection Id
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const addUserToGame = async (
-  gameId: string,
-  connectionId: string,
-  documentClient: DocumentClient = DB,
-): Promise<Game | undefined> => {
+export const addUserToGame = async (gameId: string, connectionId: string): Promise<Game | undefined> => {
   // TODO: Refactor this part to reduce the number of read operations
   // Get user by connectionId
-  const user = await getUserByConnectionId(connectionId, documentClient);
+  const user = await getUserByConnectionId(connectionId);
 
   // Only update if the user exist
   if (!user) {
@@ -127,7 +114,7 @@ export const addUserToGame = async (
   }
 
   // Get game by gameId
-  const game = await getGameByGameId(gameId, documentClient);
+  const game = await getGameByGameId(gameId);
 
   if (!game) {
     throw new Error('addUserToGame: game does not exist');
@@ -166,7 +153,7 @@ export const addUserToGame = async (
   };
 
   // Update game
-  const res = await documentClient.update(updateParam).promise();
+  const res = await DB.update(updateParam).promise();
   console.log('\naddUserToGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
@@ -176,16 +163,11 @@ export const addUserToGame = async (
  * Remove user from an existing game.
  * @param gameId
  * @param {string} connectionId
- * @param {string} documentClient
  */
-export const removeUserFromGame = async (
-  gameId: string,
-  connectionId: string,
-  documentClient: DocumentClient = DB,
-): Promise<Game | undefined> => {
+export const removeUserFromGame = async (gameId: string, connectionId: string): Promise<Game | undefined> => {
   // TODO: Refactor this part to reduce the number of read operations
   // Get game by gameId
-  const game = await getGameByGameId(gameId, documentClient);
+  const game = await getGameByGameId(gameId);
 
   // Only update when the game exists
   if (!game) {
@@ -229,13 +211,17 @@ export const removeUserFromGame = async (
     ReturnValues: 'ALL_NEW',
   };
 
-  const res = await documentClient.update(updateParam).promise();
+  const res = await DB.update(updateParam).promise();
   console.log('\nremoveUserFromGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };
 
-export const deleteGame = async (gameId: string, documentClient: DocumentClient = DB): Promise<Game | undefined> => {
+/**
+ * Delete game from GamesTable.
+ * @param {string} gameId game Id
+ */
+export const deleteGame = async (gameId: string): Promise<Game | undefined> => {
   const deleteParams: DocumentClient.DeleteItemInput = {
     TableName: GAMES_TABLE,
     Key: {
@@ -244,7 +230,7 @@ export const deleteGame = async (gameId: string, documentClient: DocumentClient 
     ReturnValues: 'ALL_OLD',
   };
 
-  const res = await documentClient.delete(deleteParams).promise();
+  const res = await DB.delete(deleteParams).promise();
   console.log('\ndeleteGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
@@ -254,13 +240,8 @@ export const deleteGame = async (gameId: string, documentClient: DocumentClient 
  * Set game started flag to true.
  * @param {string} gameId game Id
  * @param {string} callerConnectionId caller's connection id
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const startGame = async (
-  gameId: string,
-  callerConnectionId: string,
-  documentClient: DocumentClient = DB,
-): Promise<Game | undefined> => {
+export const startGame = async (gameId: string, callerConnectionId: string): Promise<Game | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
     Key: {
@@ -293,7 +274,7 @@ export const startGame = async (
   };
 
   // Update game
-  const res = await documentClient.update(updateParam).promise();
+  const res = await DB.update(updateParam).promise();
   console.log('\nstartGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);

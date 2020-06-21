@@ -10,9 +10,8 @@ import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from
 /**
  * Save new connection with connectionId to the ConnectionsTable.
  * @param {string} connectionId connectionId from event.requestContext
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const saveConnection = async (connectionId: string, documentClient: DocumentClient = DB): Promise<User> => {
+export const saveConnection = async (connectionId: string): Promise<User> => {
   const putParams: DocumentClient.PutItemInput = {
     TableName: CONNECTIONS_TABLE,
     Item: {
@@ -21,7 +20,7 @@ export const saveConnection = async (connectionId: string, documentClient: Docum
     ReturnValues: 'ALL_OLD',
   };
 
-  const res = await documentClient.put(putParams).promise(); // response is empty
+  const res = await DB.put(putParams).promise(); // response is empty
   console.log('\nsaveConnection result:', res);
 
   return { connectionId } as User;
@@ -30,12 +29,8 @@ export const saveConnection = async (connectionId: string, documentClient: Docum
 /**
  * Remove connection by connectionId from the ConnectionsTable.
  * @param {string} connectionId connectionId from event.requestContext
- * @param {DocumentClient} documentClient
  */
-export const deleteConnection = async (
-  connectionId: string,
-  documentClient: DocumentClient = DB,
-): Promise<User | undefined> => {
+export const deleteConnection = async (connectionId: string): Promise<User | undefined> => {
   const deleteParams: DocumentClient.DeleteItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -44,7 +39,7 @@ export const deleteConnection = async (
     ReturnValues: 'ALL_OLD',
   };
 
-  const res = await documentClient.delete(deleteParams).promise();
+  const res = await DB.delete(deleteParams).promise();
   console.log('\ndeleteConnection result:', res);
 
   return parseDynamoDBAttribute<User>(res);
@@ -54,13 +49,8 @@ export const deleteConnection = async (
  * Set username for a connection.
  * @param {string} connectionId connectionId
  * @param {string} username username
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const setUsername = async (
-  connectionId: string,
-  username: string,
-  documentClient: DocumentClient = DB,
-): Promise<User | undefined> => {
+export const setUsername = async (connectionId: string, username: string): Promise<User | undefined> => {
   const updateParams: DocumentClient.UpdateItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -81,7 +71,7 @@ export const setUsername = async (
     ReturnValues: 'ALL_NEW',
   };
 
-  const res = await documentClient.update(updateParams).promise();
+  const res = await DB.update(updateParams).promise();
   console.log('\nsetUserName result:', res);
 
   return parseDynamoDBAttribute<User>(res);
@@ -89,15 +79,14 @@ export const setUsername = async (
 
 /**
  * Get all connections (rows) from the ConnectionsTable.
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const getAllConnections = async (documentClient: DocumentClient = DB): Promise<User[]> => {
+export const getAllConnections = async (): Promise<User[]> => {
   const scanParams: DocumentClient.ScanInput = {
     TableName: CONNECTIONS_TABLE,
     AttributesToGet: ['connectionId', 'username'], // TODO: get less attributes to save read cost
   };
 
-  const res = await documentClient.scan(scanParams).promise();
+  const res = await DB.scan(scanParams).promise();
   console.log('\ngetAllConnections result:', res);
 
   return parseDynamoDBItemList<User>(res);
@@ -106,12 +95,8 @@ export const getAllConnections = async (documentClient: DocumentClient = DB): Pr
 /**
  * Get user attributes by connection Id.
  * @param {string} connectionId connection Id
- * @param {DocumentClient} documentClient DynamoDB DocumentClient
  */
-export const getUserByConnectionId = async (
-  connectionId: string,
-  documentClient: DocumentClient = DB,
-): Promise<User | undefined> => {
+export const getUserByConnectionId = async (connectionId: string): Promise<User | undefined> => {
   const getParam: DocumentClient.GetItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -119,17 +104,18 @@ export const getUserByConnectionId = async (
     },
   };
 
-  const res = await documentClient.get(getParam).promise();
+  const res = await DB.get(getParam).promise();
   console.log('\ngetUserByConnectionId result:', res);
 
   return parseDynamoDBItem<User>(res);
 };
 
-export const setGameIdForUser = async (
-  connectionId: string,
-  gameId: string,
-  documentClient: DocumentClient = DB,
-): Promise<User | undefined> => {
+/**
+ * Set gameId in the user object when user joins a game.
+ * @param {string} connectionId connection Id
+ * @param {string} gameId game Id
+ */
+export const setGameIdForUser = async (connectionId: string, gameId: string): Promise<User | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -149,16 +135,17 @@ export const setGameIdForUser = async (
     ReturnValues: 'ALL_NEW',
   };
 
-  const res = await documentClient.update(updateParam).promise();
+  const res = await DB.update(updateParam).promise();
   console.log('\nsetGameIdForUser result:', res);
 
   return parseDynamoDBAttribute<User>(res);
 };
 
-export const removeGameIdFromUser = async (
-  connectionId: string,
-  documentClient: DocumentClient = DB,
-): Promise<User | undefined> => {
+/**
+ * Remove game id from the user object when user leaves a game.
+ * @param {string} connectionId connection Id
+ */
+export const removeGameIdFromUser = async (connectionId: string): Promise<User | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: CONNECTIONS_TABLE,
     Key: {
@@ -175,7 +162,7 @@ export const removeGameIdFromUser = async (
     ReturnValues: 'ALL_NEW',
   };
 
-  const res = await documentClient.update(updateParam).promise();
+  const res = await DB.update(updateParam).promise();
   console.log('\nremoveGameIdFromUser result:', res);
 
   return parseDynamoDBAttribute<User>(res);
