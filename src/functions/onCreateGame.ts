@@ -1,5 +1,4 @@
 import { Handler } from 'aws-lambda';
-import { DB } from '../module/db';
 import { createGame } from '../module/gameDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
@@ -43,7 +42,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const { gameName, gameType, gameVersion } = game;
     const returnedGameObj: Game = await createGame({
       creatorConnectionId: connectionId,
-      documentClient: DB,
       gameName,
       gameType,
       gameVersion,

@@ -6,7 +6,7 @@ const getApiGatewayManagementApiEndpoint = (
   requestContext: WebSocketAPIGatewayEventRequestContext,
   localhostUrl: string,
 ): string => {
-  return process.env.IS_OFFLINE || !requestContext
+  return process.env.IS_OFFLINE || process.env.MOCK_DYNAMODB_ENDPOINT
     ? localhostUrl // For local dev
     : `https://${requestContext.domainName}/${requestContext.stage}`; // For prod
 };
