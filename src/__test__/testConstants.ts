@@ -8,6 +8,7 @@ export const FAKE_CONNECTION_ID1 = 'fake-connection-id-1';
 export const FAKE_CONNECTION_ID2 = 'fake-connection-id-2';
 export const FAKE_CONNECTION_ID3 = 'fake-connection-id-3';
 export const FAKE_USERNAME1 = 'fake-username-1';
+export const FAKE_USERNAME2 = 'fake-username-2';
 export const TEST_USER_OBJECT1 = { connectionId: FAKE_CONNECTION_ID1 };
 export const TEST_USER_OBJECT2 = { connectionId: FAKE_CONNECTION_ID2 };
 export const TEST_USER_OBJECT3 = { connectionId: FAKE_CONNECTION_ID3 };

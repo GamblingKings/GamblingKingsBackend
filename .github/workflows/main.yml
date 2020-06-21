@@ -37,15 +37,11 @@ jobs:
   # Running tests with Jest
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: ['12', '13']
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '12'
       - name: Install codecov
         run: yarn global add codecov
       - name: Install Packages

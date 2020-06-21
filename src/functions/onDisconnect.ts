@@ -7,10 +7,10 @@ import { LambdaResponse } from '../types/response';
 import { removeUserFromGame } from '../module/gameDBService';
 import { User } from '../models/User';
 import { WebSocketClient } from '../WebSocketClient';
-import { getConnectionIdsFromUsers, sendUpdates } from './functionsHelper';
-import { broadcastUserUpdate } from '../utils/broadcast';
+import { broadcastUserUpdate, getConnectionIdsFromUsers } from '../utils/broadcast';
 import { UserStates } from '../types/states';
 import { Game } from '../models/Game';
+import { sendUpdates } from './functionsHelper';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -50,6 +50,10 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   console.log('Deleting connectionId from the db table...');
   const ws = new WebSocketClient(event.requestContext);
   try {
+    // Send USER_UPDATE with DISCONNECT to all other users
+    const connectionIds = getConnectionIdsFromUsers(await getAllConnections());
+    await broadcastUserUpdate(ws, connectionId, UserStates.DISCONNECTED, connectionIds);
+
     // Delete user from ConnectionsTable
     const deletedUser = await deleteConnection(connectionId);
 
@@ -60,13 +64,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
       // 2. Delete the game if the user is the host of the game and send updates to other users
       // (see comments in the function for more details)
-      if (updatedGame) await sendUpdates(ws, deletedUser.connectionId, updatedGame);
+      if (updatedGame) await sendUpdates(ws, deletedUser.connectionId, updatedGame, deletedUser.username);
     }
-
-    // Send USER_UPDATE with DISCONNECT to all other users
-    const connectionIds = getConnectionIdsFromUsers(await getAllConnections());
-    const connectionIdsExceptCaller = connectionIds.filter((otherConnectionId) => otherConnectionId !== connectionId);
-    await broadcastUserUpdate(ws, connectionId, UserStates.DISCONNECTED, connectionIdsExceptCaller);
 
     return response(200, 'Connection deleted successfully');
   } catch (err) {

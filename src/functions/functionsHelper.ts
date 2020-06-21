@@ -4,22 +4,27 @@ import {
   broadcastGameUpdate,
   broadcastInGameMessage,
   broadcastInGameUpdate,
-  broadcastUserUpdate,
+  getConnectionIdsFromUsers,
 } from '../utils/broadcast';
 import { WebSocketActions } from '../types/WebSocketActions';
-import { GameStates, UserStates } from '../types/states';
+import { GameStates } from '../types/states';
 import { deleteGame } from '../module/gameDBService';
-import { User } from '../models/User';
 
 /**
  * Helper function to send updates to other users in the game when a user leaves the game.
  * @param {WebSocketClient} ws WebSocketClient
  * @param {string} connectionId connection id
  * @param {Game} updatedGame updated game object
+ * @param {string} username caller's username
  */
-export const sendUpdates = async (ws: WebSocketClient, connectionId: string, updatedGame: Game): Promise<void> => {
-  const connectionIds = updatedGame.users.map((user) => user.connectionId);
-  await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds);
+export const sendUpdates = async (
+  ws: WebSocketClient,
+  connectionId: string,
+  updatedGame: Game,
+  username: string | undefined = undefined,
+): Promise<void> => {
+  const connectionIds = getConnectionIdsFromUsers(updatedGame.users);
+  await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds, username);
 
   const { host, gameId, started } = updatedGame;
 
@@ -40,8 +45,8 @@ export const sendUpdates = async (ws: WebSocketClient, connectionId: string, upd
     // 1) send GAME_UPDATE with DELETE state to other users in the game,
     // 2) and delete the game in the table
     if (host.connectionId === connectionId) {
+      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId, connectionIds);
       await deleteGame(gameId);
-      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId);
       return;
     }
   }
@@ -49,8 +54,4 @@ export const sendUpdates = async (ws: WebSocketClient, connectionId: string, upd
   // If other user leaves the game, DON'T delete the game and
   // 1) send IN_GAME_UPDATE to other users in the game,
   await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
-};
-
-export const getConnectionIdsFromUsers = (usersList: User[]): string[] => {
-  return usersList.map((user) => user.connectionId);
 };

@@ -5,13 +5,13 @@ import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
 import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/createWSResponse';
 import { Game } from '../models/Game';
-import { broadcastGameUpdate } from '../utils/broadcast';
+import { broadcastGameUpdate, getConnectionIdsFromUsers } from '../utils/broadcast';
 import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { GameStates } from '../types/states';
-import { setGameIdForUser } from '../module/userDBService';
+import { getAllConnections, setGameIdForUser } from '../module/userDBService';
 
 /**
  * Handler for creating a game.
@@ -60,7 +60,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // Send game update to users
     const { gameId } = returnedGameObj;
-    if (gameId) await broadcastGameUpdate(ws, gameId, GameStates.CREATED, connectionId);
+    const connectionIds = getConnectionIdsFromUsers(await getAllConnections());
+    if (gameId) await broadcastGameUpdate(ws, gameId, GameStates.CREATED, connectionId, connectionIds);
 
     return response(200, 'Game created successfully');
   } catch (err) {

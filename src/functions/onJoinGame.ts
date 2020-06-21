@@ -52,7 +52,7 @@ const joinGame = async (ws: WebSocketClient, connectionId: string, gameId: strin
  * @param {string} connectionId connection id
  * @param {Game} updatedGame updated game object
  */
-const sendUpdates = async (ws: WebSocketClient, connectionId: string, updatedGame: Game): Promise<void> => {
+const joinGameSendUpdates = async (ws: WebSocketClient, connectionId: string, updatedGame: Game): Promise<void> => {
   // Send IN_GAME_MESSAGE to other users in the game
   const connectionIds = updatedGame.users.map((user) => user.connectionId);
   await broadcastInGameMessage(ws, connectionId, WebSocketActions.JOIN_GAME, connectionIds);
@@ -94,7 +94,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
      * 1. Send IN_GAME_MESSAGE to other users in the game
      * 2. Send IN_GAME_UPDATE with the updated users list to other users in the game
      */
-    if (updatedGame) await sendUpdates(ws, connectionId, updatedGame);
+    if (updatedGame) await joinGameSendUpdates(ws, connectionId, updatedGame);
 
     return response(200, 'Joined game successfully');
   } catch (err) {

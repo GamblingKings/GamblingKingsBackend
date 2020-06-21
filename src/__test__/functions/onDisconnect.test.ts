@@ -1,6 +1,3 @@
-import * as AWS from 'aws-sdk';
-import * as AWSMock from 'aws-sdk-mock';
-import { PostToConnectionRequest } from 'aws-sdk/clients/apigatewaymanagementapi';
 import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../functions/onDisconnect';
 import * as userFunctions from '../../module/userDBService';
@@ -8,39 +5,39 @@ import * as gamesFunctions from '../../module/gameDBService';
 import { response } from '../../utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
 import { LambdaResponse } from '../../types/response';
-import { FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, TEST_GAME_OBJECT1 } from '../testConstants';
-import { getUserByConnectionId, saveConnection, setGameIdForUser } from '../../module/userDBService';
-import { addUserToGame, createGame, getGameByGameId, removeUserFromGame } from '../../module/gameDBService';
+import {
+  FAKE_CONNECTION_ID1,
+  FAKE_CONNECTION_ID2,
+  FAKE_USERNAME1,
+  FAKE_USERNAME2,
+  TEST_GAME_OBJECT1,
+} from '../testConstants';
+import { getUserByConnectionId, saveConnection, setGameIdForUser, setUsername } from '../../module/userDBService';
+import { addUserToGame, createGame, getGameByGameId } from '../../module/gameDBService';
 import { Game } from '../../models/Game';
-import { getConnectionIdsFromUsers } from '../../functions/functionsHelper';
+import { getConnectionIdsFromUsers } from '../../utils/broadcast';
+
+jest.mock('../../WebSocketClient');
 
 describe('test onDisconnect', () => {
   let game: Game;
   let gameId: string;
 
+  // Event
   const mockResponseJSON = { action: '', payload: { message: ' ' } };
   const event = createEvent({
     connectionId: FAKE_CONNECTION_ID1,
     eventBodyJSON: mockResponseJSON,
   });
 
+  // Spies
   let deleteConnectionSpy: jest.SpyInstance;
   let getAllConnectionsSpy: jest.SpyInstance;
   let removeUserFromGameSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    AWS.config.update({ region: 'localhost' });
-    AWSMock.setSDKInstance(AWS);
-    AWSMock.mock(
-      'ApiGatewayManagementApi',
-      'postToConnection',
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      (params: PostToConnectionRequest, callback: Function) => {
-        callback(null, {});
-      },
-    );
-
     await saveConnection(FAKE_CONNECTION_ID1);
+    await setUsername(FAKE_CONNECTION_ID1, FAKE_USERNAME1);
     game = await createGame({
       creatorConnectionId: FAKE_CONNECTION_ID1,
       gameName: TEST_GAME_OBJECT1.gameName,
@@ -57,12 +54,7 @@ describe('test onDisconnect', () => {
   });
 
   afterEach(() => {
-    AWSMock.restore('ApiGatewayManagementApi');
-    expect.hasAssertions();
-
-    deleteConnectionSpy.mockRestore();
-    getAllConnectionsSpy.mockRestore();
-    removeUserFromGameSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   test('it should delete the connection and the game that is created by that connection (host)', async () => {
@@ -86,6 +78,7 @@ describe('test onDisconnect', () => {
 
   test('it should delete the connection and remove user from any game the user is part of', async () => {
     await saveConnection(FAKE_CONNECTION_ID2);
+    await setUsername(FAKE_CONNECTION_ID2, FAKE_USERNAME2);
     await addUserToGame(gameId, FAKE_CONNECTION_ID2);
     await setGameIdForUser(FAKE_CONNECTION_ID2, gameId);
 
@@ -108,7 +101,9 @@ describe('test onDisconnect', () => {
 
     // User is not host, game should not be deleted
     const updatedGame = (await getGameByGameId(gameId)) as Game;
+    console.log('updated game:', updatedGame);
     const connectionIdsInGame = getConnectionIdsFromUsers(updatedGame.users);
+    console.log('connectionIdsInGame:', connectionIdsInGame);
     expect(updatedGame).not.toBeUndefined();
     expect(connectionIdsInGame.includes(FAKE_CONNECTION_ID2)).toBeFalsy();
   });
