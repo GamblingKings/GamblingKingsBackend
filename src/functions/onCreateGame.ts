@@ -24,7 +24,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const { game } = payload;
-  // console.log('Payload data', payload);
 
   console.log('Adding game to the db table...');
   const ws = new WebSocketClient(event.requestContext);
