@@ -30,17 +30,17 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     if (username) {
       await setUsername(connectionId, username);
-      const res: WebSocketResponse = createLoginSuccessResponse();
-      await ws.send(JSON.stringify(res), connectionId);
+      const wsResponse: WebSocketResponse = createLoginSuccessResponse();
+      await ws.send(wsResponse, connectionId);
 
       return response(200, `Set username to ${username}`);
     }
 
     return response(400, 'Username attribute cannot be empty');
   } catch (err) {
-    console.error(err);
-    const res: WebSocketResponse = createLoginFailureResponse(err);
-    await ws.send(JSON.stringify(res), connectionId);
+    console.error(JSON.stringify(err));
+    const wsResponse = createLoginFailureResponse(JSON.stringify(err));
+    await ws.send(wsResponse, connectionId);
 
     return response(500, err);
   }

@@ -4,7 +4,7 @@ import { LambdaEventBody, WebSocketAPIGatewayEvent, WebSocketAPIGatewayEventRequ
  * Interface
  * ------------------------------------------------------------------------- */
 interface CreateEventParams {
-  eventBodyJSON: LambdaEventBody;
+  eventBodyJSON: unknown;
   connectionId?: string;
   domainName?: string;
   stage?: string;

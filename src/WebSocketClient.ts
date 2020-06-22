@@ -1,11 +1,12 @@
 import { ApiGatewayManagementApi } from 'aws-sdk';
 import { WebSocketAPIGatewayEventRequestContext } from './types/event';
+import { WebSocketResponse } from './types/response';
 
 const getApiGatewayManagementApiEndpoint = (
   requestContext: WebSocketAPIGatewayEventRequestContext,
   localhostUrl: string,
 ): string => {
-  return process.env.IS_OFFLINE || !requestContext
+  return process.env.IS_OFFLINE || process.env.MOCK_DYNAMODB_ENDPOINT
     ? localhostUrl // For local dev
     : `https://${requestContext.domainName}/${requestContext.stage}`; // For prod
 };
@@ -26,9 +27,14 @@ export class WebSocketClient {
     this.connectionId = requestContext ? requestContext.connectionId : '';
   }
 
-  async send(msg: string | string[], id?: string): Promise<unknown> {
+  /**
+   * Send websocket response or message to user by connection id.
+   * @param {WebSocketResponse | string} msg response (or message) content
+   * @param {string} id connection id
+   */
+  async send(msg: WebSocketResponse | string, id?: string): Promise<unknown> {
     // If passed msg is object, it's parsed to JSON
-    const parsedMsg = typeof msg === 'string' ? msg : JSON.stringify(msg);
+    const parsedMsg: string = typeof msg !== 'string' ? JSON.stringify(msg) : msg;
 
     const connectionId = id || this.connectionId;
     console.log(`Sending ${parsedMsg} to ${connectionId}`);

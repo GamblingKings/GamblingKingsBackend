@@ -7,14 +7,15 @@ import {
   getAllGames,
   getGameByGameId,
   removeUserFromGame,
+  startGame,
 } from '../../module/gameDBService';
-import { ddb } from '../jestLocalDynamoDB';
 import { cleanupTestGame } from './dbTestHelpers';
 import { Game } from '../../models/Game';
 import * as userDBFunctions from '../../module/userDBService';
 import * as gameDBFunctions from '../../module/gameDBService';
 import { User } from '../../models/User';
 import {
+  CONDITIONAL_FAILED_MSG,
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_CONNECTION_ID3,
@@ -34,11 +35,13 @@ import {
 describe('test createGame', () => {
   test('create a game and save the game to db', async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
+    await saveConnection(FAKE_CONNECTION_ID1);
+    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1)).toStrictEqual(TEST_USER_OBJECT1);
 
     // Test create a game
-    const response = await createGame({ creatorConnectionId: FAKE_CONNECTION_ID1, documentClient: ddb });
+    const response = await createGame({
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+    });
     console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
     expect(users).toStrictEqual([TEST_USER_OBJECT1]);
@@ -49,14 +52,13 @@ describe('test createGame', () => {
 
   test('create a game with all attributes and save the game to db', async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1, ddb)).toStrictEqual(TEST_USER_OBJECT1);
+    await saveConnection(FAKE_CONNECTION_ID1);
+    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1)).toStrictEqual(TEST_USER_OBJECT1);
 
     // Test create a game
     const response = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
@@ -77,24 +79,23 @@ describe('test getGameByGameId', () => {
 
   beforeEach(async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+    await saveConnection(FAKE_CONNECTION_ID1);
 
     // Create a game
     const game = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     gameId = game.gameId;
   });
 
   test('it should get a game by gameId', async () => {
-    const response = await getGameByGameId(gameId, ddb);
+    const response = await getGameByGameId(gameId);
     expect(response).toStrictEqual({ ...TEST_GAME_OBJECT1, users: [TEST_USER_OBJECT1], gameId });
   });
 
   test('it should get undefined if the game does not exist', async () => {
-    const response = await getGameByGameId('NON-EXISTING-GAME-ID', ddb);
+    const response = await getGameByGameId('NON-EXISTING-GAME-ID');
     expect(response).toBeUndefined();
   });
 });
@@ -108,26 +109,24 @@ describe('test getAllGames', () => {
 
   beforeEach(async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+    await saveConnection(FAKE_CONNECTION_ID1);
 
     // Create games
     const game1 = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     gameId1 = game1.gameId;
 
     const game2 = await createGame({
       ...TEST_GAME_OBJECT2,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     gameId2 = game2.gameId;
   });
 
   test('it should get all games', async () => {
-    const response = await getAllGames(ddb);
+    const response = await getAllGames();
     const game1 = { ...TEST_GAME_OBJECT1, gameId: gameId1 };
     const game2 = { ...TEST_GAME_OBJECT2, gameId: gameId2 };
     game2.users = [TEST_USER_OBJECT1]; // game is created by the same user
@@ -141,7 +140,7 @@ describe('test getAllGames', () => {
     await cleanupTestGame(gameId1);
     await cleanupTestGame(gameId2);
 
-    const response = await getAllGames(ddb);
+    const response = await getAllGames();
     expect(response).toHaveLength(0);
     expect(response).toIncludeSameMembers([]);
   });
@@ -160,13 +159,12 @@ describe('test addUserToGame', () => {
 
   beforeEach(async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+    await saveConnection(FAKE_CONNECTION_ID1);
 
     // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
     game = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     gameId = game.gameId;
 
@@ -186,18 +184,18 @@ describe('test addUserToGame', () => {
 
   test('it should add one user to a game', async () => {
     // Create a new test user
-    await saveConnection(FAKE_CONNECTION_ID2, ddb);
+    await saveConnection(FAKE_CONNECTION_ID2);
 
     // Test add one user to the game
-    const res = await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
+    const res = (await addUserToGame(gameId, FAKE_CONNECTION_ID2)) as Game;
     const actualUsersInGame = res.users;
     const expectedUsersInGame = [TEST_USER_OBJECT1, TEST_USER_OBJECT2];
 
     // Test function calls
-    expect(saveConnectionSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2, ddb);
-    expect(getUserByConnectionIdSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2, ddb);
-    expect(getGameByGameIdSpy).toHaveBeenLastCalledWith(gameId, ddb);
-    expect(addUserToGameSpy).toHaveBeenLastCalledWith(gameId, FAKE_CONNECTION_ID2, ddb);
+    expect(saveConnectionSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2);
+    expect(getUserByConnectionIdSpy).toHaveBeenLastCalledWith(FAKE_CONNECTION_ID2);
+    expect(getGameByGameIdSpy).toHaveBeenLastCalledWith(gameId);
+    expect(addUserToGameSpy).toHaveBeenLastCalledWith(gameId, FAKE_CONNECTION_ID2);
     expect(saveConnectionSpy).toHaveBeenCalledTimes(1);
     expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
     expect(getGameByGameIdSpy).toHaveBeenCalledTimes(1);
@@ -206,11 +204,11 @@ describe('test addUserToGame', () => {
     // Test response
     expect(actualUsersInGame).toHaveLength(2);
     expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+    expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers(expectedUsersInGame);
   });
 
   test('it should not allow to add the same user to a game', async () => {
-    const func = addUserToGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const func = addUserToGame(gameId, FAKE_CONNECTION_ID1);
     const errorMsg = 'addUserToGame: user is already in the game';
     await expect(func).rejects.toThrow(errorMsg);
 
@@ -222,12 +220,12 @@ describe('test addUserToGame', () => {
 
   test('it should add more than one user to a game', async () => {
     // Create a new test user
-    await saveConnection(FAKE_CONNECTION_ID2, ddb);
-    await saveConnection(FAKE_CONNECTION_ID3, ddb);
+    await saveConnection(FAKE_CONNECTION_ID2);
+    await saveConnection(FAKE_CONNECTION_ID3);
 
     // Test add two users to the game
-    await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
-    const res = await addUserToGame(gameId, FAKE_CONNECTION_ID3, ddb);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2);
+    const res = (await addUserToGame(gameId, FAKE_CONNECTION_ID3)) as Game;
     const actualUsersInGame = res.users;
     const expectedUsersInGame = [TEST_USER_OBJECT1, TEST_USER_OBJECT2, TEST_USER_OBJECT3];
 
@@ -240,7 +238,7 @@ describe('test addUserToGame', () => {
     // Test response
     expect(actualUsersInGame).toHaveLength(3);
     expect(actualUsersInGame).toIncludeSameMembers(expectedUsersInGame);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersInGame);
+    expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers(expectedUsersInGame);
   });
 
   // TODO: Test Errors for addUserToGame
@@ -257,13 +255,12 @@ describe('test removeUserFromGame', () => {
 
   beforeEach(async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+    await saveConnection(FAKE_CONNECTION_ID1);
 
     // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
     game = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     gameId = game.gameId;
 
@@ -278,7 +275,7 @@ describe('test removeUserFromGame', () => {
   });
 
   test('it should remove user from a game', async () => {
-    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID1);
     const actualUsersList = response?.users;
     const expectedUsersList: User[] = [];
 
@@ -289,13 +286,13 @@ describe('test removeUserFromGame', () => {
     // Test response
     expect(actualUsersList).toHaveLength(0);
     expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
+    expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers(expectedUsersList);
   });
 
   test('it should return undefined if users list is empty', async () => {
     // Call remove user from game twice
-    await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
-    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
+    await removeUserFromGame(gameId, FAKE_CONNECTION_ID1);
+    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID1);
 
     // Test function calls
     expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(2);
@@ -303,19 +300,19 @@ describe('test removeUserFromGame', () => {
 
     // Test response
     expect(response).toBeUndefined();
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers([]);
+    expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers([]);
   });
 
   test('it should remove different users from the game', async () => {
     // Create two more users and join the game
-    await saveConnection(FAKE_CONNECTION_ID2, ddb);
-    await saveConnection(FAKE_CONNECTION_ID3, ddb);
-    await addUserToGame(gameId, FAKE_CONNECTION_ID2, ddb);
-    await addUserToGame(gameId, FAKE_CONNECTION_ID3, ddb);
+    await saveConnection(FAKE_CONNECTION_ID2);
+    await saveConnection(FAKE_CONNECTION_ID3);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID3);
 
     // Remove test user 1 and 3
-    await removeUserFromGame(gameId, FAKE_CONNECTION_ID1, ddb);
-    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID3, ddb);
+    await removeUserFromGame(gameId, FAKE_CONNECTION_ID1);
+    const response = await removeUserFromGame(gameId, FAKE_CONNECTION_ID3);
     const actualUsersList = response?.users;
     const expectedUsersList = [TEST_USER_OBJECT2];
 
@@ -326,7 +323,7 @@ describe('test removeUserFromGame', () => {
     // Test response
     expect(actualUsersList).toHaveLength(1);
     expect(actualUsersList).toIncludeSameMembers(expectedUsersList);
-    expect((await getGameByGameId(gameId, ddb)).users).toIncludeSameMembers(expectedUsersList);
+    expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers(expectedUsersList);
   });
 
   // TODO: Test Errors for removeUserFromGame
@@ -342,13 +339,12 @@ describe('test deleteGame', () => {
 
   beforeEach(async () => {
     // Create a test user
-    await saveConnection(FAKE_CONNECTION_ID1, ddb);
+    await saveConnection(FAKE_CONNECTION_ID1);
 
     // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
     game = await createGame({
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
-      documentClient: ddb,
     });
     gameId = game.gameId;
 
@@ -361,43 +357,91 @@ describe('test deleteGame', () => {
   });
 
   test('it should delete a game successfully', async () => {
-    const response = await deleteGame(gameId, ddb);
+    const response = await deleteGame(gameId);
 
     // Test function call
-    expect(deleteGameSpy).toHaveBeenCalledWith(gameId, ddb);
+    expect(deleteGameSpy).toHaveBeenCalledWith(gameId);
     expect(deleteGameSpy).toHaveBeenCalledTimes(1);
 
     // Test response
     expect(response).toStrictEqual(game);
-    expect(await getGameByGameId(gameId, ddb)).toBeUndefined();
+    expect(await getGameByGameId(gameId)).toBeUndefined();
   });
 
   test('it should return undefined if a game is already deleted', async () => {
     // Delete the same game twice
-    await deleteGame(gameId, ddb);
-    const response = await deleteGame(gameId, ddb);
+    await deleteGame(gameId);
+    const response = await deleteGame(gameId);
 
     // Test function call
-    expect(deleteGameSpy).toHaveBeenLastCalledWith(gameId, ddb);
+    expect(deleteGameSpy).toHaveBeenLastCalledWith(gameId);
     expect(deleteGameSpy).toHaveBeenCalledTimes(2);
 
     // Test response
     expect(response).toBeUndefined();
-    expect(await getGameByGameId(gameId, ddb)).toBeUndefined();
+    expect(await getGameByGameId(gameId)).toBeUndefined();
   });
 
   test('it should return undefined if a game does not exist', async () => {
     const randomGameId = uuid();
 
     // Try to delete a random game that does not exist
-    const response = await deleteGame(randomGameId, ddb);
+    const response = await deleteGame(randomGameId);
 
     // Test function call
-    expect(deleteGameSpy).toHaveBeenLastCalledWith(randomGameId, ddb);
+    expect(deleteGameSpy).toHaveBeenLastCalledWith(randomGameId);
     expect(deleteGameSpy).toHaveBeenCalledTimes(1);
 
     // Test response
     expect(response).toBeUndefined();
-    expect(await getGameByGameId(randomGameId, ddb)).toBeUndefined();
+    expect(await getGameByGameId(randomGameId)).toBeUndefined();
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test startGame
+ * ------------------------------------------------------------------------- */
+describe('test startGame', () => {
+  let game: Game;
+  let gameId: string;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+    });
+    gameId = game.gameId;
+  });
+
+  test('it should set the started game flag on the game to true', async () => {
+    const response = (await startGame(gameId, FAKE_CONNECTION_ID1)) as Game;
+    expect(response.started).toBeTruthy();
+    expect(((await getGameByGameId(gameId)) as Game).started).toBeTruthy();
+  });
+
+  test('it should throw error if the game does not exist', async () => {
+    const func = startGame('NON-EXISTING-GAME-ID', FAKE_CONNECTION_ID1);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
+  });
+
+  test('It should throw error if the started flag is already set to true', async () => {
+    await startGame(gameId, FAKE_CONNECTION_ID1);
+    const func = startGame(gameId, FAKE_CONNECTION_ID1);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
+  });
+
+  test('It should throw error if the user who requests to start a game is not host', async () => {
+    // Create another user
+    await saveConnection(FAKE_CONNECTION_ID2);
+
+    // Add the user to the game
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2);
+
+    const func = startGame(gameId, FAKE_CONNECTION_ID2);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 });

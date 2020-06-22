@@ -1,4 +1,5 @@
-[![Actions Status](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg)](https://github.com/GamblingKings/GamblingKingsBackend/actions)
+![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/GamblingKings/GamblingKingsBackend/branch/master/graph/badge.svg)](https://codecov.io/gh/GamblingKings/GamblingKingsBackend)
 
 # Mahjong Application
 
@@ -134,6 +135,7 @@ yarn start
 {
   "action": "SEND_MESSAGE",
   "payload": {
+    "username": "test user",
     "message": "custom message to all users"
   }
 }
@@ -155,6 +157,17 @@ yarn start
 ```json
 {
   "action": "LEAVE_GAME",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
+  }
+}
+```
+
+`START_GAME`
+
+```json
+{
+  "action": "START_GAME",
   "payload": {
     "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
   }

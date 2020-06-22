@@ -1,7 +1,7 @@
 import { Handler } from 'aws-lambda';
 import { response } from '../utils/responseHelper';
 import { WebSocketClient } from '../WebSocketClient';
-import { broadcastConnections, broadcastUserUpdate } from '../utils/broadcast';
+import { broadcastConnections, broadcastUserUpdate, getConnectionIdsFromUsers } from '../utils/broadcast';
 import { Logger } from '../utils/Logger';
 import { User } from '../models/User';
 import { WebSocketAPIGatewayEvent } from '../types/event';
@@ -25,12 +25,12 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const res: User[] = await broadcastConnections(ws, connectionId);
 
     // Broadcast the updated users list to all the other users in the game
-    const connectionIds = res.map((user) => user.connectionId);
-    await broadcastUserUpdate(ws, connectionId, UserStates.CONNECT, connectionIds);
+    const connectionIds = getConnectionIdsFromUsers(res);
+    await broadcastUserUpdate(ws, connectionId, UserStates.CONNECTED, connectionIds);
 
     return response(200, JSON.stringify(res));
   } catch (err) {
-    console.error(err);
+    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

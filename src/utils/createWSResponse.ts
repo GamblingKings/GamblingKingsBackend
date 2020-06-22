@@ -164,6 +164,10 @@ export const createLoginFailureResponse = (errorMessage: string): WebSocketRespo
   return failedWebSocketResponse(wsResponse, errorMessage);
 };
 
+export const createStartGameResponse = (): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.START_GAME, {});
+};
+
 /* ----------------------------------------------------------------------------
  * Message
  * ------------------------------------------------------------------------- */

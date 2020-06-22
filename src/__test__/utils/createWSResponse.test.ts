@@ -73,13 +73,13 @@ describe('test createGetAllUsersResponse', () => {
 describe('test createUserUpdateResponse', () => {
   const testUserUpdatePayload: UserUpdatePayload = {
     user: TEST_USER_OBJECT1,
-    state: UserStates.CONNECT,
+    state: UserStates.CONNECTED,
   };
   const expectedResponse: WebSocketResponse = {
     action: WebSocketActions.USER_UPDATE,
     payload: {
       user: TEST_USER_OBJECT1,
-      state: UserStates.CONNECT,
+      state: UserStates.CONNECTED,
     },
   };
 
