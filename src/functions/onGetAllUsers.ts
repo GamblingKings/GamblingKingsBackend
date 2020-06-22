@@ -15,11 +15,10 @@ import { UserStates } from '../types/states';
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onGetAlUsers.ts');
 
-  console.log('RequestContext', event.requestContext);
   const { connectionId } = event.requestContext;
-  const ws = new WebSocketClient(event.requestContext);
 
   console.log('Getting all users...');
+  const ws = new WebSocketClient(event.requestContext);
   try {
     // Send all users to the caller
     const res: User[] = await broadcastConnections(ws, connectionId);

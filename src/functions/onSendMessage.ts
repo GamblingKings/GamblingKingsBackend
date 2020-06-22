@@ -14,16 +14,14 @@ import { LambdaResponse } from '../types/response';
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onSendMessage.ts');
 
-  console.log('RequestContext', event.requestContext);
-  const ws = new WebSocketClient(event.requestContext);
   const body = JSON.parse(event.body) as LambdaEventBody;
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
 
   // Broadcast message
-  console.log(body);
-  console.log(payload);
   const { username, message } = payload;
 
+  console.log('Sending message to users');
+  const ws = new WebSocketClient(event.requestContext);
   try {
     if (username && message) {
       const wsResponse = await broadcastMessage(ws, username, message);

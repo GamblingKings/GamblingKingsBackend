@@ -12,7 +12,7 @@ import {
   FAKE_USERNAME2,
   TEST_GAME_OBJECT1,
 } from '../testConstants';
-import { getUserByConnectionId, saveConnection, setGameIdForUser, setUsername } from '../../module/userDBService';
+import { saveConnection, setGameIdForUser, setUsername } from '../../module/userDBService';
 import { addUserToGame, createGame, getGameByGameId } from '../../module/gameDBService';
 import { Game } from '../../models/Game';
 import { getConnectionIdsFromUsers } from '../../utils/broadcast';
@@ -46,7 +46,6 @@ describe('test onDisconnect', () => {
     });
     gameId = game.gameId;
     await setGameIdForUser(FAKE_CONNECTION_ID1, gameId);
-    console.log('User:', await getUserByConnectionId(FAKE_CONNECTION_ID1));
 
     deleteConnectionSpy = jest.spyOn(userFunctions, 'deleteConnection');
     getAllConnectionsSpy = jest.spyOn(userFunctions, 'getAllConnections');
@@ -101,9 +100,7 @@ describe('test onDisconnect', () => {
 
     // User is not host, game should not be deleted
     const updatedGame = (await getGameByGameId(gameId)) as Game;
-    console.log('updated game:', updatedGame);
     const connectionIdsInGame = getConnectionIdsFromUsers(updatedGame.users);
-    console.log('connectionIdsInGame:', connectionIdsInGame);
     expect(updatedGame).not.toBeUndefined();
     expect(connectionIdsInGame.includes(FAKE_CONNECTION_ID2)).toBeFalsy();
   });

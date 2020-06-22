@@ -50,8 +50,7 @@ export const broadcastConnections = async (ws: WebSocketClient, connectionId: st
   const users: User[] = await getAllConnections();
 
   if (users && users.length > 0) {
-    console.log('Connections:', users);
-    console.log('Type of Connections:', typeof users);
+    console.log('broadcastConnections, Connections:', users);
 
     // Create users response object
     const wsResponse = createGetAllUsersResponse({
@@ -79,7 +78,7 @@ export const broadcastUserUpdate = async (
   allConnectionIds: string[],
 ): Promise<User | undefined> => {
   const currentUser = await getUserByConnectionId(callerConnectionId);
-  console.log('Current user calling broadcastUserUpdate:', currentUser);
+  console.log('broadcastUserUpdate, User update:', currentUser);
 
   if (currentUser) {
     const wsResponse = createUserUpdateResponse({
@@ -114,8 +113,7 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
     removeDynamoDocumentVersion<Game>(game);
   });
 
-  // Make games an empty array if games are empty
-  console.log('Games:', games);
+  console.log('broadcastGames, Games:', games);
 
   // Create games response object
   const wsResponse = createGetAllGamesResponse({
@@ -147,6 +145,8 @@ export const broadcastGameUpdate = async (
 ): Promise<Game | undefined> => {
   // Get updated game info
   const updatedGame = await getGameByGameId(gameId);
+
+  console.log('broadcastGameUpdate, Game update:', updatedGame);
 
   if (updatedGame) {
     // Remove document version on game object
@@ -205,6 +205,7 @@ export const broadcastInGameMessage = async (
   // Format message
   const actionWord: string = action === WebSocketActions.JOIN_GAME ? 'joined' : 'left';
   const message = `${username || callConnectionId} just ${actionWord} the game.`;
+  console.log('broadcastInGameMessage, In game message:', message);
 
   // Send message to the other connectionIds that are already in the game
   const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callConnectionId);
@@ -227,6 +228,8 @@ export const broadcastInGameUpdate = async (
   callConnectionId: string,
   usersInGame: User[],
 ): Promise<User[]> => {
+  console.log('broadcastInGameUpdate, Users in game:', usersInGame);
+
   // Send users list to the other connectionIds that are already in the game
   const otherConnectionIds = getConnectionIdsExceptCaller(callConnectionId, getConnectionIdsFromUsers(usersInGame));
   const wsResponse = createInGameUpdateResponse({
@@ -257,7 +260,7 @@ export const broadcastMessage = async (
   message: string,
 ): Promise<User[] | []> => {
   const users: User[] = await getAllConnections();
-  console.log('broadcastMessage to connections:', users);
+  console.log('broadcastMessage, Connections:', users);
 
   if (users && users.length > 0) {
     const wsResponse = createSendMessageResponse({
