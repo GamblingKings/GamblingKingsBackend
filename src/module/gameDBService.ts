@@ -257,7 +257,7 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
       attribute_exists(#gameIdKey) 
       AND 
       (attribute_not_exists(#startedKey) OR #startedKey = :notStartedVal)
-      AND
+      AND 
       host.connectionId = :callerConnectionIdVal
     `,
     UpdateExpression: 'SET #startedKey = :startedVal',
@@ -276,6 +276,29 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
   // Update game
   const res = await DB.update(updateParam).promise();
   console.log('\nstartGame result:', res);
+
+  return parseDynamoDBAttribute<Game>(res);
+};
+
+export const incrementUserReadyCount = async (gameId: string): Promise<Game | undefined> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAMES_TABLE,
+    Key: {
+      gameId,
+    },
+    ConditionExpression: '',
+    UpdateExpression: '',
+    ExpressionAttributeNames: {
+      '#gameIdKey': 'gameId',
+      '#readyCount:': 'readyCount',
+    },
+    ExpressionAttributeValues: {
+      ':incrementCountBy': 1,
+    },
+  };
+
+  const res = await DB.update(updateParam).promise();
+  console.log('\nincrementUserReadyCount result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };
