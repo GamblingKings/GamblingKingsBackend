@@ -35,7 +35,7 @@
   },
   "rules": {
     "linebreak-style": 0,
-    "no-console": 1,
+    "no-console": "off",
     "import/extensions": [
       "error",
       "ignorePackages",

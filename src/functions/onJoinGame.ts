@@ -30,8 +30,6 @@ const joinGame = async (ws: WebSocketClient, connectionId: string, gameId: strin
     // Remove document version on game object
     removeDynamoDocumentVersion<Game>(updatedGame);
 
-    console.log('Updated game:', updatedGame);
-
     // Add gameId as a reference to the current user
     await setGameIdForUser(connectionId, gameId);
 

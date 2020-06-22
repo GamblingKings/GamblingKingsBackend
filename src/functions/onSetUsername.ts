@@ -17,11 +17,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   Logger.createLogTitle('onSetUsername.ts');
 
   // Parse event
-  console.log('RequestContext', event.requestContext);
   const { connectionId } = event.requestContext;
   const body = JSON.parse(event.body) as LambdaEventBody;
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
-  console.log('Payload', payload);
   const { username } = payload;
 
   // Set username

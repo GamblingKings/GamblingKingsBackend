@@ -7,7 +7,6 @@ describe('test removeGameDocumentVersion', () => {
       ...TEST_GAME_OBJECT1,
     };
     delete expectedResponse.version;
-    console.log('expectedResponse:', expectedResponse);
 
     const response = removeDynamoDocumentVersion(TEST_GAME_OBJECT1);
     expect(response.version).toBeUndefined();

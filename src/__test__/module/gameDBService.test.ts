@@ -42,7 +42,7 @@ describe('test createGame', () => {
     const response = await createGame({
       creatorConnectionId: FAKE_CONNECTION_ID1,
     });
-    console.log('createGame response:', response);
+    // console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
     expect(users).toStrictEqual([TEST_USER_OBJECT1]);
     expect(gameName).toBe('');
@@ -60,7 +60,7 @@ describe('test createGame', () => {
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
     });
-    console.log('createGame response:', response);
+    // console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
     expect(users).toStrictEqual([TEST_USER_OBJECT1]);
     expect(gameName).toBe(FAKE_GAME_NAME1);
