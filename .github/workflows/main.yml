@@ -10,82 +10,38 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Linting with ESLint
-  lint:
+  lint-format-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: '12'
+
+      # Linting with ESLint
       - name: Install Packages
         run: yarn install
       - name: Lint
         run: yarn lint
 
-  # Checking format with Prettier
-  format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12'
-      - run: yarn
-      - run: yarn prettier . --check
+      # Checking format with Prettier
+      - name: Check format
+        run: yarn prettier . --check
 
-  # Running tests with Jest
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12'
-      - name: Install codecov
-        run: yarn global add codecov
-      - name: Install Packages
-        run: yarn install
+      # Running tests with Jest
       - name: Test
         run: |
-          export CODECOV_TOKEN = ${{ secrets.CODECOV_UPLOAD_TOKEN }}
+          yarn global add codecov
+          export CODECOV_TOKEN="${{ secrets.CODECOV_UPLOAD_TOKEN }}"
           yarn test
 
-  # Send workflow result via slack notification to the ci-cd channel
-  slack-notification:
-    runs-on: ubuntu-latest
-    needs: [lint, format, test]
-
-    env:
-      SLACK_CHANNEL: ci-cd
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      SLACK_ICON: https://avatars2.githubusercontent.com/u/44036562?s=400&v=4
-      SLACK_USERNAME: CI Bot
-      SLACK_MESSAGE_TEMPLATE: <https://github.com/${{github.repository}}/pull/${{github.event.pull_request.number}} | Link to PR ${{github.event.pull_request.number}}>
-
-    steps:
-      - uses: actions/checkout@v1
-
-      - uses: rtCamp/action-slack-notify@v2.0.2
-        name: Slack Success Notification
-        if: success()
+      # Send slack notification
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3.2.0
+        with:
+          author_name: ${{ github.actor }}
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job # selectable (default: repo,message)
         env:
-          SLACK_TITLE: Success Workflow Message
-          SLACK_COLOR: '#1E824C'
-          SLACK_MESSAGE: Success ☀️  `${{ env.SLACK_MESSAGE_TEMPLATE }}`
-
-      - uses: rtCamp/action-slack-notify@v2.0.2
-        name: Slack Failure Notification
-        if: failure()
-        env:
-          SLACK_TITLE: Failed Workflow Message
-          SLACK_COLOR: '#F83535'
-          SLACK_MESSAGE: Build Failed 🌧️  `${{ env.SLACK_MESSAGE_TEMPLATE }}`
-
-      - uses: rtCamp/action-slack-notify@v2.0.2
-        name: Slack Stopped Notification
-        if: cancelled()
-        env:
-          SLACK_TITLE: Cancelled Workflow Message
-          SLACK_COLOR: '#ADADAD'
-          SLACK_MESSAGE: Build Stopped ✋🏻  `${{ env.SLACK_MESSAGE_TEMPLATE }}`
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
