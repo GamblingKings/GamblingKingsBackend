@@ -9,8 +9,9 @@ import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
-import { removeGameIdFromUser } from '../module/userDBService';
+import { getAllConnections, removeGameIdFromUser } from '../module/userDBService';
 import { sendUpdates } from './functionsHelper';
+import { getConnectionIdsFromUsers } from '../utils/broadcast';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -76,7 +77,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
      * 1. Send IN_GAME_MESSAGE when a user leaves a game, no matter the user is a host or not
      * 2. Send GAME_UPDATE to other users in the game
      */
-    if (updatedGame) await sendUpdates(ws, connectionId, updatedGame);
+    const allConnectionIds = getConnectionIdsFromUsers(await getAllConnections());
+    if (updatedGame) await sendUpdates(ws, connectionId, updatedGame, undefined, allConnectionIds);
 
     return response(200, 'Left game successfully');
   } catch (err) {

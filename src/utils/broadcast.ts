@@ -133,8 +133,9 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
  * @param {WebSocketClient} ws WebSocket client
  * @param {string} gameId game Id
  * @param {GameStates} state of the game
- * @param callerConnectionId caller's connection Id
- * @param allConnectionIds connection ids from all the currently connected users
+ * @param {string} callerConnectionId caller's connection Id
+ * @param {string[]} allConnectionIds connection ids from all the currently connected users
+ * @param {boolean} sendToAll flag to whether sent to all users or not
  */
 export const broadcastGameUpdate = async (
   ws: WebSocketClient,
@@ -142,6 +143,7 @@ export const broadcastGameUpdate = async (
   state: GameStates,
   callerConnectionId: string,
   allConnectionIds: string[],
+  sendToAll = false,
 ): Promise<Game | undefined> => {
   // Get updated game info
   const updatedGame = await getGameByGameId(gameId);
@@ -155,12 +157,20 @@ export const broadcastGameUpdate = async (
       game: updatedGame,
       state,
     });
-    const otherConnectionIds = getConnectionIdsExceptCaller(callerConnectionId, allConnectionIds);
-    await Promise.all(
-      otherConnectionIds.map((otherConnectionId) => {
+
+    let promises: Promise<unknown>[];
+    if (sendToAll) {
+      promises = allConnectionIds.map((connectionId) => {
+        return ws.send(wsResponse, connectionId);
+      });
+    } else {
+      const otherConnectionIds = getConnectionIdsExceptCaller(callerConnectionId, allConnectionIds);
+      promises = otherConnectionIds.map((otherConnectionId) => {
         return ws.send(wsResponse, otherConnectionId);
-      }),
-    );
+      });
+    }
+
+    await Promise.all(promises);
   }
 
   return updatedGame;

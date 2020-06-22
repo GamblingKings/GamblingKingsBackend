@@ -15,13 +15,15 @@ import { deleteGame } from '../module/gameDBService';
  * @param {WebSocketClient} ws WebSocketClient
  * @param {string} connectionId connection id
  * @param {Game} updatedGame updated game object
- * @param {string} username caller's username
+ * @param {string} username caller's username (used when host disconnects)
+ * @param {string[]} allConnectionIds all connection Ids (used when host disconnects)
  */
 export const sendUpdates = async (
   ws: WebSocketClient,
   connectionId: string,
   updatedGame: Game,
   username: string | undefined = undefined,
+  allConnectionIds: string[] = [],
 ): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(updatedGame.users);
   await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds, username);
@@ -42,10 +44,11 @@ export const sendUpdates = async (
   // If the game is not started yet
   if (!started) {
     // If the host leaves the game,
-    // 1) send GAME_UPDATE with DELETE state to other users in the game,
+    // 1) send GAME_UPDATE with DELETE state all users (including the host)
+    //    in the game since the game is going to be deleted
     // 2) and delete the game in the table
     if (host.connectionId === connectionId) {
-      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId, connectionIds);
+      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId, allConnectionIds, true);
       await deleteGame(gameId);
       return;
     }
