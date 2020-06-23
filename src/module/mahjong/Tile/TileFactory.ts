@@ -34,4 +34,14 @@ export class TileFactory {
 
     return new BonusTiles(<BonusTileTypes>mappedTile.type, mappedTile.value);
   }
+
+  static createStringDefFromTile(tile: Tiles): string {
+    // For HonorTiles
+    if (tile.getValue() === -1) {
+      return `${tile.getType()}`;
+    }
+
+    // For SimpleTiles and BonusTiles
+    return `${tile.getValue()}_${tile.getType()}`;
+  }
 }

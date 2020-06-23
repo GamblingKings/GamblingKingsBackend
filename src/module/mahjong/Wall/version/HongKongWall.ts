@@ -9,6 +9,7 @@ import { BonusTiles } from '../../Tile/BonusTiles';
 import { MahjongVersions } from './Versions';
 
 import { bonusTileInit } from '../init/Bonus';
+import { TileFactory } from '../../Tile/TileFactory';
 
 export class HongKongWall extends Wall {
   static version: MahjongVersions = MahjongVersions.HongKong;
@@ -61,6 +62,11 @@ export class HongKongWall extends Wall {
    */
   public generateHand(): Tiles[] {
     return super.generateHand();
+  }
+
+  public generateHandAsStringDefs(): string[] {
+    const hand: Tiles[] = this.generateHand();
+    return hand.map((tile) => TileFactory.createStringDefFromTile(tile));
   }
 
   /**

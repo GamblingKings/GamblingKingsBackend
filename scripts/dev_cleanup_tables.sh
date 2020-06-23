@@ -2,8 +2,8 @@
 
 SEPARATOR="--------------------------------------------------"
 ENDPOINT="http://localhost:8000"
-CONNECTIONS="ConnectionsTable"
-GAMES="GamesTable"
+CONNECTIONS="Connections"
+GAMES="Games"
 
 echo $SEPARATOR
 echo "Deleting $CONNECTIONS table at $ENDPOINT"

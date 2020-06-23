@@ -16,7 +16,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   console.log('Writing connectionId to the db table...');
   try {
-    // Add user to ConnectionsTable
+    // Add user to Connections Table
     await saveConnection(connectionId);
 
     return response(200, 'Connection added successfully');

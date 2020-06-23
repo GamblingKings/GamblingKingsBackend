@@ -17,7 +17,7 @@ import { honorTileInit } from './init/Honor';
 export abstract class Wall {
   static DEFAULT_NUM_OF_TILE = 4;
 
-  protected tiles: Tiles[];
+  tiles: Tiles[];
 
   /**
    * Public constructor.
@@ -97,6 +97,10 @@ export abstract class Wall {
    */
   public getTiles(): Tiles[] {
     return this.tiles;
+  }
+
+  public setTiles(tiles: Tiles[]): void {
+    this.tiles = tiles;
   }
 
   /**

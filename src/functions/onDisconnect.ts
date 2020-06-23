@@ -54,7 +54,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const connectionIds = getConnectionIdsFromUsers(await getAllConnections());
     await broadcastUserUpdate(ws, connectionId, UserStates.DISCONNECTED, connectionIds);
 
-    // Delete user from ConnectionsTable
+    // Delete user from Connections Table
     const deletedUser = await deleteConnection(connectionId);
 
     // Additional cleanup when user disconnect

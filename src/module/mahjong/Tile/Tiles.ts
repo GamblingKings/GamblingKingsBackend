@@ -11,9 +11,27 @@ import { HonorTileTypes } from './types/HonorTileTypes';
 export abstract class Tiles {
   static DELIMITER = '_';
 
-  abstract toString(): string;
+  // eslint-disable-next-line no-useless-constructor
+  constructor(private type: SimpleTileTypes | HonorTileTypes | BonusTileTypes, private value: number) {}
 
-  abstract getType(): SimpleTileTypes | HonorTileTypes | BonusTileTypes;
+  /**
+   * @returns the type property
+   */
+  public getType(): SimpleTileTypes | HonorTileTypes | BonusTileTypes {
+    return this.type;
+  }
 
-  abstract getValue(): number;
+  /**
+   * @returns the value property
+   */
+  public getValue(): number {
+    return this.value;
+  }
+
+  /**
+   * @returns a string representation of the object
+   */
+  public toString(): string {
+    return `${this.value}${Tiles.DELIMITER}${this.type}`;
+  }
 }

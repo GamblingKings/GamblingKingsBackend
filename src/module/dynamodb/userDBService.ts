@@ -8,7 +8,7 @@ import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from
  * User DB Service
  * ------------------------------------------------------------------------- */
 /**
- * Save new connection with connectionId to the ConnectionsTable.
+ * Save new connection with connectionId to the Connections Table.
  * @param {string} connectionId connectionId from event.requestContext
  */
 export const saveConnection = async (connectionId: string): Promise<User> => {
@@ -27,7 +27,7 @@ export const saveConnection = async (connectionId: string): Promise<User> => {
 };
 
 /**
- * Remove connection by connectionId from the ConnectionsTable.
+ * Remove connection by connectionId from the Connections Table.
  * @param {string} connectionId connectionId from event.requestContext
  */
 export const deleteConnection = async (connectionId: string): Promise<User | undefined> => {
@@ -78,7 +78,7 @@ export const setUsername = async (connectionId: string, username: string): Promi
 };
 
 /**
- * Get all connections (rows) from the ConnectionsTable.
+ * Get all connections (rows) from the Connections Table.
  */
 export const getAllConnections = async (): Promise<User[]> => {
   const scanParams: DocumentClient.ScanInput = {

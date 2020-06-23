@@ -21,7 +21,7 @@ interface CreateGameParams {
  * Game
  * ------------------------------------------------------------------------- */
 /**
- * Create a game that takes in a list of connection Ids (users) and write to the GamesTable.
+ * Create a game that takes in a list of connection Ids (users) and write to the Games Table.
  * @param creatorConnectionId creator's connection Id
  * @param {string} gameName game name
  * @param {string} gameType game type
@@ -68,7 +68,7 @@ export const createGame = async ({
 };
 
 /**
- * Get all the games (rows) from the GamesTable.
+ * Get all the games (rows) from the Games Table.
  */
 export const getAllGames = async (): Promise<Game[]> => {
   const scanParams: DocumentClient.ScanInput = {
@@ -219,7 +219,7 @@ export const removeUserFromGame = async (gameId: string, connectionId: string): 
 };
 
 /**
- * Delete game from GamesTable.
+ * Delete game from Games Table.
  * @param {string} gameId game Id
  */
 export const deleteGame = async (gameId: string): Promise<Game | undefined> => {

@@ -46,10 +46,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       return response(200, 'Game started (after game page loaded) successfully');
     }
 
-    console.log(`
-      ${gameLoadedCount} users' game page has been loaded, 
-      waiting for ${4 - gameLoadedCount} user(s)
-    `);
+    console.log(`${gameLoadedCount} users' game page has been loaded, waiting for ${4 - gameLoadedCount} user(s)`);
 
     return response(200, 'User ready count incremented successfully');
   } catch (err) {

@@ -58,15 +58,20 @@ provider:
         - 'dynamodb:Query'
         - 'dynamodb:Scan'
       Resource:
-        - Fn::GetAtt: [ConnectionsTable, Arn]
-        - Fn::GetAtt: [GamesTable, Arn]
+        - Fn::GetAtt: [Connections, Arn]
+        - Fn::GetAtt: [Games, Arn]
+        - Fn::GetAtt: [GameState, Arn]
         - Fn::Join:
             - '/'
-            - - Fn::GetAtt: [ConnectionsTable, Arn]
+            - - Fn::GetAtt: [Connections, Arn]
               - '*'
         - Fn::Join:
             - '/'
-            - - Fn::GetAtt: [GamesTable, Arn]
+            - - Fn::GetAtt: [Games, Arn]
+              - '*'
+        - Fn::Join:
+            - '/'
+            - - Fn::GetAtt: [GameState, Arn]
               - '*'
 
   # you can define service wide environment variables here
@@ -139,7 +144,7 @@ resources:
     Connections:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ConnectionsTable
+        TableName: Connections
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S
@@ -152,7 +157,7 @@ resources:
     Games:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: GamesTable
+        TableName: Games
         AttributeDefinitions:
           - AttributeName: gameId
             AttributeType: S
@@ -167,10 +172,10 @@ resources:
       Properties:
         TableName: GameState
         AttributeDefinitions:
-          - AttributeName: connectionId
+          - AttributeName: gameId
             AttributeType: S
         KeySchema:
-          - AttributeName: connectionId
+          - AttributeName: gameId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5
