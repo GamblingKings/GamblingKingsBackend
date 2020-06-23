@@ -1,8 +1,8 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
-import { User } from '../models/User';
-import { CONNECTIONS_TABLE } from '../constants';
+import { User } from '../../models/User';
+import { CONNECTIONS_TABLE } from '../../constants';
 import { DB } from './db';
-import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from '../utils/dbHelper';
+import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from '../../utils/dbHelper';
 
 /* ----------------------------------------------------------------------------
  * User DB Service

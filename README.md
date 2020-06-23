@@ -32,7 +32,7 @@ yarn run dev:cleanup
 yarn run install_dep
 ```
 
-2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](./src/module/db.ts) and [WebSocketClient.ts](./src/WebSocketClient.ts)
+2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](src/module/dynamodb/db.ts) and [WebSocketClient.ts](./src/WebSocketClient.ts)
 
 3. (**Important**) Increase max space size for Node (otherwise, webpack may not work in your local machine)
 

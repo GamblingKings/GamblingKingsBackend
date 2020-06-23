@@ -9,7 +9,7 @@ import {
   saveConnection,
   setGameIdForUser,
   setUsername,
-} from '../../module/userDBService';
+} from '../../module/dynamodb/userDBService';
 import {
   CONDITIONAL_FAILED_MSG,
   FAKE_CONNECTION_ID1,
@@ -19,7 +19,7 @@ import {
   TEST_USER_OBJECT1,
   TEST_USER_OBJECT2,
 } from '../testConstants';
-import { createGame } from '../../module/gameDBService';
+import { createGame } from '../../module/dynamodb/gameDBService';
 import { Game } from '../../models/Game';
 import { User } from '../../models/User';
 

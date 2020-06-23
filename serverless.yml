@@ -94,43 +94,42 @@ functions:
     handler: src/functions/defaultMessage.handler
     events:
       - websocket: $default
-  setUsername:
+  onSetUsername:
     handler: src/functions/onSetUsername.handler
     events:
       - websocket: SET_USERNAME
-  getAllUsers:
+  onGetAllUsers:
     handler: src/functions/onGetAllUsers.handler
     events:
       - websocket: GET_ALL_USERS
-  createGame:
+  onCreateGame:
     handler: src/functions/onCreateGame.handler
     events:
       - websocket: CREATE_GAME
-  getAllGames:
+  onGetAllGames:
     handler: src/functions/onGetAllGames.handler
     events:
       - websocket: GET_ALL_GAMES
-  sendMessage:
+  onSendMessage:
     handler: src/functions/onSendMessage.handler
     events:
       - websocket: SEND_MESSAGE
-  joinGame:
+  onJoinGame:
     handler: src/functions/onJoinGame.handler
     events:
       - websocket: JOIN_GAME
-  leaveGame:
+  onLeaveGame:
     handler: src/functions/onLeaveGame.handler
     events:
       - websocket: LEAVE_GAME
-  startGame:
+  onStartGame:
     handler: src/functions/onStartGame.handler
     events:
       - websocket: START_GAME
-  # To be implemented
-  # game_page_load:
-  #   handler: src/functions/onGamePageLoad.handler
-  #   events:
-  #     - websocket: GAME_PAGE_LOAD
+  onGamePageLoad:
+    handler: src/functions/onGamePageLoad.handler
+    events:
+      - websocket: GAME_PAGE_LOAD
 
 # you can add CloudFormation resource templates here
 resources:

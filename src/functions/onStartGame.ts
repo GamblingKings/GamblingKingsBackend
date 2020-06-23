@@ -3,7 +3,7 @@ import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse, WebSocketResponse } from '../types/response';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
-import { startGame } from '../module/gameDBService';
+import { startGame } from '../module/dynamodb/gameDBService';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { WebSocketClient } from '../WebSocketClient';
 import { createStartGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/createWSResponse';

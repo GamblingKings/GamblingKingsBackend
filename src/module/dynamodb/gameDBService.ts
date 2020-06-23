@@ -1,11 +1,11 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { v4 as uuid } from 'uuid';
-import { Game } from '../models/Game';
-import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../constants';
+import { Game } from '../../models/Game';
+import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../../constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
-import { GameStates } from '../types/states';
-import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from '../utils/dbHelper';
+import { GameStates } from '../../types/states';
+import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from '../../utils/dbHelper';
 
 /* ----------------------------------------------------------------------------
  * Interface
@@ -50,7 +50,7 @@ export const createGame = async ({
     gameVersion: gameVersion || '',
     state: GameStates.CREATED,
     started: false,
-    readyCount: 0,
+    gameLoadedCount: 0,
 
     // Attribute to keep track of the document version to prevent
     // concurrent update on different versions of a game document
@@ -255,10 +255,10 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
      * 3. the user calling the function must be the host of the game
      */
     ConditionExpression: `
-      attribute_exists(#gameIdKey) 
-      AND 
+      attribute_exists(#gameIdKey)
+      AND
       (attribute_not_exists(#startedKey) OR #startedKey = :notStartedVal)
-      AND 
+      AND
       host.connectionId = :callerConnectionIdVal
     `,
     UpdateExpression: 'SET #startedKey = :startedVal',
@@ -281,7 +281,7 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
   return parseDynamoDBAttribute<Game>(res);
 };
 
-export const incrementUserReadyCount = async (gameId: string): Promise<Game | undefined> => {
+export const incrementGameLoadedCount = async (gameId: string): Promise<Game | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
     Key: {
@@ -289,18 +289,18 @@ export const incrementUserReadyCount = async (gameId: string): Promise<Game | un
     },
     /**
      * 1. Game must exists
-     * 2. readyCount must be less than 4 (its < 4 because when the count already reach 4,
+     * 2. gameLoadedCount must be less than 4 (its < 4 because when the count already reach 4,
      *    the next increment should fail)
      */
     ConditionExpression: `
-      attribute_exists(#gameIdKey) 
-      AND 
-      (attribute_exists(#readyCount) AND #readyCount < :maxUserCount)
+      attribute_exists(#gameIdKey)
+      AND
+      (attribute_exists(#gameLoadedCountKey) AND #gameLoadedCountKey < :maxUserCount)
     `,
-    UpdateExpression: 'ADD #readyCount :incrementCountBy',
+    UpdateExpression: 'ADD #gameLoadedCountKey :incrementCountBy',
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
-      '#readyCount': 'readyCount',
+      '#gameLoadedCountKey': 'gameLoadedCount',
     },
     ExpressionAttributeValues: {
       ':incrementCountBy': 1,

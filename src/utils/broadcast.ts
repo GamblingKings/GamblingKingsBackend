@@ -1,6 +1,6 @@
 import { WebSocketClient } from '../WebSocketClient';
-import { getAllConnections, getUserByConnectionId } from '../module/userDBService';
-import { getAllGames, getGameByGameId } from '../module/gameDBService';
+import { getAllConnections, getUserByConnectionId } from '../module/dynamodb/userDBService';
+import { getAllGames, getGameByGameId } from '../module/dynamodb/gameDBService';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
 import {
@@ -11,6 +11,7 @@ import {
   createGetAllGamesResponse,
   createGetAllUsersResponse,
   createSendMessageResponse,
+  createGameStartResponse,
 } from './createWSResponse';
 import { removeDynamoDocumentVersion } from './dbHelper';
 import { WebSocketActions } from '../types/WebSocketActions';
@@ -179,14 +180,14 @@ export const broadcastGameUpdate = async (
 /**
  * Broadcast a message about who is joining the game with the IN_GAME_MESSAGE action
  * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string} callConnectionId caller's connection Id
+ * @param {string} callerConnectionId caller's connection Id
  * @param {WebSocketActions.JOIN_GAME | WebSocketActions.LEAVE_GAME} action join or leave game action
  * @param {string[]} connectionIds connection Ids of all users who are in the same game
  * @param {string} callerUsername caller's username
  */
 export const broadcastInGameMessage = async (
   ws: WebSocketClient,
-  callConnectionId: string,
+  callerConnectionId: string,
   action: WebSocketActions.JOIN_GAME | WebSocketActions.LEAVE_GAME,
   connectionIds: string[],
   callerUsername: string | undefined = undefined,
@@ -194,7 +195,7 @@ export const broadcastInGameMessage = async (
   let username: string;
   if (!callerUsername) {
     // For onLeaveGame and onJoinGame, need to get user's username
-    const user = (await getUserByConnectionId(callConnectionId)) as User;
+    const user = (await getUserByConnectionId(callerConnectionId)) as User;
 
     username = user.username || 'Unknown User'; // TODO: change to a more appropriate name
   } else {
@@ -204,11 +205,11 @@ export const broadcastInGameMessage = async (
 
   // Format message
   const actionWord: string = action === WebSocketActions.JOIN_GAME ? 'joined' : 'left';
-  const message = `${username || callConnectionId} just ${actionWord} the game.`;
+  const message = `${username || callerConnectionId} just ${actionWord} the game.`;
   console.log('broadcastInGameMessage, In game message:', message);
 
   // Send message to the other connectionIds that are already in the game
-  const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callConnectionId);
+  const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callerConnectionId);
   const wsResponse = createInGameMessageResponse(username, message);
   await Promise.all(
     otherConnectionIds.map((otherConnectionId) => {
@@ -220,18 +221,18 @@ export const broadcastInGameMessage = async (
 /**
  * Broadcast in game update about the current users list in the game
  * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string} callConnectionId caller's connection Id
+ * @param {string} callerConnectionId caller's connection Id
  * @param {User[]} usersInGame current users list in the game
  */
 export const broadcastInGameUpdate = async (
   ws: WebSocketClient,
-  callConnectionId: string,
+  callerConnectionId: string,
   usersInGame: User[],
 ): Promise<User[]> => {
   console.log('broadcastInGameUpdate, Users in game:', usersInGame);
 
   // Send users list to the other connectionIds that are already in the game
-  const otherConnectionIds = getConnectionIdsExceptCaller(callConnectionId, getConnectionIdsFromUsers(usersInGame));
+  const otherConnectionIds = getConnectionIdsExceptCaller(callerConnectionId, getConnectionIdsFromUsers(usersInGame));
   const wsResponse = createInGameUpdateResponse({
     users: usersInGame,
   });
@@ -242,6 +243,24 @@ export const broadcastInGameUpdate = async (
   );
 
   return usersInGame;
+};
+
+// TODO: To be implemented
+export const broadcastGameStart = async (ws: WebSocketClient, usersInGame: User[]): Promise<void> => {
+  const connectionIds = getConnectionIdsFromUsers(usersInGame);
+
+  const promises = connectionIds.map((connectionId) => {
+    // TODO: Create random tiles
+    const tiles = 'TILES-PLACEHOLDER';
+
+    // Put random tiles in response
+    const wsResponse = createGameStartResponse({ tiles });
+
+    // Send tiles as a string to each user in the game
+    return ws.send(wsResponse, connectionId);
+  });
+
+  await Promise.all(promises);
 };
 
 /* ----------------------------------------------------------------------------

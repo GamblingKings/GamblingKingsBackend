@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { createGame } from '../module/gameDBService';
+import { createGame } from '../module/dynamodb/gameDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
@@ -11,7 +11,7 @@ import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { GameStates } from '../types/states';
-import { getAllConnections, setGameIdForUser } from '../module/userDBService';
+import { getAllConnections, setGameIdForUser } from '../module/dynamodb/userDBService';
 
 /**
  * Handler for creating a game.

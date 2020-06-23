@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { removeUserFromGame } from '../module/gameDBService';
+import { removeUserFromGame } from '../module/dynamodb/gameDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';
@@ -9,7 +9,7 @@ import { removeDynamoDocumentVersion } from '../utils/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
-import { getAllConnections, removeGameIdFromUser } from '../module/userDBService';
+import { getAllConnections, removeGameIdFromUser } from '../module/dynamodb/userDBService';
 import { sendUpdates } from './functionsHelper';
 import { getConnectionIdsFromUsers } from '../utils/broadcast';
 

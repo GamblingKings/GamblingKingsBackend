@@ -1,19 +1,19 @@
 import { v4 as uuid } from 'uuid';
-import { getUserByConnectionId, saveConnection } from '../../module/userDBService';
+import { getUserByConnectionId, saveConnection } from '../../module/dynamodb/userDBService';
 import {
   addUserToGame,
   createGame,
   deleteGame,
   getAllGames,
   getGameByGameId,
-  incrementUserReadyCount,
+  incrementGameLoadedCount,
   removeUserFromGame,
   startGame,
-} from '../../module/gameDBService';
+} from '../../module/dynamodb/gameDBService';
 import { cleanupTestGame } from './dbTestHelpers';
 import { Game } from '../../models/Game';
-import * as userDBFunctions from '../../module/userDBService';
-import * as gameDBFunctions from '../../module/gameDBService';
+import * as userDBFunctions from '../../module/dynamodb/userDBService';
+import * as gameDBFunctions from '../../module/dynamodb/gameDBService';
 import { User } from '../../models/User';
 import {
   CONDITIONAL_FAILED_MSG,
@@ -466,25 +466,25 @@ describe('test incrementUserReadyCount', () => {
     });
     gameId = game.gameId;
 
-    incrementUserReadyCountSpy = jest.spyOn(gameDBFunctions, 'incrementUserReadyCount');
+    incrementUserReadyCountSpy = jest.spyOn(gameDBFunctions, 'incrementGameLoadedCount');
   });
 
   test('it should increment ready count successfully', async () => {
     // Initial count should be 0
-    expect(game.readyCount).toBe(0);
+    expect(game.gameLoadedCount).toBe(0);
 
-    const response = (await incrementUserReadyCount(gameId)) as Game;
+    const response = (await incrementGameLoadedCount(gameId)) as Game;
     const expectResponse = {
       ...TEST_GAME_OBJECT1,
       gameId,
-      readyCount: 1,
+      gameLoadedCount: 1,
     };
 
     // Test function call
     expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(1);
 
     // Test response
-    expect(response.readyCount).toBe(1);
+    expect(response.gameLoadedCount).toBe(1);
     expect(response).toStrictEqual(expectResponse);
   });
 
@@ -494,16 +494,16 @@ describe('test incrementUserReadyCount', () => {
 
   test('it should fail if try to increment count when the total count already reach 4', async () => {
     // Initial count should be 0
-    expect(game.readyCount).toBe(0);
+    expect(game.gameLoadedCount).toBe(0);
 
     // Increment count 4 times
-    await incrementUserReadyCount(gameId);
-    await incrementUserReadyCount(gameId);
-    await incrementUserReadyCount(gameId);
-    await incrementUserReadyCount(gameId);
+    await incrementGameLoadedCount(gameId);
+    await incrementGameLoadedCount(gameId);
+    await incrementGameLoadedCount(gameId);
+    await incrementGameLoadedCount(gameId);
 
     // The fifth time should fail
-    const func = incrementUserReadyCount(gameId);
+    const func = incrementGameLoadedCount(gameId);
     await expect(func).rejects.toThrow(' ');
 
     // Test function call

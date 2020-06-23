@@ -8,7 +8,7 @@ import {
 } from '../utils/broadcast';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates } from '../types/states';
-import { deleteGame } from '../module/gameDBService';
+import { deleteGame } from '../module/dynamodb/gameDBService';
 
 /**
  * Helper function to send updates to other users in the game when a user leaves the game.

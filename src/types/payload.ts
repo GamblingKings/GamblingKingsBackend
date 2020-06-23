@@ -21,6 +21,7 @@ export interface LambdaEventBodyPayloadOptions {
   error?: string;
   state?: string;
   time?: string;
+  tiles?: string;
 }
 
 export interface UserUpdatePayload {
@@ -66,4 +67,8 @@ export interface InGameMessagePayload {
 export interface SendMessagePayload {
   username: string;
   message: string;
+}
+
+export interface GameStartPayload {
+  tiles: string;
 }

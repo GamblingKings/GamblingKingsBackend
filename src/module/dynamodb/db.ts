@@ -1,5 +1,5 @@
 import { DynamoDB } from 'aws-sdk';
-import { ddb } from '../__test__/jestLocalDynamoDB';
+import { ddb } from '../../__test__/jestLocalDynamoDB';
 
 /* ----------------------------------------------------------------------------
  * DocumentClient

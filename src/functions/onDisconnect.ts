@@ -1,10 +1,10 @@
 import { Handler } from 'aws-lambda';
-import { deleteConnection, getAllConnections } from '../module/userDBService';
+import { deleteConnection, getAllConnections } from '../module/dynamodb/userDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
-import { removeUserFromGame } from '../module/gameDBService';
+import { removeUserFromGame } from '../module/dynamodb/gameDBService';
 import { User } from '../models/User';
 import { WebSocketClient } from '../WebSocketClient';
 import { broadcastUserUpdate, getConnectionIdsFromUsers } from '../utils/broadcast';

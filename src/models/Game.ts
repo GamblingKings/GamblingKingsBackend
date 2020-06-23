@@ -8,7 +8,7 @@ export interface Game extends HasVersion {
   readonly gameId: string;
   host: User;
   users: User[];
-  readyCount: number;
+  gameLoadedCount: number;
   gameName?: string;
   gameType?: string;
   gameVersion?: string;

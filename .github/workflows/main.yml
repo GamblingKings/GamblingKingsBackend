@@ -32,7 +32,7 @@ jobs:
       - name: Test
         run: |
           yarn global add codecov
-          export CODECOV_TOKEN="${{ secrets.CODECOV_UPLOAD_TOKEN }}"
+          export CODECOV_TOKEN="${{ secrets.CODECOV_TOKEN_BACKEND }}"
           yarn test
 
       # Send slack notification

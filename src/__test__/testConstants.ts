@@ -31,7 +31,7 @@ export const TEST_GAME_OBJECT1 = {
   started: false,
   state: GameStates.CREATED,
   version: DEFAULT_DOCUMENT_VERSION,
-  readyCount: 0,
+  gameLoadedCount: 0,
 };
 export const TEST_GAME_OBJECT2 = {
   host: TEST_USER_OBJECT2,
@@ -42,7 +42,7 @@ export const TEST_GAME_OBJECT2 = {
   started: false,
   state: GameStates.CREATED,
   version: DEFAULT_DOCUMENT_VERSION,
-  readyCount: 0,
+  gameLoadedCount: 0,
 };
 
 /* ----------------------------------------------------------------------------

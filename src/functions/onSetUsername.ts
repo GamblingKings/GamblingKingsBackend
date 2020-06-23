@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { setUsername } from '../module/userDBService';
+import { setUsername } from '../module/dynamodb/userDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketClient } from '../WebSocketClient';

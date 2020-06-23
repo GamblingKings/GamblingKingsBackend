@@ -1,5 +1,6 @@
 import {
   CreateGamePayload,
+  GameStartPayload,
   GameUpdatePayload,
   GetAllGamesPayload,
   GetAllUsersPayload,
@@ -166,6 +167,11 @@ export const createLoginFailureResponse = (errorMessage: string): WebSocketRespo
 
 export const createStartGameResponse = (): WebSocketResponse => {
   return createWSResponse(WebSocketActions.START_GAME, {});
+};
+
+export const createGameStartResponse = (payload: GameStartPayload): WebSocketResponse => {
+  const emptyGameStartResponse = createWSResponse(WebSocketActions.GAME_START, payload);
+  return successWebSocketResponse(emptyGameStartResponse);
 };
 
 /* ----------------------------------------------------------------------------
