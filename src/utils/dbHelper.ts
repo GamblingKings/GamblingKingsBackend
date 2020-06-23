@@ -1,5 +1,6 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { HasVersion } from '../models/Version';
+import { UserHand } from '../models/GameState';
 
 /**
  * Remove version attribute from a Game object.
@@ -41,4 +42,11 @@ export const parseDynamoDBAttribute = <T>(
   const attributes = response.Attributes as DocumentClient.AttributeMap;
   if (!attributes || attributes === {}) return undefined;
   return attributes as T;
+};
+
+export const getHandByConnectionId = (hands: UserHand[], connectionId: string): string => {
+  const userHand = hands.find((hand) => {
+    return hand.connectionId === connectionId;
+  }) as UserHand;
+  return userHand.hand;
 };

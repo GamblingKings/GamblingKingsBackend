@@ -13,6 +13,9 @@ import {
   createUserUpdateResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
+  createStartGameResponse,
+  createGameStartResponse,
+  createGamePageLoadResponse,
 } from '../../utils/createWSResponse';
 import {
   CreateGamePayload,
@@ -251,6 +254,48 @@ describe('test createInGameMessageResponse', () => {
     expect(response.payload.username).toStrictEqual(username);
     expect(response.payload.message).toStrictEqual(message);
     expect(response.payload.time).not.toBeUndefined();
+  });
+});
+
+describe('test createStartGameResponse', () => {
+  test('it should get the correct response', () => {
+    const response = createStartGameResponse();
+    const expectedResponse = {
+      action: WebSocketActions.START_GAME,
+      payload: {},
+    };
+
+    expect(response.payload).toStrictEqual({});
+    expect(response).toStrictEqual(expectedResponse);
+  });
+});
+
+describe('test createGamePageLoadResponse', () => {
+  test('it should get the correct response', () => {
+    const response = createGamePageLoadResponse();
+    const expectedResponse = {
+      action: WebSocketActions.GAME_PAGE_LOAD,
+      payload: {},
+    };
+
+    expect(response.payload).toStrictEqual({});
+    expect(response).toStrictEqual(expectedResponse);
+  });
+});
+
+describe('test createGameStartResponse', () => {
+  test('it should get the correct response', () => {
+    const testTiles = '';
+    const response = createGameStartResponse({ tiles: testTiles });
+    const expectedResponse = {
+      action: WebSocketActions.GAME_START,
+      payload: {
+        tiles: testTiles,
+      },
+    };
+
+    expect(response.payload).toStrictEqual({ tiles: testTiles });
+    expect(response).toStrictEqual(expectedResponse);
   });
 });
 

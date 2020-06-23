@@ -1,8 +1,9 @@
 /**
  * Table Names
  */
-export const CONNECTIONS_TABLE = 'ConnectionsTable';
-export const GAMES_TABLE = 'GamesTable';
+export const CONNECTIONS_TABLE = 'Connections';
+export const GAMES_TABLE = 'Games';
+export const GAME_STATE_TABLE = 'GameState';
 
 /**
  * Default Document Version

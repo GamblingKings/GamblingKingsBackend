@@ -119,6 +119,28 @@ export const createInGameMessageResponse = (username: string, message: string): 
   return createWSResponse(WebSocketActions.IN_GAME_MESSAGE, wsPayload);
 };
 
+/**
+ * Create START_GAME response object.
+ */
+export const createStartGameResponse = (): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.START_GAME, {});
+};
+
+/**
+ * Create GAME_PAGE_LOAD response object.
+ */
+export const createGamePageLoadResponse = (): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.GAME_PAGE_LOAD, {});
+};
+
+/**
+ * Create GAME_START response object.
+ * @param {GameStartPayload} payload payload object
+ */
+export const createGameStartResponse = (payload: GameStartPayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.GAME_START, payload);
+};
+
 /* ----------------------------------------------------------------------------
  * Success and Failure Response
  * ------------------------------------------------------------------------- */
@@ -163,15 +185,6 @@ export const createLoginSuccessResponse = (): WebSocketResponse => {
 export const createLoginFailureResponse = (errorMessage: string): WebSocketResponse => {
   const wsResponse = createWSResponse(WebSocketActions.LOGIN_SUCCESS, {});
   return failedWebSocketResponse(wsResponse, errorMessage);
-};
-
-export const createStartGameResponse = (): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.START_GAME, {});
-};
-
-export const createGameStartResponse = (payload: GameStartPayload): WebSocketResponse => {
-  const emptyGameStartResponse = createWSResponse(WebSocketActions.GAME_START, payload);
-  return successWebSocketResponse(emptyGameStartResponse);
 };
 
 /* ----------------------------------------------------------------------------

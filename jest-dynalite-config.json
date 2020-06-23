@@ -1,7 +1,7 @@
 {
   "tables": [
     {
-      "TableName": "ConnectionsTable",
+      "TableName": "Connections",
       "KeySchema": [
         {
           "AttributeName": "connectionId",
@@ -20,7 +20,26 @@
       }
     },
     {
-      "TableName": "GamesTable",
+      "TableName": "Games",
+      "KeySchema": [
+        {
+          "AttributeName": "gameId",
+          "KeyType": "HASH"
+        }
+      ],
+      "AttributeDefinitions": [
+        {
+          "AttributeName": "gameId",
+          "AttributeType": "S"
+        }
+      ],
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "TableName": "GameState",
       "KeySchema": [
         {
           "AttributeName": "gameId",

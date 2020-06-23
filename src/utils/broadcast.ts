@@ -13,9 +13,10 @@ import {
   createSendMessageResponse,
   createGameStartResponse,
 } from './createWSResponse';
-import { removeDynamoDocumentVersion } from './dbHelper';
+import { getHandByConnectionId, removeDynamoDocumentVersion } from './dbHelper';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates, UserStates } from '../types/states';
+import { initGameState } from '../module/dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------
  * Helpers
@@ -245,13 +246,12 @@ export const broadcastInGameUpdate = async (
   return usersInGame;
 };
 
-// TODO: To be implemented
-export const broadcastGameStart = async (ws: WebSocketClient, usersInGame: User[]): Promise<void> => {
+export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, usersInGame: User[]): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(usersInGame);
+  const { hands } = await initGameState(gameId, connectionIds);
 
   const promises = connectionIds.map((connectionId) => {
-    // TODO: Create random tiles
-    const tiles = 'TILES-PLACEHOLDER';
+    const tiles = getHandByConnectionId(hands, connectionId);
 
     // Put random tiles in response
     const wsResponse = createGameStartResponse({ tiles });
