@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { v4 as uuid } from 'uuid';
 import { Game } from '../models/Game';
-import { DEFAULT_DOCUMENT_VERSION, GAMES_TABLE } from '../constants';
+import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
 import { GameStates } from '../types/states';
@@ -50,6 +50,7 @@ export const createGame = async ({
     gameVersion: gameVersion || '',
     state: GameStates.CREATED,
     started: false,
+    readyCount: 0,
 
     // Attribute to keep track of the document version to prevent
     // concurrent update on different versions of a game document
@@ -286,15 +287,26 @@ export const incrementUserReadyCount = async (gameId: string): Promise<Game | un
     Key: {
       gameId,
     },
-    ConditionExpression: '',
-    UpdateExpression: '',
+    /**
+     * 1. Game must exists
+     * 2. readyCount must be less than 4 (its < 4 because when the count already reach 4,
+     *    the next increment should fail)
+     */
+    ConditionExpression: `
+      attribute_exists(#gameIdKey) 
+      AND 
+      (attribute_exists(#readyCount) AND #readyCount < :maxUserCount)
+    `,
+    UpdateExpression: 'ADD #readyCount :incrementCountBy',
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
-      '#readyCount:': 'readyCount',
+      '#readyCount': 'readyCount',
     },
     ExpressionAttributeValues: {
       ':incrementCountBy': 1,
+      ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
     },
+    ReturnValues: 'ALL_NEW',
   };
 
   const res = await DB.update(updateParam).promise();

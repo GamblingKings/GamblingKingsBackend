@@ -6,6 +6,7 @@ import {
   deleteGame,
   getAllGames,
   getGameByGameId,
+  incrementUserReadyCount,
   removeUserFromGame,
   startGame,
 } from '../../module/gameDBService';
@@ -443,5 +444,69 @@ describe('test startGame', () => {
 
     const func = startGame(gameId, FAKE_CONNECTION_ID2);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test incrementUserReadyCount
+ * ------------------------------------------------------------------------- */
+describe('test incrementUserReadyCount', () => {
+  let game: Game;
+  let gameId: string;
+  let incrementUserReadyCountSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1);
+
+    // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
+    game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+    });
+    gameId = game.gameId;
+
+    incrementUserReadyCountSpy = jest.spyOn(gameDBFunctions, 'incrementUserReadyCount');
+  });
+
+  test('it should increment ready count successfully', async () => {
+    // Initial count should be 0
+    expect(game.readyCount).toBe(0);
+
+    const response = (await incrementUserReadyCount(gameId)) as Game;
+    const expectResponse = {
+      ...TEST_GAME_OBJECT1,
+      gameId,
+      readyCount: 1,
+    };
+
+    // Test function call
+    expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.readyCount).toBe(1);
+    expect(response).toStrictEqual(expectResponse);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should fail if try to increment count when the total count already reach 4', async () => {
+    // Initial count should be 0
+    expect(game.readyCount).toBe(0);
+
+    // Increment count 4 times
+    await incrementUserReadyCount(gameId);
+    await incrementUserReadyCount(gameId);
+    await incrementUserReadyCount(gameId);
+    await incrementUserReadyCount(gameId);
+
+    // The fifth time should fail
+    const func = incrementUserReadyCount(gameId);
+    await expect(func).rejects.toThrow(' ');
+
+    // Test function call
+    expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(5);
   });
 });
