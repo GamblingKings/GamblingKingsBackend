@@ -1,6 +1,6 @@
-import { Hand } from '../../../../module/mahjong/Hand/Hand';
-import { DeadPile } from '../../../../module/mahjong/DeadPile/DeadPile';
-import { HongKongWall } from '../../../../module/mahjong/Wall/version/HongKongWall';
+import { Hand } from '../../../../games/mahjong/Hand/Hand';
+import { DeadPile } from '../../../../games/mahjong/DeadPile/DeadPile';
+import { HongKongWall } from '../../../../games/mahjong/Wall/version/HongKongWall';
 
 const w = new HongKongWall();
 const d = new DeadPile();

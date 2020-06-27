@@ -1,5 +1,5 @@
-import { SimpleTiles } from '../../../../module/mahjong/Tile/SimpleTiles';
-import { SimpleTileTypes } from '../../../../module/mahjong/Tile/types/SimpleTileTypes';
+import { SimpleTiles } from '../../../../games/mahjong/Tile/SimpleTiles';
+import { SimpleTileTypes } from '../../../../games/mahjong/Tile/types/SimpleTileTypes';
 
 test('SimpleTiles fails to initialize is range is not between 1 - 9', () => {
   const t = () => {

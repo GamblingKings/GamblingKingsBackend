@@ -1,4 +1,4 @@
-import { HongKongWall } from '../../../../module/mahjong/Wall/version/HongKongWall';
+import { HongKongWall } from '../../../../games/mahjong/Wall/version/HongKongWall';
 
 const DEFAULT_WALL_LENGTH = 144;
 

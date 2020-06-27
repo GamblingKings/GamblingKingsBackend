@@ -1,4 +1,4 @@
-import { DEFAULT_DOCUMENT_VERSION } from '../constants';
+import { DEFAULT_DOCUMENT_VERSION } from '../utils/constants';
 import { GameStates } from '../types/states';
 
 /* ----------------------------------------------------------------------------

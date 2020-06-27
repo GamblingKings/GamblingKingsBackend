@@ -1,4 +1,4 @@
-import { removeDynamoDocumentVersion } from '../../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../../dynamodb/dbHelper';
 import { TEST_GAME_OBJECT1 } from '../testConstants';
 
 describe('test removeGameDocumentVersion', () => {

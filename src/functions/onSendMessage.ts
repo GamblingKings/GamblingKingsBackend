@@ -1,7 +1,7 @@
 import { Handler } from 'aws-lambda';
 import { response } from '../utils/responseHelper';
-import { WebSocketClient } from '../WebSocketClient';
-import { broadcastMessage } from '../utils/broadcast';
+import { WebSocketClient } from '../websocket/WebSocketClient';
+import { broadcastMessage } from '../websocket/broadcast';
 import { Logger } from '../utils/Logger';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';

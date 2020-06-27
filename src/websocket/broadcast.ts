@@ -1,6 +1,6 @@
-import { WebSocketClient } from '../WebSocketClient';
-import { getAllConnections, getUserByConnectionId } from '../module/dynamodb/userDBService';
-import { getAllGames, getGameByGameId } from '../module/dynamodb/gameDBService';
+import { WebSocketClient } from './WebSocketClient';
+import { getAllConnections, getUserByConnectionId } from '../dynamodb/userDBService';
+import { getAllGames, getGameByGameId } from '../dynamodb/gameDBService';
 import { User } from '../models/User';
 import { Game } from '../models/Game';
 import {
@@ -13,10 +13,10 @@ import {
   createSendMessageResponse,
   createGameStartResponse,
 } from './createWSResponse';
-import { getHandByConnectionId, removeDynamoDocumentVersion } from './dbHelper';
+import { getHandByConnectionId, removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates, UserStates } from '../types/states';
-import { initGameState } from '../module/dynamodb/gameStateDBService';
+import { initGameState } from '../dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------
  * Helpers

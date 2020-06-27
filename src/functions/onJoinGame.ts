@@ -1,17 +1,21 @@
 import { Handler } from 'aws-lambda';
-import { addUserToGame } from '../module/dynamodb/gameDBService';
+import { addUserToGame } from '../dynamodb/gameDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
-import { WebSocketClient } from '../WebSocketClient';
-import { createJoinGameResponse, failedWebSocketResponse, successWebSocketResponse } from '../utils/createWSResponse';
-import { broadcastInGameMessage, broadcastInGameUpdate } from '../utils/broadcast';
-import { removeDynamoDocumentVersion } from '../utils/dbHelper';
+import { WebSocketClient } from '../websocket/WebSocketClient';
+import {
+  createJoinGameResponse,
+  failedWebSocketResponse,
+  successWebSocketResponse,
+} from '../websocket/createWSResponse';
+import { broadcastInGameMessage, broadcastInGameUpdate } from '../websocket/broadcast';
+import { removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
 import { Game } from '../models/Game';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { WebSocketActions } from '../types/WebSocketActions';
-import { setGameIdForUser } from '../module/dynamodb/userDBService';
+import { setGameIdForUser } from '../dynamodb/userDBService';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions

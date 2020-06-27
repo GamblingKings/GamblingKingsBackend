@@ -1,5 +1,5 @@
-import { BonusTiles } from '../../../../module/mahjong/Tile/BonusTiles';
-import { BonusTileTypes } from '../../../../module/mahjong/Tile/types/BonusTileTypes';
+import { BonusTiles } from '../../../../games/mahjong/Tile/BonusTiles';
+import { BonusTileTypes } from '../../../../games/mahjong/Tile/types/BonusTileTypes';
 
 test('BonusTiles fails to initialize is range is not between 1 - 4', () => {
   const t = () => {

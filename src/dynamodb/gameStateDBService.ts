@@ -1,21 +1,21 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { GAME_STATE_TABLE } from '../../constants';
-import { HongKongWall } from '../mahjong/Wall/version/HongKongWall';
+import { GAME_STATE_TABLE } from '../utils/constants';
+import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
-import { GameState, UserHand } from '../../models/GameState';
-import { getHandByConnectionId, parseDynamoDBItem } from '../../utils/dbHelper';
-import { Wall } from '../mahjong/Wall/Wall';
-import { SimpleTileTypes } from '../mahjong/Tile/types/SimpleTileTypes';
-import { SimpleTiles } from '../mahjong/Tile/SimpleTiles';
-import { BonusTileTypes } from '../mahjong/Tile/types/BonusTileTypes';
-import { HonorTileTypes } from '../mahjong/Tile/types/HonorTileTypes';
-import { BonusTiles } from '../mahjong/Tile/BonusTiles';
-import { HonorTiles } from '../mahjong/Tile/HonorTiles';
-import { Tiles } from '../mahjong/Tile/Tiles';
+import { GameState, UserHand } from '../models/GameState';
+import { getHandByConnectionId, parseDynamoDBItem } from './dbHelper';
+import { Wall } from '../games/mahjong/Wall/Wall';
+import { SimpleTileTypes } from '../games/mahjong/Tile/types/SimpleTileTypes';
+import { SimpleTiles } from '../games/mahjong/Tile/SimpleTiles';
+import { BonusTileTypes } from '../games/mahjong/Tile/types/BonusTileTypes';
+import { HonorTileTypes } from '../games/mahjong/Tile/types/HonorTileTypes';
+import { BonusTiles } from '../games/mahjong/Tile/BonusTiles';
+import { HonorTiles } from '../games/mahjong/Tile/HonorTiles';
+import { Tiles } from '../games/mahjong/Tile/Tiles';
 
 /* ----------------------------------------------------------------------------
  * Helper functions
- * Note: these is a hack to parse wall object returned from DynamoDB and load
+ * Note: this is a hack to parse wall object returned from DynamoDB and load
  *       it into an instance of a wall object (e.g. HongKongWall). Move these
  *       to somewhere else when done refining.
  * ------------------------------------------------------------------------- */

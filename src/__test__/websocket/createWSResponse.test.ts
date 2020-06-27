@@ -16,7 +16,7 @@ import {
   createStartGameResponse,
   createGameStartResponse,
   createGamePageLoadResponse,
-} from '../../utils/createWSResponse';
+} from '../../websocket/createWSResponse';
 import {
   CreateGamePayload,
   GameUpdatePayload,

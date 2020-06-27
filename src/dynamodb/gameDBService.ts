@@ -1,11 +1,11 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { v4 as uuid } from 'uuid';
-import { Game } from '../../models/Game';
-import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../../constants';
+import { Game } from '../models/Game';
+import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../utils/constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
-import { GameStates } from '../../types/states';
-import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from '../../utils/dbHelper';
+import { GameStates } from '../types/states';
+import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from './dbHelper';
 
 /* ----------------------------------------------------------------------------
  * Interface

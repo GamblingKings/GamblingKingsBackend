@@ -1,6 +1,6 @@
 import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../functions/onConnect';
-import * as userFunctions from '../../module/dynamodb/userDBService';
+import * as userFunctions from '../../dynamodb/userDBService';
 import { response } from '../../utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
 import { LambdaResponse } from '../../types/response';

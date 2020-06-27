@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { saveConnection } from '../module/dynamodb/userDBService';
+import { saveConnection } from '../dynamodb/userDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';

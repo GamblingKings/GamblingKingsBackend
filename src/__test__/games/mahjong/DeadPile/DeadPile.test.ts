@@ -1,6 +1,6 @@
-import { DeadPile } from '../../../../module/mahjong/DeadPile/DeadPile';
-import { SimpleTiles } from '../../../../module/mahjong/Tile/SimpleTiles';
-import { SimpleTileTypes } from '../../../../module/mahjong/Tile/types/SimpleTileTypes';
+import { DeadPile } from '../../../../games/mahjong/DeadPile/DeadPile';
+import { SimpleTiles } from '../../../../games/mahjong/Tile/SimpleTiles';
+import { SimpleTileTypes } from '../../../../games/mahjong/Tile/types/SimpleTileTypes';
 
 const charSimpleTile = new SimpleTiles(SimpleTileTypes.CHARACTER, 1);
 const bambooSimpleTile = new SimpleTiles(SimpleTileTypes.BAMBOO, 5);

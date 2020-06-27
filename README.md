@@ -1,5 +1,6 @@
 ![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/GamblingKings/GamblingKingsBackend/branch/master/graph/badge.svg)](https://codecov.io/gh/GamblingKings/GamblingKingsBackend)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 # Mahjong Application
 
@@ -32,7 +33,7 @@ yarn run dev:cleanup
 yarn run install_dep
 ```
 
-2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](src/module/dynamodb/db.ts) and [WebSocketClient.ts](./src/WebSocketClient.ts)
+2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](src/dynamodb/db.ts) and [WebSocketClient.ts](src/websocket/WebSocketClient.ts)
 
 3. (**Important**) Increase max space size for Node (otherwise, webpack may not work in your local machine)
 

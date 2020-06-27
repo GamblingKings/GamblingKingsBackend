@@ -1,10 +1,10 @@
-import { TileFactory } from '../../../../module/mahjong/Tile/TileFactory';
-import { SimpleTiles } from '../../../../module/mahjong/Tile/SimpleTiles';
-import { HonorTiles } from '../../../../module/mahjong/Tile/HonorTiles';
-import { BonusTiles } from '../../../../module/mahjong/Tile/BonusTiles';
-import { SimpleTileTypes } from '../../../../module/mahjong/Tile/types/SimpleTileTypes';
-import { BonusTileTypes } from '../../../../module/mahjong/Tile/types/BonusTileTypes';
-import { HonorTileTypes } from '../../../../module/mahjong/Tile/types/HonorTileTypes';
+import { TileFactory } from '../../../../games/mahjong/Tile/TileFactory';
+import { SimpleTiles } from '../../../../games/mahjong/Tile/SimpleTiles';
+import { HonorTiles } from '../../../../games/mahjong/Tile/HonorTiles';
+import { BonusTiles } from '../../../../games/mahjong/Tile/BonusTiles';
+import { SimpleTileTypes } from '../../../../games/mahjong/Tile/types/SimpleTileTypes';
+import { BonusTileTypes } from '../../../../games/mahjong/Tile/types/BonusTileTypes';
+import { HonorTileTypes } from '../../../../games/mahjong/Tile/types/HonorTileTypes';
 
 test('Tiles Factory creates a Simple Tiles when passed 1_DOT', () => {
   const t = TileFactory.createTileFromStringDef('1_DOT');

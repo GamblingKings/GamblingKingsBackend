@@ -1,22 +1,22 @@
-import * as gameStateDBFunctions from '../../../module/dynamodb/gameStateDBService';
+import * as gameStateDBFunctions from '../../dynamodb/gameStateDBService';
 import {
   getCurrentWallByGameId,
   getGameStateByGameId,
   getUserHandsInGame,
   initGameState,
-} from '../../../module/dynamodb/gameStateDBService';
+} from '../../dynamodb/gameStateDBService';
 import {
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_CONNECTION_ID3,
   FAKE_CONNECTION_ID4,
   FAKE_GAME_ID,
-} from '../../testConstants';
-import { DEFAULT_MAX_USERS_IN_GAME } from '../../../constants';
-import { GameState, UserHand } from '../../../models/GameState';
-import { HongKongWall } from '../../../module/mahjong/Wall/version/HongKongWall';
-import { Tiles } from '../../../module/mahjong/Tile/Tiles';
-import { TileMapper } from '../../../module/mahjong/Tile/map/TileMapper';
+} from '../testConstants';
+import { DEFAULT_MAX_USERS_IN_GAME } from '../../utils/constants';
+import { GameState, UserHand } from '../../models/GameState';
+import { HongKongWall } from '../../games/mahjong/Wall/version/HongKongWall';
+import { Tiles } from '../../games/mahjong/Tile/Tiles';
+import { TileMapper } from '../../games/mahjong/Tile/map/TileMapper';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
 const MAX_WALL_LENGTH = 144;

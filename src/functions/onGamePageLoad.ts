@@ -4,14 +4,14 @@ import { LambdaResponse } from '../types/response';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { incrementGameLoadedCount } from '../module/dynamodb/gameDBService';
-import { WebSocketClient } from '../WebSocketClient';
-import { broadcastGameStart } from '../utils/broadcast';
+import { incrementGameLoadedCount } from '../dynamodb/gameDBService';
+import { WebSocketClient } from '../websocket/WebSocketClient';
+import { broadcastGameStart } from '../websocket/broadcast';
 import {
   createGamePageLoadResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
-} from '../utils/createWSResponse';
+} from '../websocket/createWSResponse';
 import { Game } from '../models/Game';
 
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
