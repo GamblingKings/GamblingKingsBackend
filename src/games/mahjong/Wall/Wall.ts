@@ -17,13 +17,18 @@ import { honorTileInit } from './init/Honor';
 export abstract class Wall {
   static DEFAULT_NUM_OF_TILE = 4;
 
-  tiles: Tiles[];
+  static DEFAULT_WALL_LENGTH = 144;
+
+  protected tiles: Tiles[];
+
+  private currentTileIndex: number;
 
   /**
    * Public constructor.
    */
   constructor() {
     this.tiles = [];
+    this.currentTileIndex = 0;
   }
 
   /**
@@ -76,17 +81,24 @@ export abstract class Wall {
    * @returns a Tiles Array
    */
   public generateHand(): Tiles[] {
-    const { length } = this.tiles;
-    return this.tiles.splice(length - 13, 13);
+    const hand: Tiles[] = [];
+    for (let i = 0; i < 13; i += 1) {
+      const currentTile = this.tiles[this.currentTileIndex];
+      hand.push(currentTile);
+      this.currentTileIndex += 1;
+    }
+
+    return hand;
   }
 
   /**
    * Draws a tile from the wall
    * @returns a Tiles if available, otherwise null
    */
-  public draw(): Tiles | null | undefined {
-    if (this.tiles.length > 0) {
-      return this.tiles.pop();
+  public draw(): Tiles | undefined | null {
+    if (this.currentTileIndex < Wall.DEFAULT_WALL_LENGTH) {
+      this.currentTileIndex += 1;
+      return this.tiles[this.currentTileIndex + 1];
     }
 
     return null;
@@ -108,5 +120,12 @@ export abstract class Wall {
    */
   public clear(): void {
     this.tiles = [];
+  }
+
+  /**
+   * Get current tile index number
+   */
+  public getCurrentTileIndex() {
+    return this.currentTileIndex;
   }
 }

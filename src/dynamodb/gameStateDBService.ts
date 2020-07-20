@@ -32,6 +32,7 @@ interface IGameState {
   wall: IWall;
   gameId: string;
   hands: UserHand[];
+  currentIndex: number;
 }
 
 export const mapTileObjToTilesClass = (tiles: ITile[]): Tiles[] => {
@@ -83,6 +84,7 @@ export const initGameState = async (gameId: string, connectionIds: string[]): Pr
     gameId,
     wall: initialWall,
     hands,
+    currentIndex: 13 * 4,
   };
 
   const putParam: DocumentClient.PutItemInput = {
@@ -138,3 +140,25 @@ export const getUserHandsInGame = async (gameId: string, connectionId: string): 
 
   return getHandByConnectionId(hands, connectionId);
 };
+
+// export const incrementCurrentTileIndex = async (gameId: string): Promise<void> => {
+//   const updateParam: DocumentClient.UpdateItemInput = {
+//     TableName: GAME_STATE_TABLE,
+//     Key: {
+//       gameId,
+//     },
+//     UpdateExpression: 'ADD #currentTile :incrementIndexBy',
+//     ExpressionAttributeNames: {
+//       '#currentTile': 'currentTile',
+//     },
+//     ExpressionAttributeValues: {
+//       ':incrementIndexBy': 1,
+//     },
+//     ReturnValues: 'ALL_NEW',
+//   };
+// };
+//
+// export const drawsTile = async (gameId: string, connectionId: string): Promise<Tiles[]> => {
+//   const currentGameState = await getGameStateByGameId(gameId);
+//   const { wall } = currentGameState;
+// };

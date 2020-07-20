@@ -4,6 +4,7 @@ export interface GameState {
   gameId: string;
   wall: HongKongWall;
   hands: UserHand[];
+  currentIndex: number;
 }
 
 export interface UserHand {
