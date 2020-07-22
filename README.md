@@ -1,17 +1,19 @@
+# Mahjong Application Backend
+
 ![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/GamblingKings/GamblingKingsBackend/branch/master/graph/badge.svg)](https://codecov.io/gh/GamblingKings/GamblingKingsBackend)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-# Mahjong Application
-
 ## Local development
 
-**Prerequisite:**
+### Prerequisite
 
 - Node.Js
 - Typescript
 - Serverless
 - Java Runtime Engine (JRE) version 6.x or newer
+
+### Start local development
 
 **To start local dev, simply run:**
 
@@ -65,8 +67,8 @@ For more details on local dev, see the following links
 aws-vault add gamblingkings-sls
 ```
 
-1. Deploy or remove AWS resources \
-   **Note：** --no-session flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
+2. Deploy or remove AWS resources \
+   **Note:** `--no-session` flag seems to be required。 See this [bug](https://github.com/serverless/serverless/issues/5199) for more details
 
 **To deploy:**
 
@@ -74,13 +76,13 @@ aws-vault add gamblingkings-sls
 aws-vault exec <PROFILE_NAME> --no-session -- sls deploy
 ```
 
-To remove:
+**To remove:**
 
 ```shell script
 aws-vault exec <PROFILE_NAME> --no-session -- sls remove
 ```
 
-**To start a production build and deploy to AWS**
+**To start a production build and deploy to AWS:**
 
 ```shell script
 yarn start
@@ -230,12 +232,12 @@ yarn start
 ### Configuration files
 
 - [jest.config.js](./jest.config.js)
-- [jest-dynalite-config.json](./jest-dynalite-config.json)
+- [jest-dynalite-config.js](./jest-dynalite-config.js)
 - [global.d.ts](./src/global.d.ts): for ide or editor to recognize jest-extended library
 
 ### Test folder
 
-See [**test**](./src/__test__)
+- See [**test**](./src/__test__)
 
 ## TODOs on Optimization and Future Refactoring
 
