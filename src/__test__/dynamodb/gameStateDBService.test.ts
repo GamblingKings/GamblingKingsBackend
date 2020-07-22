@@ -1,8 +1,10 @@
 import * as gameStateDBFunctions from '../../dynamodb/gameStateDBService';
 import {
+  drawTile,
   getCurrentWallByGameId,
   getGameStateByGameId,
   getUserHandsInGame,
+  incrementCurrentTileIndex,
   initGameState,
 } from '../../dynamodb/gameStateDBService';
 import {
@@ -14,8 +16,6 @@ import {
 } from '../testConstants';
 import { DEFAULT_MAX_USERS_IN_GAME } from '../../utils/constants';
 import { GameState, UserHand } from '../../models/GameState';
-import { HongKongWall } from '../../games/mahjong/Wall/version/HongKongWall';
-import { Tiles } from '../../games/mahjong/Tile/Tiles';
 import { TileMapper } from '../../games/mahjong/Tile/map/TileMapper';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
@@ -32,23 +32,22 @@ describe('test initGameState', () => {
     // Test game Id and remaining tiles in the wall
     const { gameId, wall, hands } = response;
     expect(gameId).toBe(FAKE_GAME_ID);
-    const remainingWallLength = MAX_WALL_LENGTH - DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME;
-    expect(wall.getTiles()).toHaveLength(remainingWallLength);
+    expect(wall).toHaveLength(MAX_WALL_LENGTH);
 
     // Test hands
     const [hand1, hand2, hand3, hand4] = hands;
 
     expect(hand1.connectionId).toBe(FAKE_CONNECTION_ID1);
-    expect(JSON.parse(hand1.hand)).toHaveLength(DEFAULT_HAND_LENGTH);
+    expect(hand1.hand).toHaveLength(DEFAULT_HAND_LENGTH);
 
     expect(hand2.connectionId).toBe(FAKE_CONNECTION_ID2);
-    expect(JSON.parse(hand2.hand)).toHaveLength(DEFAULT_HAND_LENGTH);
+    expect(hand2.hand).toHaveLength(DEFAULT_HAND_LENGTH);
 
     expect(hand3.connectionId).toBe(FAKE_CONNECTION_ID3);
-    expect(JSON.parse(hand3.hand)).toHaveLength(DEFAULT_HAND_LENGTH);
+    expect(hand3.hand).toHaveLength(DEFAULT_HAND_LENGTH);
 
     expect(hand4.connectionId).toBe(FAKE_CONNECTION_ID4);
-    expect(JSON.parse(hand4.hand)).toHaveLength(DEFAULT_HAND_LENGTH);
+    expect(hand4.hand).toHaveLength(DEFAULT_HAND_LENGTH);
   });
 });
 
@@ -58,11 +57,10 @@ describe('test initGameState', () => {
 describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame', () => {
   let gameState: GameState;
   let gameId: string;
-  let wall: HongKongWall;
+  let wall: string[];
   let hands: UserHand[];
 
   // Spies
-  let mapTileObjToTilesClassSpy: jest.SpyInstance;
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
@@ -71,7 +69,6 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
     wall = gameState.wall;
     hands = gameState.hands;
 
-    mapTileObjToTilesClassSpy = jest.spyOn(gameStateDBFunctions, 'mapTileObjToTilesClass');
     getGameStateByGameIdSpy = jest.spyOn(gameStateDBFunctions, 'getGameStateByGameId');
   });
 
@@ -86,55 +83,49 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
       gameId,
       wall,
       hands,
+      currentIndex: DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
     };
 
     // Test function calls
-    expect(mapTileObjToTilesClassSpy).toHaveBeenCalledTimes(1);
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
 
     // Test response
     expect(response).toStrictEqual(expectedResponse);
   });
 
-  test('it should get the correct wall object from the game state using getGameStateByGameId', async () => {
-    const response = await getGameStateByGameId(gameId);
+  test('it should get the correct wall as string array from the game state using getGameStateByGameId', async () => {
+    const response = (await getGameStateByGameId(gameId)) as GameState;
 
     // Test function calls
-    expect(mapTileObjToTilesClassSpy).toHaveBeenCalledTimes(1);
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
 
     // Test response
-    expect(response.wall).toBeInstanceOf(HongKongWall);
-    expect(response.wall.draw()).toBeInstanceOf(Tiles);
-    expect(response.wall.getTiles()).toHaveLength(92 - 1);
+    expect(response.wall).toHaveLength(MAX_WALL_LENGTH);
   });
 
   test('it should get the correct hands from the game state using getGameStateByGameId', async () => {
     const response = await getGameStateByGameId(gameId);
 
     // Test function calls
-    expect(mapTileObjToTilesClassSpy).toHaveBeenCalledTimes(1);
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
 
     // Test response
-    const { hands: userHands } = response;
+    const { hands: userHands } = response as GameState;
     expect(userHands).toHaveLength(4);
 
-    const { connectionId, hand: userHandJSON } = userHands[0] as UserHand;
+    const { connectionId, hand } = userHands[0] as UserHand;
     expect(connectionId).toBe(FAKE_CONNECTION_ID1);
 
-    const userHand = JSON.parse(userHandJSON);
     const mapperKeys = Object.keys(TileMapper);
-    expect(userHand).toHaveLength(13);
+    expect(hand).toHaveLength(13);
 
-    userHand.forEach((tileStringDef: string) => expect(mapperKeys.includes(tileStringDef)).toBeTruthy());
+    hand.forEach((tileStringDef: string) => expect(mapperKeys.includes(tileStringDef)).toBeTruthy());
   });
 
   test('it should get the current wall from the game state using getCurrentWallByGameId', async () => {
     const response = await getCurrentWallByGameId(gameId);
 
     // Test function calls
-    expect(mapTileObjToTilesClassSpy).toHaveBeenCalledTimes(1);
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
 
     // Test response
@@ -148,7 +139,6 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
     const response4 = await getUserHandsInGame(gameId, FAKE_CONNECTION_ID4);
 
     // Test function calls
-    expect(mapTileObjToTilesClassSpy).toHaveBeenCalledTimes(4);
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(4);
 
     // Test response
@@ -160,5 +150,88 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
     expect(response2).toStrictEqual(expectedResponse2);
     expect(response3).toStrictEqual(expectedResponse3);
     expect(response4).toStrictEqual(expectedResponse4);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test incrementCurrentTileIndex
+ * ------------------------------------------------------------------------- */
+describe('test incrementCurrentTileIndex', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let currentIndex: number;
+
+  // Spies
+  let incrementCurrentTileIndexSpy: jest.SpyInstance;
+  let getGameStateByGameIdSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    currentIndex = gameState.currentIndex;
+
+    incrementCurrentTileIndexSpy = jest.spyOn(gameStateDBFunctions, 'incrementCurrentTileIndex');
+    getGameStateByGameIdSpy = jest.spyOn(gameStateDBFunctions, 'getGameStateByGameId');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should increment tile index for the wall', async () => {
+    const initialIndex = DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME;
+    expect(currentIndex).toBe(initialIndex);
+    await incrementCurrentTileIndex(gameId);
+    await incrementCurrentTileIndex(gameId);
+
+    // Test response
+    const newGameState = (await getGameStateByGameId(gameId)) as GameState;
+    expect(newGameState.currentIndex).toBe(initialIndex + 2);
+
+    // Test function calls
+    expect(incrementCurrentTileIndexSpy).toHaveBeenCalledTimes(2);
+    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test drawsTile
+ * ------------------------------------------------------------------------- */
+describe('test drawsTile', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let wall: string[];
+  let currentIndex: number;
+
+  // Spies
+  let drawTileSpy: jest.SpyInstance;
+  let getGameStateByGameIdSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    wall = gameState.wall;
+    currentIndex = gameState.currentIndex;
+
+    drawTileSpy = jest.spyOn(gameStateDBFunctions, 'drawTile');
+    getGameStateByGameIdSpy = jest.spyOn(gameStateDBFunctions, 'getGameStateByGameId');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should draw tiles from the wall based on the current index', async () => {
+    const tileToBeDrawn = wall[currentIndex];
+    const tileDrawn = await drawTile(gameId);
+    const newGameState = (await getGameStateByGameId(gameId)) as GameState;
+
+    // Test function calls
+    expect(drawTileSpy).toHaveBeenCalledTimes(1);
+    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(tileDrawn).toBe(tileToBeDrawn);
+    expect(newGameState.currentIndex).toBe(currentIndex + 1);
   });
 });

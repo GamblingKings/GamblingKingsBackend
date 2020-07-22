@@ -4,7 +4,6 @@
  */
 
 import { Wall } from '../Wall';
-import { Tiles } from '../../Tile/Tiles';
 import { BonusTiles } from '../../Tile/BonusTiles';
 import { MahjongVersions } from './Versions';
 
@@ -51,7 +50,8 @@ export class HongKongWall extends Wall {
     Object.values(bonusTileInit).forEach((object) => {
       for (let value = 1; value <= 4; value += 1) {
         const b: BonusTiles = new BonusTiles(object.type, value);
-        this.tiles.push(b);
+        const stringDef: string = TileFactory.createStringDefFromTile(b);
+        this.tiles.push(stringDef);
       }
     });
   }
@@ -60,27 +60,29 @@ export class HongKongWall extends Wall {
    * Generate a hand
    * @returns a tile array
    */
-  public generateHand(): Tiles[] {
+  public generateHand(): string[] {
     return super.generateHand();
-  }
-
-  public generateHandAsStringDefs(): string[] {
-    const hand: Tiles[] = this.generateHand();
-    return hand.map((tile) => TileFactory.createStringDefFromTile(tile));
   }
 
   /**
    * Draws a tile from the wall
    * @returns a Tiles
    */
-  public draw(): Tiles | null | undefined {
+  public draw(): string | null | undefined {
     return super.draw();
   }
 
   /**
    * @returns the tiles property
    */
-  public getTiles(): Tiles[] {
+  public getTiles(): string[] {
     return super.getTiles();
+  }
+
+  /**
+   * Get current tile index number
+   */
+  public getCurrentTileIndex(): number {
+    return super.getCurrentTileIndex();
   }
 }

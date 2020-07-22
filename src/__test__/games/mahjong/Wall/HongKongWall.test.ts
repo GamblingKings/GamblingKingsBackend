@@ -13,21 +13,26 @@ test('Generate hand will yield a hand of 13 tiles', () => {
   expect(hand).toHaveLength(13);
 });
 
-test('Generate hand will remove 13 tiles from the wall', () => {
+test('Generate hand increment wall index by 13', () => {
   const wall = new HongKongWall();
   const hand = wall.generateHand();
-  expect(wall.getTiles()).toHaveLength(DEFAULT_WALL_LENGTH - hand.length);
+  expect(hand).toHaveLength(13);
+  expect(wall.getCurrentTileIndex()).toBe(13);
 });
 
-test('Generate hand will take the last 13 tiles from the wall', () => {
+test('Generate hand will take tiles from the correct indexes', () => {
   const wall = new HongKongWall();
-  const lastThirteen = [...wall.getTiles().slice(wall.getTiles.length - 13)];
+
+  // Call generate twice
+  wall.generateHand();
   const hand = wall.generateHand();
+
+  const tilesDrawn = [...wall.getTiles().slice(13, 13 * 2)];
 
   let same = true;
 
   for (let i = 0; i < hand.length; i += 1) {
-    if (lastThirteen[i] !== hand[i]) {
+    if (tilesDrawn[i] !== hand[i]) {
       same = false;
       break;
     }
@@ -36,7 +41,7 @@ test('Generate hand will take the last 13 tiles from the wall', () => {
   expect(same).toBeTruthy();
 });
 
-test('Drawing from the wall removes 1 from the wall', () => {
+test('Drawing from the wall increment index by 1', () => {
   const drawCount = 10;
   const wall = new HongKongWall();
 
@@ -44,18 +49,16 @@ test('Drawing from the wall removes 1 from the wall', () => {
     wall.draw();
   }
 
-  expect(wall.getTiles()).toHaveLength(DEFAULT_WALL_LENGTH - drawCount);
+  expect(wall.getCurrentTileIndex()).toBe(10);
 });
 
 test('able to rest the wall', () => {
   const wall = new HongKongWall();
-
-  const drawCount = 50;
-  for (let i = 0; i < drawCount; i += 1) {
-    wall.draw();
-  }
+  const originalWall = wall.getTiles();
 
   wall.reset();
+  const newWall = wall.getTiles();
 
-  expect(wall.getTiles()).toHaveLength(DEFAULT_WALL_LENGTH);
+  expect(originalWall).toIncludeSameMembers(newWall);
+  expect(originalWall).not.toStrictEqual(newWall);
 });

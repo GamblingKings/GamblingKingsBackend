@@ -1,13 +1,11 @@
-import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
-
 export interface GameState {
   gameId: string;
-  wall: HongKongWall;
+  wall: string[];
   hands: UserHand[];
   currentIndex: number;
 }
 
 export interface UserHand {
   connectionId: string;
-  hand: string;
+  hand: string[];
 }

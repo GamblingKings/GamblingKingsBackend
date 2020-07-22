@@ -7,19 +7,19 @@
  * and thus this class is left for inheritence
  */
 
-import { Tiles } from '../Tile/Tiles';
 import { SimpleTiles } from '../Tile/SimpleTiles';
 import { HonorTiles } from '../Tile/HonorTiles';
 
 import { simpleTileInit } from './init/Simple';
 import { honorTileInit } from './init/Honor';
+import { TileFactory } from '../Tile/TileFactory';
 
 export abstract class Wall {
   static DEFAULT_NUM_OF_TILE = 4;
 
   static DEFAULT_WALL_LENGTH = 144;
 
-  protected tiles: Tiles[];
+  protected tiles: string[];
 
   private currentTileIndex: number;
 
@@ -48,7 +48,8 @@ export abstract class Wall {
       for (let value = 1; value <= object.range; value += 1) {
         for (let i = 0; i < Wall.DEFAULT_NUM_OF_TILE; i += 1) {
           const t: SimpleTiles = new SimpleTiles(object.type, value);
-          this.tiles.push(t);
+          const stringDef: string = TileFactory.createStringDefFromTile(t);
+          this.tiles.push(stringDef);
         }
       }
     });
@@ -61,7 +62,8 @@ export abstract class Wall {
     Object.values(honorTileInit).forEach((object) => {
       for (let i = 0; i < Wall.DEFAULT_NUM_OF_TILE; i += 1) {
         const t: HonorTiles = new HonorTiles(object.type);
-        this.tiles.push(t);
+        const stringDef: string = TileFactory.createStringDefFromTile(t);
+        this.tiles.push(stringDef);
       }
     });
   }
@@ -80,8 +82,8 @@ export abstract class Wall {
    * Generates a hand from the wall
    * @returns a Tiles Array
    */
-  public generateHand(): Tiles[] {
-    const hand: Tiles[] = [];
+  public generateHand(): string[] {
+    const hand: string[] = [];
     for (let i = 0; i < 13; i += 1) {
       const currentTile = this.tiles[this.currentTileIndex];
       hand.push(currentTile);
@@ -95,10 +97,10 @@ export abstract class Wall {
    * Draws a tile from the wall
    * @returns a Tiles if available, otherwise null
    */
-  public draw(): Tiles | undefined | null {
+  public draw(): string | undefined | null {
     if (this.currentTileIndex < Wall.DEFAULT_WALL_LENGTH) {
       this.currentTileIndex += 1;
-      return this.tiles[this.currentTileIndex + 1];
+      return this.tiles[this.currentTileIndex];
     }
 
     return null;
@@ -107,11 +109,11 @@ export abstract class Wall {
   /**
    * @returns the tile property
    */
-  public getTiles(): Tiles[] {
+  public getTiles(): string[] {
     return this.tiles;
   }
 
-  public setTiles(tiles: Tiles[]): void {
+  public setTiles(tiles: string[]): void {
     this.tiles = tiles;
   }
 
@@ -125,7 +127,7 @@ export abstract class Wall {
   /**
    * Get current tile index number
    */
-  public getCurrentTileIndex() {
+  public getCurrentTileIndex(): number {
     return this.currentTileIndex;
   }
 }

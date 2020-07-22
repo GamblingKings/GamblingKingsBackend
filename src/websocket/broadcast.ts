@@ -254,7 +254,7 @@ export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, us
     const tiles = getHandByConnectionId(hands, connectionId);
 
     // Put random tiles in response
-    const wsResponse = createGameStartResponse({ tiles });
+    const wsResponse = createGameStartResponse({ tiles: JSON.stringify(tiles) });
 
     // Send tiles as a string to each user in the game
     return ws.send(wsResponse, connectionId);

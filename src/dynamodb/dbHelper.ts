@@ -44,9 +44,10 @@ export const parseDynamoDBAttribute = <T>(
   return attributes as T;
 };
 
-export const getHandByConnectionId = (hands: UserHand[], connectionId: string): string => {
+export const getHandByConnectionId = (hands: UserHand[], connectionId: string): string[] => {
   const userHand = hands.find((hand) => {
     return hand.connectionId === connectionId;
   }) as UserHand;
+
   return userHand.hand;
 };
