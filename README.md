@@ -1,8 +1,10 @@
 # Mahjong Application Backend
 
-![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg?branch=master)
+[![Last Commit](https://img.shields.io/github/last-commit/GamblingKings/GamblingKingsBackend?style=flat)](https://github.com/GamblingKings/GamblingKingsBackend/commits)
+[![CI](https://github.com/GamblingKings/GamblingKingsBackend/workflows/CI/badge.svg)](https://github.com/GamblingKings/GamblingKingsBackend/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/GamblingKings/GamblingKingsBackend/branch/master/graph/badge.svg)](https://codecov.io/gh/GamblingKings/GamblingKingsBackend)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat)](https://github.com/GamblingKings/GamblingKingsBackend/blob/master/LICENSE)
 
 ## Local development
 
