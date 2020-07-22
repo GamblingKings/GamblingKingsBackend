@@ -197,6 +197,30 @@ yarn start
 }
 ```
 
+`PLAY_TILE` (_TO BE IMPLEMENTED_)
+
+```json
+{
+  "action": "PLAY_TILE",
+  "payload": {
+    "...": "..."
+  }
+}
+```
+
+## General user flow
+
+1. `connect` **x 4**: Four users connect to websocket
+2. `CREATE_GAME`: One user creates a game
+3. `JOIN_GAME` **x 3**: Three other users join the game created by the host
+4. `START_GAME`: Starts the game if there are four users in the game
+5. `GAME_PAGE_LOAD` **x 4**: Wait until assets are loaded on the frontend for all four users
+6. `GAME_START`: Officially starts the game if gameLoadedCount for the game in the Games table is 4
+7. `DRAW_TILE`: Draw one tile and send it to a user in the game
+8. `LEAVE_GAME`: To remove user from the Games table if user disconnects or manually leave a game.
+   Note: if the user leaving the game is the game host, the game will be deleted
+9. `PLAY_TILE`: _TO BE IMPLEMENTED_
+
 ## Testing
 
 - [Jest framework](https://jestjs.io/) is used for testing
