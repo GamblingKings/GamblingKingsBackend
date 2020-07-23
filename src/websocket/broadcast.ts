@@ -12,11 +12,12 @@ import {
   createGetAllUsersResponse,
   createSendMessageResponse,
   createGameStartResponse,
+  createDrawTileResponse,
 } from './createWSResponse';
 import { getHandByConnectionId, removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { GameStates, UserStates } from '../types/states';
-import { initGameState } from '../dynamodb/gameStateDBService';
+import { drawTile, initGameState } from '../dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------
  * Helpers
@@ -297,4 +298,18 @@ export const broadcastMessage = async (
   }
 
   return users || [];
+};
+
+export const broadcastDrawTileToUser = async (
+  ws: WebSocketClient,
+  gameId: string,
+  connectionId: string,
+): Promise<string> => {
+  const tileDrawn = await drawTile(gameId);
+  console.log('tile drawn:', tileDrawn);
+
+  const wsResponse = createDrawTileResponse({ tile: tileDrawn });
+  await ws.send(wsResponse, connectionId);
+
+  return tileDrawn;
 };

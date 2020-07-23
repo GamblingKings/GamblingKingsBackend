@@ -20,4 +20,5 @@ export enum WebSocketActions {
   START_GAME = 'START_GAME',
   GAME_PAGE_LOAD = 'GAME_PAGE_LOAD',
   GAME_START = 'GAME_START',
+  DRAW_TILE = 'DRAW_TILE',
 }

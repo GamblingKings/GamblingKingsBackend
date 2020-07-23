@@ -175,6 +175,17 @@ yarn start
 }
 ```
 
+`DRAW_TILE`
+
+```json
+{
+  "action": "DRAW_TILE",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c"
+  }
+}
+```
+
 ## Testing
 
 - [Jest framework](https://jestjs.io/) is used for testing

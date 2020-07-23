@@ -137,6 +137,10 @@ functions:
     handler: src/functions/onGamePageLoad.handler
     events:
       - websocket: GAME_PAGE_LOAD
+  onDrawTile:
+    handler: src/functions/onDrawTile.handler
+    events:
+      - websocket: DRAW_TILE
 
 # you can add CloudFormation resource templates here
 resources:

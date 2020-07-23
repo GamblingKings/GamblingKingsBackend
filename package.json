@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/yummyblabla/GamblingKingsBackend.git",
-  "author": "Vincent Wong <vwong125@my.bcit.ca>",
+  "author": "GamblingKings",
   "license": "MIT",
   "scripts": {
     "dev:cleanup": "rm -rf .build/ .serverless/ .dynamodb/ .webpack/",

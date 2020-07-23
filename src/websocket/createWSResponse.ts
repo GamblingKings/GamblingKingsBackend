@@ -1,5 +1,6 @@
 import {
   CreateGamePayload,
+  DrawTilePayload,
   GameStartPayload,
   GameUpdatePayload,
   GetAllGamesPayload,
@@ -139,6 +140,10 @@ export const createGamePageLoadResponse = (): WebSocketResponse => {
  */
 export const createGameStartResponse = (payload: GameStartPayload): WebSocketResponse => {
   return createWSResponse(WebSocketActions.GAME_START, payload);
+};
+
+export const createDrawTileResponse = (payload: DrawTilePayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.DRAW_TILE, payload);
 };
 
 /* ----------------------------------------------------------------------------
