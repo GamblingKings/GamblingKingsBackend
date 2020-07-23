@@ -113,10 +113,6 @@ export abstract class Wall {
     return this.tiles;
   }
 
-  public setTiles(tiles: string[]): void {
-    this.tiles = tiles;
-  }
-
   /**
    * Clears the tiles array
    */
