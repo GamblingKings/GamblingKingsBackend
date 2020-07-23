@@ -5,6 +5,12 @@ import { DB } from './db';
 import { GameState, UserHand } from '../models/GameState';
 import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
 
+/**
+ * Initialize the game by generating a mahjong wall,
+ * 4 hands of mahjong, and save the initial game state to the db
+ * @param {string} gameId game Id
+ * @param {string} connectionIds connection Ids of all the users in a game
+ */
 export const initGameState = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
   const initialWall = new HongKongWall();
 
@@ -36,6 +42,10 @@ export const initGameState = async (gameId: string, connectionIds: string[]): Pr
   return initialGame;
 };
 
+/**
+ * Get the current game state by game Id.
+ * @param {string} gameId game Id
+ */
 export const getGameStateByGameId = async (gameId: string): Promise<GameState | undefined> => {
   const getParam: DocumentClient.GetItemInput = {
     TableName: GAME_STATE_TABLE,
@@ -50,11 +60,21 @@ export const getGameStateByGameId = async (gameId: string): Promise<GameState | 
   return parseDynamoDBItem<GameState>(res);
 };
 
+/**
+ * Get the mahjong wall of a game by game Id.
+ * @param {string} gameId Game Id
+ */
 export const getCurrentWallByGameId = async (gameId: string): Promise<string[]> => {
   const currentGameState = (await getGameStateByGameId(gameId)) as GameState;
   return currentGameState.wall;
 };
 
+/**
+ * Get current the user hand for a user in the game by connection Id.
+ * TODO: remove this method if decided not to save user hands to the db
+ * @param {string} gameId Game Id
+ * @param {string} connectionId Connection Id
+ */
 export const getUserHandsInGame = async (gameId: string, connectionId: string): Promise<string[]> => {
   const currentGameState = (await getGameStateByGameId(gameId)) as GameState;
   const { hands } = currentGameState;
@@ -62,6 +82,10 @@ export const getUserHandsInGame = async (gameId: string, connectionId: string): 
   return getHandByConnectionId(hands, connectionId);
 };
 
+/**
+ * Increment the tile index by 1.
+ * @param {string} gameId Game Id
+ */
 export const incrementCurrentTileIndex = async (gameId: string): Promise<GameState | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
@@ -84,6 +108,10 @@ export const incrementCurrentTileIndex = async (gameId: string): Promise<GameSta
   return parseDynamoDBAttribute<GameState>(res);
 };
 
+/**
+ * Draw a tile from the wall.
+ * @param {string} gameId Game Id
+ */
 export const drawTile = async (gameId: string): Promise<string> => {
   const currentGameState = await getGameStateByGameId(gameId);
   let tileDrawn = '';

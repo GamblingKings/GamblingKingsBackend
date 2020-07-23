@@ -142,6 +142,10 @@ export const createGameStartResponse = (payload: GameStartPayload): WebSocketRes
   return createWSResponse(WebSocketActions.GAME_START, payload);
 };
 
+/**
+ * Create DRAW_TILE response object.
+ * @param {DrawTilePayload} payload payload object
+ */
 export const createDrawTileResponse = (payload: DrawTilePayload): WebSocketResponse => {
   return createWSResponse(WebSocketActions.DRAW_TILE, payload);
 };

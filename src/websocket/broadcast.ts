@@ -300,6 +300,12 @@ export const broadcastMessage = async (
   return users || [];
 };
 
+/**
+ * Broadcast a tile string to a user in the game.
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} gameId game Id
+ * @param {string} connectionId connection Id
+ */
 export const broadcastDrawTileToUser = async (
   ws: WebSocketClient,
   gameId: string,
