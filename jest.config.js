@@ -12,6 +12,7 @@ module.exports = {
     '@utils/(.*)$': '<rootDir>/src/utils/$1',
     '@models/(.*)$': '<rootDir>/src/models/$1',
     '@types/(.*)$': '<rootDir>/src/types/$1',
+    '@websocket/(.*)$': '<rootDir>/src/websocket/$1',
   },
   collectCoverage: true,
   coverageDirectory: './coverage/',
@@ -19,8 +20,9 @@ module.exports = {
     // Get full coverage
     // 'src/**/*.ts',
 
-    // Ignore coverage for lambda functions for now
+    // Ignore coverage for lambda functions / websocket for now
     // 'src/functions/**/*.ts',
+    // 'src/websocket/**/*.ts',
 
     'src/dynamodb/**/*.ts',
     'src/games/**/*.ts',
