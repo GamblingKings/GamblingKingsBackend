@@ -9,6 +9,7 @@ import {
   createGetAllGamesResponse,
   createInGameMessageResponse,
   createInGameUpdateResponse,
+  createPlayTileResponse,
 } from '../createWSResponse';
 import { GameStates } from '../../types/states';
 import { WebSocketActions } from '../../types/WebSocketActions';
@@ -198,4 +199,26 @@ export const broadcastDrawTileToUser = async (
   await ws.send(wsResponse, connectionId);
 
   return tileDrawn;
+};
+
+/**
+ * Broadcast a tile string that is discarded by a user to all users in the game.
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} tile tile discarded by a user
+ * @param {string[]} connectionIds connectionIds connection Ids of all users who are in the same game
+ */
+export const broadcastPlayedTileToUsers = async (
+  ws: WebSocketClient,
+  tile: string,
+  connectionIds: string[],
+): Promise<string> => {
+  const wsResponse = createPlayTileResponse({ tile });
+
+  await Promise.all(
+    connectionIds.map((connectionId) => {
+      return ws.send(wsResponse, connectionId);
+    }),
+  );
+
+  return tile;
 };
