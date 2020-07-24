@@ -469,27 +469,31 @@ describe('test incrementUserReadyCount', () => {
     incrementUserReadyCountSpy = jest.spyOn(gameDBFunctions, 'incrementGameLoadedCount');
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('it should increment ready count successfully', async () => {
     // Initial count should be 0
     expect(game.gameLoadedCount).toBe(0);
 
+    await incrementGameLoadedCount(gameId);
+    await incrementGameLoadedCount(gameId);
+    await incrementGameLoadedCount(gameId);
     const response = (await incrementGameLoadedCount(gameId)) as Game;
     const expectResponse = {
       ...TEST_GAME_OBJECT1,
       gameId,
-      gameLoadedCount: 1,
+      gameLoadedCount: 4,
+      version: 1,
     };
 
     // Test function call
-    expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(1);
+    expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(4);
 
     // Test response
-    expect(response.gameLoadedCount).toBe(1);
+    expect(response.gameLoadedCount).toBe(4);
     expect(response).toStrictEqual(expectResponse);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   test('it should fail if try to increment count when the total count already reach 4', async () => {
@@ -508,5 +512,22 @@ describe('test incrementUserReadyCount', () => {
 
     // Test function call
     expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(5);
+  });
+
+  test('it should increment count when function is called concurrently', async () => {
+    // Initial count should be 0
+    expect(game.gameLoadedCount).toBe(0);
+
+    const responses = (await Promise.all(
+      [gameId, gameId, gameId, gameId].map((g) => {
+        return incrementGameLoadedCount(g);
+      }),
+    )) as Game[];
+
+    // Test function call
+    expect(incrementUserReadyCountSpy).toHaveBeenCalledTimes(4);
+
+    // Test response
+    expect(responses[3].gameLoadedCount).toBe(4);
   });
 });

@@ -65,7 +65,7 @@ export const setUsername = async (connectionId: string, username: string): Promi
       '#usernameKey': 'username',
     },
     ExpressionAttributeValues: {
-      ':usernameVal': username,
+      ':usernameVal': username.trim(),
       ':emptyString': '',
     },
     ReturnValues: 'ALL_NEW',

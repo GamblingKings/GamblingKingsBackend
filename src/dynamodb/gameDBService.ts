@@ -199,9 +199,9 @@ export const removeUserFromGame = async (gameId: string, connectionId: string): 
     },
     ConditionExpression: 'version = :version',
     UpdateExpression: `
-          REMOVE #users[${indexToRemove}]
-          ADD version :incrementVersionBy
-        `,
+      REMOVE #users[${indexToRemove}]
+      ADD version :incrementVersionBy
+    `,
     ExpressionAttributeNames: {
       '#users': 'users',
     },
@@ -297,7 +297,9 @@ export const incrementGameLoadedCount = async (gameId: string): Promise<Game | u
       AND
       (attribute_exists(#gameLoadedCountKey) AND #gameLoadedCountKey < :maxUserCount)
     `,
-    UpdateExpression: 'ADD #gameLoadedCountKey :incrementCountBy',
+    UpdateExpression: `
+      ADD #gameLoadedCountKey :incrementCountBy
+    `,
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
       '#gameLoadedCountKey': 'gameLoadedCount',
