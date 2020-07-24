@@ -15,7 +15,7 @@ import {
 import { saveConnection, setGameIdForUser, setUsername } from '../../dynamodb/userDBService';
 import { addUserToGame, createGame, getGameByGameId } from '../../dynamodb/gameDBService';
 import { Game } from '../../models/Game';
-import { getConnectionIdsFromUsers } from '../../websocket/broadcast';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
 jest.mock('../../websocket/WebSocketClient');
 

@@ -1,109 +1,25 @@
-import { WebSocketClient } from './WebSocketClient';
-import { getAllConnections, getUserByConnectionId } from '../dynamodb/userDBService';
-import { getAllGames, getGameByGameId } from '../dynamodb/gameDBService';
-import { User } from '../models/User';
-import { Game } from '../models/Game';
+import { WebSocketClient } from '../WebSocketClient';
+import { Game } from '../../models/Game';
+import { getAllGames, getGameByGameId } from '../../dynamodb/gameDBService';
+import { getHandByConnectionId, removeDynamoDocumentVersion } from '../../dynamodb/dbHelper';
 import {
+  createDrawTileResponse,
+  createGameStartResponse,
   createGameUpdateResponse,
+  createGetAllGamesResponse,
   createInGameMessageResponse,
   createInGameUpdateResponse,
-  createUserUpdateResponse,
-  createGetAllGamesResponse,
-  createGetAllUsersResponse,
-  createSendMessageResponse,
-  createGameStartResponse,
-  createDrawTileResponse,
-} from './createWSResponse';
-import { getHandByConnectionId, removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
-import { WebSocketActions } from '../types/WebSocketActions';
-import { GameStates, UserStates } from '../types/states';
-import { drawTile, initGameState } from '../dynamodb/gameStateDBService';
-
-/* ----------------------------------------------------------------------------
- * Helpers
- * ------------------------------------------------------------------------- */
-
-/**
- * Get connection Ids from a list of User objects.
- * @param {User[]} usersList users list
- */
-export const getConnectionIdsFromUsers = (usersList: User[]): string[] => {
-  return usersList.map((user) => user.connectionId);
-};
-
-/**
- * Filter out caller connection Id from a list of connection Ids.
- * @param {string} callerConnectionId caller connection Id
- * @param {string} connectionIds connection Ids
- */
-export const getConnectionIdsExceptCaller = (callerConnectionId: string, connectionIds: string[]): string[] => {
-  return connectionIds.filter((otherConnectionId) => otherConnectionId !== callerConnectionId);
-};
-
-/* ----------------------------------------------------------------------------
- * User
- * ------------------------------------------------------------------------- */
-
-/**
- * Broadcast all the connections to a user.
- * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string} connectionId connection Id
- */
-export const broadcastConnections = async (ws: WebSocketClient, connectionId: string): Promise<User[] | []> => {
-  const users: User[] = await getAllConnections();
-
-  if (users && users.length > 0) {
-    console.log('broadcastConnections, Connections:', users);
-
-    // Create users response object
-    const wsResponse = createGetAllUsersResponse({
-      users,
-    });
-
-    // Send all the active connections to a user
-    await ws.send(wsResponse, connectionId);
-  }
-
-  return users || [];
-};
-
-/**
- * Broadcast user update to every other user (except the one with connectionId specified in the argument)
- * @param {WebSocketClient} ws WebSocket client
- * @param {string} callerConnectionId connection Id
- * @param {UserStates} state user state
- * @param allConnectionIds connection ids from all the currently connected users
- */
-export const broadcastUserUpdate = async (
-  ws: WebSocketClient,
-  callerConnectionId: string,
-  state: UserStates,
-  allConnectionIds: string[],
-): Promise<User | undefined> => {
-  const currentUser = await getUserByConnectionId(callerConnectionId);
-  console.log('broadcastUserUpdate, User update:', currentUser);
-
-  if (currentUser) {
-    const wsResponse = createUserUpdateResponse({
-      user: currentUser,
-      state,
-    });
-
-    const otherConnectionIds = getConnectionIdsExceptCaller(callerConnectionId, allConnectionIds);
-    await Promise.all(
-      otherConnectionIds.map((otherConnectionId) => {
-        return ws.send(wsResponse, otherConnectionId);
-      }),
-    );
-  }
-
-  return currentUser;
-};
+} from '../createWSResponse';
+import { GameStates } from '../../types/states';
+import { WebSocketActions } from '../../types/WebSocketActions';
+import { getUserByConnectionId } from '../../dynamodb/userDBService';
+import { User } from '../../models/User';
+import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
+import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
 /* ----------------------------------------------------------------------------
  * Game
  * ------------------------------------------------------------------------- */
-
 /**
  * Broadcast all the currently active games to a user.
  * @param {WebSocketClient} ws a WebSocketClient instance
@@ -262,42 +178,6 @@ export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, us
   });
 
   await Promise.all(promises);
-};
-
-/* ----------------------------------------------------------------------------
- * Message
- * ------------------------------------------------------------------------- */
-
-/**
- * Broadcast a message to all users.
- * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string} username username of the user who send the message to all other users
- * @param {string} message message content
- */
-export const broadcastMessage = async (
-  ws: WebSocketClient,
-  username: string,
-  message: string,
-): Promise<User[] | []> => {
-  const users: User[] = await getAllConnections();
-  console.log('broadcastMessage, Connections:', users);
-
-  if (users && users.length > 0) {
-    const wsResponse = createSendMessageResponse({
-      username,
-      message,
-    });
-
-    // Send a message to all the active connections
-    await Promise.all(
-      users.map((connection) => {
-        // Send all connections to all users
-        return ws.send(wsResponse, connection.connectionId);
-      }),
-    );
-  }
-
-  return users || [];
 };
 
 /**

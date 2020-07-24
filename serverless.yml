@@ -141,6 +141,10 @@ functions:
     handler: src/functions/onDrawTile.handler
     events:
       - websocket: DRAW_TILE
+  onPlayTile:
+    handler: src/functions/onPlayTile.handler
+    events:
+      - websocket: PLAY_TILE
 
 # you can add CloudFormation resource templates here
 resources:

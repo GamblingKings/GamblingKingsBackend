@@ -1,6 +1,6 @@
 import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../functions/onGetAllUsers';
-import * as broadcastFunctions from '../../websocket/broadcast';
+import * as broadcastFunctions from '../../websocket/broadcast/userBroadcast';
 import { createEvent } from './functionsTestHelpers';
 import { TEST_USER_OBJECT1, TEST_USER_OBJECT2 } from '../testConstants';
 import { response } from '../../utils/responseHelper';

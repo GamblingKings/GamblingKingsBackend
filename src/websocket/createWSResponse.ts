@@ -10,6 +10,7 @@ import {
   JoinGamePayload,
   LambdaEventBodyPayloadOptions,
   LeaveGamePayload,
+  PlayTilePayload,
   SendMessagePayload,
   UserUpdatePayload,
 } from '../types/payload';
@@ -148,6 +149,14 @@ export const createGameStartResponse = (payload: GameStartPayload): WebSocketRes
  */
 export const createDrawTileResponse = (payload: DrawTilePayload): WebSocketResponse => {
   return createWSResponse(WebSocketActions.DRAW_TILE, payload);
+};
+
+/**
+ * Create PLAY_TILE response object.
+ * @param {DrawTilePayload} payload payload object
+ */
+export const createPlayTileResponse = (payload: PlayTilePayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActions.PLAY_TILE, payload);
 };
 
 /* ----------------------------------------------------------------------------

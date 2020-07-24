@@ -8,7 +8,6 @@ import {
   failedWebSocketResponse,
   successWebSocketResponse,
 } from '../websocket/createWSResponse';
-import { broadcastInGameMessage, broadcastInGameUpdate } from '../websocket/broadcast';
 import { removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
 import { Game } from '../models/Game';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
@@ -16,6 +15,7 @@ import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { WebSocketActions } from '../types/WebSocketActions';
 import { setGameIdForUser } from '../dynamodb/userDBService';
+import { broadcastInGameMessage, broadcastInGameUpdate } from '../websocket/broadcast/gameBroadcast';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions

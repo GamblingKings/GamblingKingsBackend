@@ -11,7 +11,7 @@ import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { getAllConnections, removeGameIdFromUser } from '../dynamodb/userDBService';
 import { sendUpdates } from './functionsHelper';
-import { getConnectionIdsFromUsers } from '../websocket/broadcast';
+import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions

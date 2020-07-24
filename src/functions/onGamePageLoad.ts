@@ -6,13 +6,13 @@ import { Logger } from '../utils/Logger';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { incrementGameLoadedCount } from '../dynamodb/gameDBService';
 import { WebSocketClient } from '../websocket/WebSocketClient';
-import { broadcastGameStart } from '../websocket/broadcast';
 import {
   createGamePageLoadResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
 } from '../websocket/createWSResponse';
 import { Game } from '../models/Game';
+import { broadcastGameStart } from '../websocket/broadcast/gameBroadcast';
 
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onGamePageLoad.ts');

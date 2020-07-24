@@ -1,12 +1,13 @@
 import { Handler } from 'aws-lambda';
 import { response } from '../utils/responseHelper';
 import { WebSocketClient } from '../websocket/WebSocketClient';
-import { broadcastConnections, broadcastUserUpdate, getConnectionIdsFromUsers } from '../websocket/broadcast';
 import { Logger } from '../utils/Logger';
 import { User } from '../models/User';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
 import { UserStates } from '../types/states';
+import { broadcastConnections, broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';
+import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 
 /**
  * Handler for getting all the users (or connections).

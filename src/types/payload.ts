@@ -77,3 +77,7 @@ export interface GameStartPayload {
 export interface DrawTilePayload {
   tile: string;
 }
+
+export interface PlayTilePayload {
+  tile: string;
+}
