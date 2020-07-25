@@ -1,8 +1,8 @@
 import * as LambdaTester from 'lambda-tester';
-import { handler } from '../../functions/defaultMessage';
-import { response } from '../../utils/responseHelper';
+import { handler } from '../../src/functions/defaultMessage';
+import { response } from '../../src/utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
-import { LambdaResponse } from '../../types/response';
+import { LambdaResponse } from '../../src/types/response';
 
 const DEFAULT_MESSAGE = 'Default message';
 

@@ -2,8 +2,8 @@ import * as AWSMock from 'aws-sdk-mock';
 import * as AWS from 'aws-sdk';
 
 import { PostToConnectionRequest } from 'aws-sdk/clients/apigatewaymanagementapi';
-import { WebSocketClient } from '../../websocket/WebSocketClient';
-import { WebSocketAPIGatewayEventRequestContext } from '../../types/event';
+import { WebSocketClient } from '../../src/websocket/WebSocketClient';
+import { WebSocketAPIGatewayEventRequestContext } from '../../src/types/event';
 
 const FAKE_CONNECTION_ID = 'FAKE_ID';
 const LOCALHOST_URL = 'ws://localhost:1234';

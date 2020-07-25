@@ -1,10 +1,10 @@
 import * as LambdaTester from 'lambda-tester';
-import { handler } from '../../functions/onGetAllUsers';
-import * as broadcastFunctions from '../../websocket/broadcast/userBroadcast';
+import { handler } from '../../src/functions/onGetAllUsers';
+import * as broadcastFunctions from '../../src/websocket/broadcast/userBroadcast';
 import { createEvent } from './functionsTestHelpers';
 import { TEST_USER_OBJECT1, TEST_USER_OBJECT2 } from '../testConstants';
-import { response } from '../../utils/responseHelper';
-import { LambdaResponse } from '../../types/response';
+import { response } from '../../src/utils/responseHelper';
+import { LambdaResponse } from '../../src/types/response';
 
 const TEST_CONNECTION_ID = 'test-onGetAllUsers-connection-id';
 const TEST_USERS = [TEST_USER_OBJECT1, TEST_USER_OBJECT2];

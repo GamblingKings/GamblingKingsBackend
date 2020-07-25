@@ -16,7 +16,7 @@ import {
   createStartGameResponse,
   createGameStartResponse,
   createGamePageLoadResponse,
-} from '../../websocket/createWSResponse';
+} from '../../src/websocket/createWSResponse';
 import {
   CreateGamePayload,
   GameUpdatePayload,
@@ -27,7 +27,7 @@ import {
   LeaveGamePayload,
   SendMessagePayload,
   UserUpdatePayload,
-} from '../../types/payload';
+} from '../../src/types/payload';
 import {
   TEST_GAME_OBJECT1,
   TEST_GAME_OBJECT2,
@@ -35,10 +35,10 @@ import {
   TEST_USER_OBJECT2,
   TEST_USER_OBJECT3,
 } from '../testConstants';
-import { WebSocketActions } from '../../types/WebSocketActions';
-import { GameStates, UserStates } from '../../types/states';
-import { WebSocketResponse } from '../../types/response';
-import { Game } from '../../models/Game';
+import { WebSocketActions } from '../../src/types/WebSocketActions';
+import { GameStates, UserStates } from '../../src/types/states';
+import { WebSocketResponse } from '../../src/types/response';
+import { Game } from '../../src/models/Game';
 
 // User
 const TEST_USERS_LIST = [TEST_USER_OBJECT1, TEST_USER_OBJECT2, TEST_USER_OBJECT3];
