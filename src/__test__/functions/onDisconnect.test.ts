@@ -1,7 +1,7 @@
 import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../functions/onDisconnect';
-import * as userFunctions from '../../module/userDBService';
-import * as gamesFunctions from '../../module/gameDBService';
+import * as userFunctions from '../../dynamodb/userDBService';
+import * as gamesFunctions from '../../dynamodb/gameDBService';
 import { response } from '../../utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
 import { LambdaResponse } from '../../types/response';
@@ -12,12 +12,12 @@ import {
   FAKE_USERNAME2,
   TEST_GAME_OBJECT1,
 } from '../testConstants';
-import { saveConnection, setGameIdForUser, setUsername } from '../../module/userDBService';
-import { addUserToGame, createGame, getGameByGameId } from '../../module/gameDBService';
+import { saveConnection, setGameIdForUser, setUsername } from '../../dynamodb/userDBService';
+import { addUserToGame, createGame, getGameByGameId } from '../../dynamodb/gameDBService';
 import { Game } from '../../models/Game';
-import { getConnectionIdsFromUsers } from '../../utils/broadcast';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
-jest.mock('../../WebSocketClient');
+jest.mock('../../websocket/WebSocketClient');
 
 describe('test onDisconnect', () => {
   let game: Game;

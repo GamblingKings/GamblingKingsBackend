@@ -1,10 +1,10 @@
 import { Handler } from 'aws-lambda';
 import { response } from '../utils/responseHelper';
-import { WebSocketClient } from '../WebSocketClient';
-import { broadcastGames } from '../utils/broadcast';
+import { WebSocketClient } from '../websocket/WebSocketClient';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
+import { broadcastGames } from '../websocket/broadcast/gameBroadcast';
 
 /**
  * Handler for getting all the games.

@@ -1,0 +1,47 @@
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  lint-format-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      # Linting with ESLint
+      - name: Install Packages
+        run: yarn install
+      - name: Lint
+        run: yarn lint
+
+      # Checking format with Prettier
+      - name: Check format
+        run: yarn prettier . --check
+
+      # Running tests with Jest
+      - name: Test
+        run: |
+          yarn global add codecov
+          export CODECOV_TOKEN="${{ secrets.CODECOV_TOKEN_BACKEND }}"
+          yarn test
+
+      # Send slack notification
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3.2.0
+        with:
+          author_name: ${{ github.actor }}
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
+        if: always() # Pick up events even if the job fails or is canceled.

@@ -1,17 +1,18 @@
 import { Handler } from 'aws-lambda';
-import { createGame } from '../module/gameDBService';
+import { createGame } from '../dynamodb/gameDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
-import { WebSocketClient } from '../WebSocketClient';
-import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../utils/createWSResponse';
+import { WebSocketClient } from '../websocket/WebSocketClient';
+import { createGameResponse, successWebSocketResponse, failedWebSocketResponse } from '../websocket/createWSResponse';
 import { Game } from '../models/Game';
-import { broadcastGameUpdate, getConnectionIdsFromUsers } from '../utils/broadcast';
-import { removeDynamoDocumentVersion } from '../utils/dbHelper';
+import { removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
 import { GameStates } from '../types/states';
-import { getAllConnections, setGameIdForUser } from '../module/userDBService';
+import { getAllConnections, setGameIdForUser } from '../dynamodb/userDBService';
+import { broadcastGameUpdate } from '../websocket/broadcast/gameBroadcast';
+import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 
 /**
  * Handler for creating a game.

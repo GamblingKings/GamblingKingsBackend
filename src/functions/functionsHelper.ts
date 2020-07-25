@@ -1,14 +1,14 @@
-import { WebSocketClient } from '../WebSocketClient';
+import { WebSocketClient } from '../websocket/WebSocketClient';
 import { Game } from '../models/Game';
+import { WebSocketActions } from '../types/WebSocketActions';
+import { GameStates } from '../types/states';
+import { deleteGame } from '../dynamodb/gameDBService';
 import {
   broadcastGameUpdate,
   broadcastInGameMessage,
   broadcastInGameUpdate,
-  getConnectionIdsFromUsers,
-} from '../utils/broadcast';
-import { WebSocketActions } from '../types/WebSocketActions';
-import { GameStates } from '../types/states';
-import { deleteGame } from '../module/gameDBService';
+} from '../websocket/broadcast/gameBroadcast';
+import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 
 /**
  * Helper function to send updates to other users in the game when a user leaves the game.

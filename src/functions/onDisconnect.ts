@@ -1,16 +1,17 @@
 import { Handler } from 'aws-lambda';
-import { deleteConnection, getAllConnections } from '../module/userDBService';
+import { deleteConnection, getAllConnections } from '../dynamodb/userDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
-import { removeUserFromGame } from '../module/gameDBService';
+import { removeUserFromGame } from '../dynamodb/gameDBService';
 import { User } from '../models/User';
-import { WebSocketClient } from '../WebSocketClient';
-import { broadcastUserUpdate, getConnectionIdsFromUsers } from '../utils/broadcast';
+import { WebSocketClient } from '../websocket/WebSocketClient';
 import { UserStates } from '../types/states';
 import { Game } from '../models/Game';
 import { sendUpdates } from './functionsHelper';
+import { broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';
+import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -54,7 +55,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const connectionIds = getConnectionIdsFromUsers(await getAllConnections());
     await broadcastUserUpdate(ws, connectionId, UserStates.DISCONNECTED, connectionIds);
 
-    // Delete user from ConnectionsTable
+    // Delete user from Connections Table
     const deletedUser = await deleteConnection(connectionId);
 
     // Additional cleanup when user disconnect

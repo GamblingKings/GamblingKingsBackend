@@ -1,5 +1,5 @@
 import { Handler } from 'aws-lambda';
-import { saveConnection } from '../module/userDBService';
+import { saveConnection } from '../dynamodb/userDBService';
 import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';
@@ -16,7 +16,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   console.log('Writing connectionId to the db table...');
   try {
-    // Add user to ConnectionsTable
+    // Add user to Connections Table
     await saveConnection(connectionId);
 
     return response(200, 'Connection added successfully');

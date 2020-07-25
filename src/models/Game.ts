@@ -5,9 +5,10 @@ import { HasVersion } from './Version';
  * Game interface
  */
 export interface Game extends HasVersion {
-  gameId: string;
+  readonly gameId: string;
   host: User;
   users: User[];
+  gameLoadedCount: number;
   gameName?: string;
   gameType?: string;
   gameVersion?: string;

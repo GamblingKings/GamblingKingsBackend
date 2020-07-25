@@ -58,23 +58,30 @@ provider:
         - 'dynamodb:Query'
         - 'dynamodb:Scan'
       Resource:
-        - Fn::GetAtt: [ConnectionsTable, Arn]
-        - Fn::GetAtt: [GamesTable, Arn]
+        - Fn::GetAtt: [Connections, Arn]
+        - Fn::GetAtt: [Games, Arn]
+        - Fn::GetAtt: [GameState, Arn]
         - Fn::Join:
             - '/'
-            - - Fn::GetAtt: [ConnectionsTable, Arn]
+            - - Fn::GetAtt: [Connections, Arn]
               - '*'
         - Fn::Join:
             - '/'
-            - - Fn::GetAtt: [GamesTable, Arn]
+            - - Fn::GetAtt: [Games, Arn]
+              - '*'
+        - Fn::Join:
+            - '/'
+            - - Fn::GetAtt: [GameState, Arn]
               - '*'
 
   # you can define service wide environment variables here
   environment:
     CONNECTIONS_TABLE:
-      Ref: ConnectionsTable
+      Ref: Connections
     GAMES_TABLE:
-      Ref: GamesTable
+      Ref: Games
+    GAME_STATE_TABLE:
+      Ref: GameState
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
 
@@ -94,51 +101,58 @@ functions:
     handler: src/functions/defaultMessage.handler
     events:
       - websocket: $default
-  setUsername:
+  onSetUsername:
     handler: src/functions/onSetUsername.handler
     events:
       - websocket: SET_USERNAME
-  getAllUsers:
+  onGetAllUsers:
     handler: src/functions/onGetAllUsers.handler
     events:
       - websocket: GET_ALL_USERS
-  createGame:
+  onCreateGame:
     handler: src/functions/onCreateGame.handler
     events:
       - websocket: CREATE_GAME
-  getAllGames:
+  onGetAllGames:
     handler: src/functions/onGetAllGames.handler
     events:
       - websocket: GET_ALL_GAMES
-  sendMessage:
+  onSendMessage:
     handler: src/functions/onSendMessage.handler
     events:
       - websocket: SEND_MESSAGE
-  joinGame:
+  onJoinGame:
     handler: src/functions/onJoinGame.handler
     events:
       - websocket: JOIN_GAME
-  leaveGame:
+  onLeaveGame:
     handler: src/functions/onLeaveGame.handler
     events:
       - websocket: LEAVE_GAME
-  startGame:
+  onStartGame:
     handler: src/functions/onStartGame.handler
     events:
       - websocket: START_GAME
-  # To be implemented
-  # game_page_load:
-  #   handler: src/functions/onGamePageLoad.handler
-  #   events:
-  #     - websocket: GAME_PAGE_LOAD
+  onGamePageLoad:
+    handler: src/functions/onGamePageLoad.handler
+    events:
+      - websocket: GAME_PAGE_LOAD
+  onDrawTile:
+    handler: src/functions/onDrawTile.handler
+    events:
+      - websocket: DRAW_TILE
+  onPlayTile:
+    handler: src/functions/onPlayTile.handler
+    events:
+      - websocket: PLAY_TILE
 
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    ConnectionsTable:
+    Connections:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ConnectionsTable
+        TableName: Connections
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S
@@ -148,10 +162,23 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    GamesTable:
+    Games:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: GamesTable
+        TableName: Games
+        AttributeDefinitions:
+          - AttributeName: gameId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: gameId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    GameState:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: GameState
         AttributeDefinitions:
           - AttributeName: gameId
             AttributeType: S
