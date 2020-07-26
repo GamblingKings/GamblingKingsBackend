@@ -13,6 +13,7 @@ plugins:
   - '@typescript-eslint'
 extends:
   - airbnb-base
+  - prettier
   - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - plugin:prettier/recommended
