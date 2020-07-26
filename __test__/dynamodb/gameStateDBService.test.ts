@@ -1,4 +1,4 @@
-import * as gameStateDBFunctions from '../../dynamodb/gameStateDBService';
+import * as gameStateDBFunctions from '../../src/dynamodb/gameStateDBService';
 import {
   drawTile,
   getCurrentWallByGameId,
@@ -6,7 +6,7 @@ import {
   getUserHandsInGame,
   incrementCurrentTileIndex,
   initGameState,
-} from '../../dynamodb/gameStateDBService';
+} from '../../src/dynamodb/gameStateDBService';
 import {
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
@@ -14,9 +14,9 @@ import {
   FAKE_CONNECTION_ID4,
   FAKE_GAME_ID,
 } from '../testConstants';
-import { DEFAULT_MAX_USERS_IN_GAME } from '../../utils/constants';
-import { GameState, UserHand } from '../../models/GameState';
-import { TileMapper } from '../../games/mahjong/Tile/map/TileMapper';
+import { DEFAULT_MAX_USERS_IN_GAME } from '../../src/utils/constants';
+import { GameState, UserHand } from '../../src/models/GameState';
+import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
 const MAX_WALL_LENGTH = 144;

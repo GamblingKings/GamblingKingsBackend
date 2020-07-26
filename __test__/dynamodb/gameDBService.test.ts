@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { getUserByConnectionId, saveConnection } from '../../dynamodb/userDBService';
+import { getUserByConnectionId, saveConnection } from '../../src/dynamodb/userDBService';
 import {
   addUserToGame,
   createGame,
@@ -9,12 +9,12 @@ import {
   incrementGameLoadedCount,
   removeUserFromGame,
   startGame,
-} from '../../dynamodb/gameDBService';
+} from '../../src/dynamodb/gameDBService';
 import { cleanupTestGame } from './dbTestHelpers';
-import { Game } from '../../models/Game';
-import * as userDBFunctions from '../../dynamodb/userDBService';
-import * as gameDBFunctions from '../../dynamodb/gameDBService';
-import { User } from '../../models/User';
+import { Game } from '../../src/models/Game';
+import * as userDBFunctions from '../../src/dynamodb/userDBService';
+import * as gameDBFunctions from '../../src/dynamodb/gameDBService';
+import { User } from '../../src/models/User';
 import {
   CONDITIONAL_FAILED_MSG,
   FAKE_CONNECTION_ID1,

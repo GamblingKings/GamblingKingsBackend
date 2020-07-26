@@ -1,9 +1,9 @@
 import * as LambdaTester from 'lambda-tester';
-import { handler } from '../../functions/onConnect';
-import * as userFunctions from '../../dynamodb/userDBService';
-import { response } from '../../utils/responseHelper';
+import { handler } from '../../src/functions/onConnect';
+import * as userFunctions from '../../src/dynamodb/userDBService';
+import { response } from '../../src/utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
-import { LambdaResponse } from '../../types/response';
+import { LambdaResponse } from '../../src/types/response';
 
 const TEST_CONNECTION_ID = 'test-onConnect-connectionId';
 

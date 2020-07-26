@@ -1,6 +1,6 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
-import { CONNECTIONS_TABLE, GAMES_TABLE } from '../../utils/constants';
-import { ddb } from '../jestLocalDynamoDB';
+import { CONNECTIONS_TABLE, GAMES_TABLE } from '../../src/utils/constants';
+import { ddb } from '../../src/dynamodb/jestLocalDynamoDB';
 
 /* ----------------------------------------------------------------------------
  * Helper functions

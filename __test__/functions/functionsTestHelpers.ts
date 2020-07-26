@@ -1,4 +1,4 @@
-import { WebSocketAPIGatewayEvent, WebSocketAPIGatewayEventRequestContext } from '../../types/event';
+import { WebSocketAPIGatewayEvent, WebSocketAPIGatewayEventRequestContext } from '../../src/types/event';
 
 /* ----------------------------------------------------------------------------
  * Interface
