@@ -26,13 +26,13 @@ settings:
     import/resolver:
       node:
         extensions:
-          - '.js'
-          - '.jsx'
-          - '.ts'
-          - '.tsx'
+          - .js
+          - .jsx
+          - .ts
+          - .tsx
 rules:
   linebreak-style: 0
-  no-console: 'off'
+  no-console: 0
   import/extensions:
     - error
     - ignorePackages
@@ -41,9 +41,9 @@ rules:
       ts: never
       tsx: never
   import/no-default-export: error
-  import/prefer-default-export: 'off'
-  import/no-unresolved: 'off'
-  import/no-extraneous-dependencies: 'off'
+  import/prefer-default-export: off
+  import/no-unresolved: off
+  import/no-extraneous-dependencies: off
   prettier/prettier:
     - error
     - endOfLine: auto
