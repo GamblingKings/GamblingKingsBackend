@@ -16,6 +16,8 @@ import {
   createStartGameResponse,
   createGameStartResponse,
   createGamePageLoadResponse,
+  createDrawTileResponse,
+  createPlayTileResponse,
 } from '../../src/websocket/createWSResponse';
 import {
   CreateGamePayload,
@@ -295,6 +297,38 @@ describe('test createGameStartResponse', () => {
     };
 
     expect(response.payload).toStrictEqual({ tiles: testTiles });
+    expect(response).toStrictEqual(expectedResponse);
+  });
+});
+
+describe('test createDrawTileResponse', () => {
+  test('it should get the correct response', () => {
+    const testTile = '1_DOT';
+    const response = createDrawTileResponse({ tile: testTile });
+    const expectedResponse = {
+      action: WebSocketActions.DRAW_TILE,
+      payload: {
+        tile: testTile,
+      },
+    };
+
+    expect(response.payload).toStrictEqual({ tile: testTile });
+    expect(response).toStrictEqual(expectedResponse);
+  });
+});
+
+describe('test createPlayTileResponse', () => {
+  test('it should get the correct response', () => {
+    const testTile = '2_DOT';
+    const response = createPlayTileResponse({ tile: testTile });
+    const expectedResponse = {
+      action: WebSocketActions.PLAY_TILE,
+      payload: {
+        tile: testTile,
+      },
+    };
+
+    expect(response.payload).toStrictEqual({ tile: testTile });
     expect(response).toStrictEqual(expectedResponse);
   });
 });
