@@ -1,5 +1,5 @@
 import { DEFAULT_DOCUMENT_VERSION } from '../src/utils/constants';
-import { GameStates } from '../src/types/states';
+import { GameStates } from '../src/enums/states';
 
 /* ----------------------------------------------------------------------------
  * User

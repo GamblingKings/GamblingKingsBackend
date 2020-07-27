@@ -1,5 +1,5 @@
 import { LambdaEventBodyPayloadOptions } from './payload';
-import { WebSocketActions } from './WebSocketActions';
+import { WebSocketActions } from '../enums/WebSocketActions';
 
 /* ----------------------------------------------------------------------------
  * Lambda

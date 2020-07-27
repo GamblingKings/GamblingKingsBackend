@@ -1,7 +1,7 @@
 import { WebSocketClient } from '../websocket/WebSocketClient';
 import { Game } from '../models/Game';
-import { WebSocketActions } from '../types/WebSocketActions';
-import { GameStates } from '../types/states';
+import { WebSocketActions } from '../enums/WebSocketActions';
+import { GameStates } from '../enums/states';
 import { deleteGame } from '../dynamodb/gameDBService';
 import {
   broadcastGameUpdate,

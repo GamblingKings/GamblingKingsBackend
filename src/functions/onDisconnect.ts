@@ -7,7 +7,7 @@ import { LambdaResponse } from '../types/response';
 import { removeUserFromGame } from '../dynamodb/gameDBService';
 import { User } from '../models/User';
 import { WebSocketClient } from '../websocket/WebSocketClient';
-import { UserStates } from '../types/states';
+import { UserStates } from '../enums/states';
 import { Game } from '../models/Game';
 import { sendUpdates } from './functionsHelper';
 import { broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';

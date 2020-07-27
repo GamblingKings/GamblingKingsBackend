@@ -1,6 +1,6 @@
 import { Game } from '../models/Game';
 import { User } from '../models/User';
-import { GameStates, UserStates } from './states';
+import { GameStates, UserStates } from '../enums/states';
 
 /* ----------------------------------------------------------------------------
  * WebSocket Payload

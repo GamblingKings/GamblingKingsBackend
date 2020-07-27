@@ -11,8 +11,8 @@ import {
   createInGameUpdateResponse,
   createPlayTileResponse,
 } from '../createWSResponse';
-import { GameStates } from '../../types/states';
-import { WebSocketActions } from '../../types/WebSocketActions';
+import { GameStates } from '../../enums/states';
+import { WebSocketActions } from '../../enums/WebSocketActions';
 import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
 import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';

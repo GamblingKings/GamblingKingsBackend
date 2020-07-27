@@ -35,8 +35,8 @@ import {
   TEST_USER_OBJECT2,
   TEST_USER_OBJECT3,
 } from '../testConstants';
-import { WebSocketActions } from '../../src/types/WebSocketActions';
-import { GameStates, UserStates } from '../../src/types/states';
+import { WebSocketActions } from '../../src/enums/WebSocketActions';
+import { GameStates, UserStates } from '../../src/enums/states';
 import { WebSocketResponse } from '../../src/types/response';
 import { Game } from '../../src/models/Game';
 
