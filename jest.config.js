@@ -10,15 +10,16 @@ module.exports = {
     // Get full coverage
     // 'src/**/*.ts',
 
-    // Ignore coverage for lambda functions / websocket for now
-    // 'src/functions/**/*.ts',
-    // 'src/websocket/**/*.ts',
-
+    // Get coverage
     'src/dynamodb/**/*.ts',
     'src/games/**/*.ts',
     'src/models/**/*.ts',
     'src/types/**/*.ts',
     'src/utils/**/*.ts',
+
+    // Ignored coverage
+    '!src/functions/**/*.ts',
+    '!src/websocket/broadcast/**/*.ts',
   ],
   setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
   preset: 'jest-dynalite',
