@@ -15,6 +15,7 @@ import {
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_USERNAME1,
+  NON_EXISTING_CONNECTION_ID,
   TEST_GAME_OBJECT1,
   TEST_USER_OBJECT1,
   TEST_USER_OBJECT2,
@@ -86,11 +87,8 @@ describe('test deleteConnection', () => {
   });
 
   test('it should return undefined if user does not exist', async () => {
-    // Make sure test user does not exist before testing deleteConnection
-    expect(await getUserByConnectionId(FAKE_CONNECTION_ID1)).toBeUndefined();
-
     // Test delete non-existing user
-    const response = await deleteConnection(FAKE_CONNECTION_ID1);
+    const response = await deleteConnection(NON_EXISTING_CONNECTION_ID);
     expect(response).toBeUndefined();
   });
 });
@@ -175,7 +173,7 @@ describe('test setGameIdForUser', () => {
   });
 
   test('it should throw error if update with non-existing connection id', async () => {
-    const func = setGameIdForUser('NON-EXISTING-ID', gameId);
+    const func = setGameIdForUser(NON_EXISTING_CONNECTION_ID, gameId);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 
@@ -214,7 +212,7 @@ describe('test removeGameIdFromUser', () => {
   });
 
   test('it should throw error if remove gameId with non-existing connection id', async () => {
-    const func = removeGameIdFromUser('NON-EXISTING-ID');
+    const func = removeGameIdFromUser(NON_EXISTING_CONNECTION_ID);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 

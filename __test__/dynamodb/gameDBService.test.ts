@@ -23,6 +23,8 @@ import {
   FAKE_GAME_NAME1,
   FAKE_GAME_TYPE1,
   FAKE_GAME_VERSION1,
+  NON_EXISTING_CONNECTION_ID,
+  NON_EXISTING_GAME_ID,
   TEST_GAME_OBJECT1,
   TEST_GAME_OBJECT2,
   TEST_USER_OBJECT1,
@@ -34,7 +36,7 @@ import {
  * Test createGame
  * ------------------------------------------------------------------------- */
 describe('test createGame', () => {
-  test('create a game and save the game to db', async () => {
+  test('it should create a game and save the game to db', async () => {
     // Create a test user
     await saveConnection(FAKE_CONNECTION_ID1);
     expect(await getUserByConnectionId(FAKE_CONNECTION_ID1)).toStrictEqual(TEST_USER_OBJECT1);
@@ -43,7 +45,6 @@ describe('test createGame', () => {
     const response = await createGame({
       creatorConnectionId: FAKE_CONNECTION_ID1,
     });
-    // console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
     expect(users).toStrictEqual([TEST_USER_OBJECT1]);
     expect(gameName).toBe('');
@@ -51,7 +52,7 @@ describe('test createGame', () => {
     expect(gameVersion).toBe('');
   });
 
-  test('create a game with all attributes and save the game to db', async () => {
+  test('it should create a game with all attributes and save the game to db', async () => {
     // Create a test user
     await saveConnection(FAKE_CONNECTION_ID1);
     expect(await getUserByConnectionId(FAKE_CONNECTION_ID1)).toStrictEqual(TEST_USER_OBJECT1);
@@ -61,7 +62,6 @@ describe('test createGame', () => {
       ...TEST_GAME_OBJECT1,
       creatorConnectionId: FAKE_CONNECTION_ID1,
     });
-    // console.log('createGame response:', response);
     const { users, gameName, gameType, gameVersion } = response;
     expect(users).toStrictEqual([TEST_USER_OBJECT1]);
     expect(gameName).toBe(FAKE_GAME_NAME1);
@@ -69,7 +69,14 @@ describe('test createGame', () => {
     expect(gameVersion).toBe(FAKE_GAME_VERSION1);
   });
 
-  // TODO: Test Errors for createGame
+  test('it should throw error if user creating the game does not exist', async () => {
+    const func = createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: NON_EXISTING_CONNECTION_ID,
+    });
+    const errorMsg = 'createGame: User cannot be empty';
+    await expect(func).rejects.toThrow(errorMsg);
+  });
 });
 
 /* ----------------------------------------------------------------------------
@@ -96,7 +103,7 @@ describe('test getGameByGameId', () => {
   });
 
   test('it should get undefined if the game does not exist', async () => {
-    const response = await getGameByGameId('NON-EXISTING-GAME-ID');
+    const response = await getGameByGameId(NON_EXISTING_GAME_ID);
     expect(response).toBeUndefined();
   });
 });
@@ -177,10 +184,7 @@ describe('test addUserToGame', () => {
   });
 
   afterEach(() => {
-    getUserByConnectionIdSpy.mockRestore();
-    saveConnectionSpy.mockRestore();
-    getGameByGameIdSpy.mockRestore();
-    addUserToGameSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   test('it should add one user to a game', async () => {
@@ -242,7 +246,35 @@ describe('test addUserToGame', () => {
     expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers(expectedUsersInGame);
   });
 
-  // TODO: Test Errors for addUserToGame
+  test('it should throw error if user does not exists', async () => {
+    const func = addUserToGame(gameId, FAKE_CONNECTION_ID2);
+    const errorMsg = 'addUserToGame: user does not exist';
+
+    // Test function call
+    expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
+    expect(addUserToGameSpy).toHaveBeenCalledTimes(1);
+
+    // Test error
+    await expect(func).rejects.toThrow(errorMsg);
+  });
+
+  test('it should throw error if game does not exist', async () => {
+    // Create a new test user
+    await saveConnection(FAKE_CONNECTION_ID2);
+
+    // Test add user to game
+    const func = addUserToGame(NON_EXISTING_GAME_ID, FAKE_CONNECTION_ID2);
+    const errorMsg = 'addUserToGame: game does not exist';
+
+    // Test error
+    await expect(func).rejects.toThrow(errorMsg);
+
+    // Test function calls
+    expect(saveConnectionSpy).toHaveBeenCalledTimes(1);
+    expect(getUserByConnectionIdSpy).toHaveBeenCalledTimes(1);
+    expect(getGameByGameIdSpy).toHaveBeenCalledTimes(1);
+    expect(addUserToGameSpy).toHaveBeenCalledTimes(1);
+  });
 });
 
 /* ----------------------------------------------------------------------------
@@ -271,8 +303,7 @@ describe('test removeUserFromGame', () => {
   });
 
   afterEach(() => {
-    getGameByGameIdnIdSpy.mockRestore();
-    removeUserFromGameSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   test('it should remove user from a game', async () => {
@@ -327,7 +358,29 @@ describe('test removeUserFromGame', () => {
     expect(((await getGameByGameId(gameId)) as Game).users).toIncludeSameMembers(expectedUsersList);
   });
 
-  // TODO: Test Errors for removeUserFromGame
+  test('it should throw error if game does not exist', async () => {
+    const func = removeUserFromGame(NON_EXISTING_GAME_ID, FAKE_CONNECTION_ID1);
+    const errorMsg = 'removeUserFromGame: Game does not exist';
+
+    // Test error
+    await expect(func).rejects.toThrow(errorMsg);
+
+    // Test function calls
+    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(1);
+    expect(removeUserFromGameSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('it should throw error if user is not in the game', async () => {
+    const func = removeUserFromGame(gameId, NON_EXISTING_CONNECTION_ID);
+    const errorMsg = 'removeUserFromGame: User not found';
+
+    // Test error
+    await expect(func).rejects.toThrow(errorMsg);
+
+    // Test function calls
+    expect(getGameByGameIdnIdSpy).toHaveBeenCalledTimes(1);
+    expect(removeUserFromGameSpy).toHaveBeenCalledTimes(1);
+  });
 });
 
 /* ----------------------------------------------------------------------------
@@ -425,7 +478,7 @@ describe('test startGame', () => {
   });
 
   test('it should throw error if the game does not exist', async () => {
-    const func = startGame('NON-EXISTING-GAME-ID', FAKE_CONNECTION_ID1);
+    const func = startGame(NON_EXISTING_GAME_ID, FAKE_CONNECTION_ID1);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 

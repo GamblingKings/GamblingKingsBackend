@@ -10,16 +10,17 @@ module.exports = {
     // Get full coverage
     // 'src/**/*.ts',
 
-    // Get coverage
+    // Get coverage from
     'src/dynamodb/**/*.ts',
     'src/games/**/*.ts',
     'src/models/**/*.ts',
     'src/types/**/*.ts',
     'src/utils/**/*.ts',
 
-    // Ignored coverage
+    // Ignore coverage from
     '!src/functions/**/*.ts',
     '!src/websocket/broadcast/**/*.ts',
+    '!src/dynamodb/**/db.ts',
   ],
   setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
   preset: 'jest-dynalite',
