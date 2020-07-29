@@ -236,7 +236,7 @@ yarn start
 
 - [jest.config.js](./jest.config.js)
 - [jest-dynalite-config.js](./jest-dynalite-config.js)
-- [global.d.ts](./src/global.d.ts): for ide or editor to recognize jest-extended library
+- [global.d.ts](__test__/global.d.ts): for ide or editor to recognize jest-extended library
 
 ### Test folder
 

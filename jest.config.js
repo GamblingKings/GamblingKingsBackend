@@ -2,7 +2,7 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.ts$',
+  testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverage: true,
   coverageDirectory: './coverage/',
@@ -10,15 +10,17 @@ module.exports = {
     // Get full coverage
     // 'src/**/*.ts',
 
-    // Ignore coverage for lambda functions / websocket for now
-    // 'src/functions/**/*.ts',
-    // 'src/websocket/**/*.ts',
-
+    // Get coverage from
     'src/dynamodb/**/*.ts',
     'src/games/**/*.ts',
     'src/models/**/*.ts',
     'src/types/**/*.ts',
     'src/utils/**/*.ts',
+
+    // Ignore coverage from
+    '!src/functions/**/*.ts',
+    '!src/websocket/broadcast/**/*.ts',
+    '!src/dynamodb/**/db.ts',
   ],
   setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
   preset: 'jest-dynalite',

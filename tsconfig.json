@@ -12,6 +12,6 @@
     "lib": ["es2015"],
     "rootDir": "./"
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./__test__/**/*.ts", "global.d.ts"],
   "exclude": ["node_modules/**/*", ".dynamodb/**/*", ".vscode/**/*"]
 }

@@ -27,8 +27,7 @@ describe('test onGetAllUsers', () => {
   });
 
   afterEach(() => {
-    broadcastConnectionsSpy.mockRestore();
-    broadcastUserUpdateSpy.mockRestore();
+    jest.resetAllMocks();
   });
 
   test('should get all users', async () => {

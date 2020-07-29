@@ -5,7 +5,7 @@ import { Logger } from '../utils/Logger';
 import { User } from '../models/User';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
-import { UserStates } from '../types/states';
+import { UserStates } from '../enums/states';
 import { broadcastConnections, broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';
 import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 

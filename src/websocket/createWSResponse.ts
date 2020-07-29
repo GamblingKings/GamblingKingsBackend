@@ -15,7 +15,7 @@ import {
   UserUpdatePayload,
 } from '../types/payload';
 import { WebSocketResponse } from '../types/response';
-import { WebSocketActions } from '../types/WebSocketActions';
+import { WebSocketActions } from '../enums/WebSocketActions';
 
 /**
  * Create a websocket response object.

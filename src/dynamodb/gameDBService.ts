@@ -4,7 +4,7 @@ import { Game } from '../models/Game';
 import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../utils/constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
-import { GameStates } from '../types/states';
+import { GameStates } from '../enums/states';
 import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from './dbHelper';
 
 /* ----------------------------------------------------------------------------

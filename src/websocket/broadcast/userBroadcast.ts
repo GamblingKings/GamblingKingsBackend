@@ -2,7 +2,7 @@ import { WebSocketClient } from '../WebSocketClient';
 import { User } from '../../models/User';
 import { getAllConnections, getUserByConnectionId } from '../../dynamodb/userDBService';
 import { createGetAllUsersResponse, createUserUpdateResponse } from '../createWSResponse';
-import { UserStates } from '../../types/states';
+import { UserStates } from '../../enums/states';
 import { getConnectionIdsExceptCaller } from '../../utils/broadcastHelper';
 
 /* ----------------------------------------------------------------------------

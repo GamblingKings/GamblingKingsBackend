@@ -13,7 +13,7 @@ import { Game } from '../models/Game';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
-import { WebSocketActions } from '../types/WebSocketActions';
+import { WebSocketActions } from '../enums/WebSocketActions';
 import { setGameIdForUser } from '../dynamodb/userDBService';
 import { broadcastInGameMessage, broadcastInGameUpdate } from '../websocket/broadcast/gameBroadcast';
 

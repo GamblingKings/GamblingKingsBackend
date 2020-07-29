@@ -9,7 +9,7 @@ import { removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaEventBodyPayloadOptions } from '../types/payload';
 import { LambdaResponse } from '../types/response';
-import { GameStates } from '../types/states';
+import { GameStates } from '../enums/states';
 import { getAllConnections, setGameIdForUser } from '../dynamodb/userDBService';
 import { broadcastGameUpdate } from '../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
