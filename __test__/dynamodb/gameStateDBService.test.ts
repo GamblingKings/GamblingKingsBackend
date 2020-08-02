@@ -1,7 +1,13 @@
 import * as gameStateDBFunctions from '../../src/dynamodb/gameStateDBService';
 import {
+  changeDealer,
+  changeTurn,
+  changeWind,
   drawTile,
+  getCurrentDealer,
+  getCurrentTurn,
   getCurrentWallByGameId,
+  getCurrentWind,
   getGameStateByGameId,
   getUserHandsInGame,
   incrementCurrentTileIndex,
@@ -13,6 +19,7 @@ import {
   FAKE_CONNECTION_ID3,
   FAKE_CONNECTION_ID4,
   FAKE_GAME_ID,
+  NON_EXISTING_GAME_ID,
 } from '../testConstants';
 import { DEFAULT_MAX_USERS_IN_GAME } from '../../src/utils/constants';
 import { GameState, UserHand } from '../../src/models/GameState';
@@ -27,7 +34,7 @@ const DEFAULT_HAND_LENGTH = 13;
  * ------------------------------------------------------------------------- */
 describe('test initGameState', () => {
   test('it should init a game with a wall and 4 hands to users', async () => {
-    const response = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    const response = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
 
     // Test game Id and remaining tiles in the wall
     const { gameId, wall, hands } = response;
@@ -64,7 +71,7 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
     gameId = gameState.gameId;
     wall = gameState.wall;
     hands = gameState.hands;
@@ -84,6 +91,9 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
       wall,
       hands,
       currentIndex: DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
+      currentTurn: 0,
+      currentWind: 0,
+      dealer: 0,
     };
 
     // Test function calls
@@ -166,7 +176,7 @@ describe('test incrementCurrentTileIndex', () => {
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
     gameId = gameState.gameId;
     currentIndex = gameState.currentIndex;
 
@@ -208,7 +218,7 @@ describe('test drawsTile', () => {
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
     gameId = gameState.gameId;
     wall = gameState.wall;
     currentIndex = gameState.currentIndex;
@@ -233,5 +243,214 @@ describe('test drawsTile', () => {
     // Test response
     expect(tileDrawn).toBe(tileToBeDrawn);
     expect(newGameState.currentIndex).toBe(currentIndex + 1);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test changeDealer, getCurrentDealer
+ * ------------------------------------------------------------------------- */
+describe('test changeDealer, getCurrentDealer', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let currentDealerIndex: number;
+
+  // Spy
+  let changeDealerSpy: jest.SpyInstance;
+  let getDealerSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    currentDealerIndex = gameState.dealer;
+
+    changeDealerSpy = jest.spyOn(gameStateDBFunctions, 'changeDealer');
+    getDealerSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentDealer');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should change the dealer to the next available index', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentDealerIndex).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+
+    const response = (await changeDealer(gameId)) as GameState;
+
+    // Test function call
+    expect(changeDealerSpy).toHaveBeenCalledTimes(1);
+    expect(getDealerSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.dealer).toBe(1);
+    expect(await getCurrentDealer(gameId)).toBe(1);
+  });
+
+  test('it should reset index to 0 when max index is reached', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentDealerIndex).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+
+    await changeDealer(gameId);
+    await changeDealer(gameId);
+    await changeDealer(gameId);
+    const response = (await changeDealer(gameId)) as GameState;
+
+    // Test function call
+    expect(changeDealerSpy).toHaveBeenCalledTimes(4);
+    expect(getDealerSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.dealer).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+  });
+
+  test('it should throw error when the game does not exist', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentDealerIndex).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+
+    const func = changeDealer(NON_EXISTING_GAME_ID);
+    const errorMsg = 'changeDealer: game state not found';
+
+    // Test function call
+    expect(changeDealerSpy).toHaveBeenCalledTimes(1);
+    expect(getDealerSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    await expect(func).rejects.toThrow(errorMsg);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test changeWind, getCurrentWind
+ * ------------------------------------------------------------------------- */
+describe('test changeWind, getCurrentWind', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let currentWindNum: number;
+
+  // Spy
+  let changeWindSpy: jest.SpyInstance;
+  let getWindSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    currentWindNum = gameState.currentWind;
+
+    changeWindSpy = jest.spyOn(gameStateDBFunctions, 'changeWind');
+    getWindSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentWind');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should change to the next wind number', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentWindNum).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+
+    const response = (await changeWind(gameId)) as GameState;
+
+    // Test function call
+    expect(changeWindSpy).toHaveBeenCalledTimes(1);
+    expect(getWindSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.currentWind).toBe(1);
+    expect(await getCurrentWind(gameId)).toBe(1);
+  });
+
+  test('it should reset index to 0 when max wind number is reached', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentWindNum).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+
+    await changeWind(gameId);
+    await changeWind(gameId);
+    await changeWind(gameId);
+    const response = (await changeWind(gameId)) as GameState;
+
+    // Test function call
+    expect(changeWindSpy).toHaveBeenCalledTimes(4);
+    expect(getWindSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.currentWind).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+  });
+
+  test('it should throw error when the game does not exist', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentWindNum).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+
+    const func = changeWind(NON_EXISTING_GAME_ID);
+    const errorMsg = 'changeWind: game state not found';
+
+    // Test function call
+    expect(changeWindSpy).toHaveBeenCalledTimes(1);
+    expect(getWindSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    await expect(func).rejects.toThrow(errorMsg);
+    expect(await getCurrentWind(gameId)).toBe(0);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test changeTurn, getCurrentTurn
+ * ------------------------------------------------------------------------- */
+describe('test changeTurn, getCurrentTurn', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let currentTurn: number;
+
+  // Spy
+  let changeTurnSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    currentTurn = gameState.currentTurn;
+
+    changeTurnSpy = jest.spyOn(gameStateDBFunctions, 'changeTurn');
+  });
+
+  afterEach(() => {
+    changeTurnSpy.mockRestore();
+  });
+
+  test('it should update turn', async () => {
+    expect(currentTurn).toBe(0);
+    expect(await getCurrentTurn(gameId)).toBe(0);
+
+    const response = (await changeTurn(gameId)) as GameState;
+
+    // Test function call
+    expect(changeTurnSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.currentTurn).toBe(1);
+    expect(await getCurrentTurn(gameId)).toBe(1);
+  });
+
+  test('it should fail if game does not exist', async () => {
+    expect(currentTurn).toBe(0);
+    expect(await getCurrentTurn(gameId)).toBe(0);
+
+    const func = changeTurn(NON_EXISTING_GAME_ID);
+    const errorMsg = 'changeTurn: game state not found';
+
+    // Test function call
+    expect(changeTurnSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    await expect(func).rejects.toThrow(errorMsg);
+    expect(await getCurrentTurn(gameId)).toBe(0);
   });
 });

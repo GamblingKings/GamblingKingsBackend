@@ -2,7 +2,7 @@ import { WebSocketClient } from '../WebSocketClient';
 import { User } from '../../models/User';
 import { getAllConnections, getUserByConnectionId } from '../../dynamodb/userDBService';
 import { createGetAllUsersResponse, createUserUpdateResponse } from '../createWSResponse';
-import { UserStates } from '../../enums/states';
+import { UserStatesEnum } from '../../enums/states';
 import { getConnectionIdsExceptCaller } from '../../utils/broadcastHelper';
 
 /* ----------------------------------------------------------------------------
@@ -36,13 +36,13 @@ export const broadcastConnections = async (ws: WebSocketClient, connectionId: st
  * Broadcast user update to every other user (except the one with connectionId specified in the argument)
  * @param {WebSocketClient} ws WebSocket client
  * @param {string} callerConnectionId connection Id
- * @param {UserStates} state user state
+ * @param {UserStatesEnum} state user state
  * @param allConnectionIds connection ids from all the currently connected users
  */
 export const broadcastUserUpdate = async (
   ws: WebSocketClient,
   callerConnectionId: string,
-  state: UserStates,
+  state: UserStatesEnum,
   allConnectionIds: string[],
 ): Promise<User | undefined> => {
   const currentUser = await getUserByConnectionId(callerConnectionId);

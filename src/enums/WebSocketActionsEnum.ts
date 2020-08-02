@@ -5,7 +5,7 @@
 /**
  *  Websocket action types enum
  */
-export enum WebSocketActions {
+export enum WebSocketActionsEnum {
   GET_ALL_GAMES = 'GET_ALL_GAMES',
   GET_ALL_USERS = 'GET_ALL_USERS',
   CREATE_GAME = 'CREATE_GAME',

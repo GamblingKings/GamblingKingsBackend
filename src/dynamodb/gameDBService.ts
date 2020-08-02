@@ -4,7 +4,7 @@ import { Game } from '../models/Game';
 import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../utils/constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
-import { GameStates } from '../enums/states';
+import { GameStatesEnum } from '../enums/states';
 import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from './dbHelper';
 
 /* ----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ export const createGame = async ({
     gameName: gameName || '',
     gameType: gameType || '',
     gameVersion: gameVersion || '',
-    state: GameStates.CREATED,
+    state: GameStatesEnum.CREATED,
     started: false,
     gameLoadedCount: 0,
 

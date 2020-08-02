@@ -35,7 +35,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     }
 
     // Send the tile that is played by a user
-    await broadcastPlayedTileToUsers(ws, tile, connectionIds);
+    await broadcastPlayedTileToUsers(ws, tile, connectionId, connectionIds);
 
     return response(200, 'Tile discarded successfully');
   } catch (err) {

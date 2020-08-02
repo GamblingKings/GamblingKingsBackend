@@ -1,7 +1,7 @@
 import { WebSocketClient } from '../websocket/WebSocketClient';
 import { Game } from '../models/Game';
-import { WebSocketActions } from '../enums/WebSocketActions';
-import { GameStates } from '../enums/states';
+import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
+import { GameStatesEnum } from '../enums/states';
 import { deleteGame } from '../dynamodb/gameDBService';
 import {
   broadcastGameUpdate,
@@ -26,7 +26,7 @@ export const sendUpdates = async (
   allConnectionIds: string[] = [],
 ): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(updatedGame.users);
-  await broadcastInGameMessage(ws, connectionId, WebSocketActions.LEAVE_GAME, connectionIds, username);
+  await broadcastInGameMessage(ws, connectionId, WebSocketActionsEnum.LEAVE_GAME, connectionIds, username);
 
   const { host, gameId, started } = updatedGame;
 
@@ -48,7 +48,7 @@ export const sendUpdates = async (
     //    in the game since the game is going to be deleted
     // 2) and delete the game in the table
     if (host.connectionId === connectionId) {
-      await broadcastGameUpdate(ws, gameId, GameStates.DELETED, connectionId, allConnectionIds, true);
+      await broadcastGameUpdate(ws, gameId, GameStatesEnum.DELETED, connectionId, allConnectionIds, true);
       await deleteGame(gameId);
       return;
     }

@@ -7,7 +7,7 @@ import { LambdaResponse } from '../types/response';
 import { removeUserFromGame } from '../dynamodb/gameDBService';
 import { User } from '../models/User';
 import { WebSocketClient } from '../websocket/WebSocketClient';
-import { UserStates } from '../enums/states';
+import { UserStatesEnum } from '../enums/states';
 import { Game } from '../models/Game';
 import { sendUpdates } from './functionsHelper';
 import { broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';
@@ -53,7 +53,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   try {
     // Send USER_UPDATE with DISCONNECT to all other users
     const connectionIds = getConnectionIdsFromUsers(await getAllConnections());
-    await broadcastUserUpdate(ws, connectionId, UserStates.DISCONNECTED, connectionIds);
+    await broadcastUserUpdate(ws, connectionId, UserStatesEnum.DISCONNECTED, connectionIds);
 
     // Delete user from Connections Table
     const deletedUser = await deleteConnection(connectionId);

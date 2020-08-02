@@ -2,12 +2,12 @@
  * States
  * ------------------------------------------------------------------------- */
 
-export enum UserStates {
+export enum UserStatesEnum {
   CONNECTED = 'CONNECTED',
   DISCONNECTED = 'DISCONNECTED',
 }
 
-export enum GameStates {
+export enum GameStatesEnum {
   CREATED = 'CREATED',
   DELETED = 'DELETED',
 }

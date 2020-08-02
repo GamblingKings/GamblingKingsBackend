@@ -11,8 +11,8 @@ import {
   createInGameUpdateResponse,
   createPlayTileResponse,
 } from '../createWSResponse';
-import { GameStates } from '../../enums/states';
-import { WebSocketActions } from '../../enums/WebSocketActions';
+import { GameStatesEnum } from '../../enums/states';
+import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
 import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
 import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
@@ -50,7 +50,7 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
  * Broadcast game update to all users except the game host
  * @param {WebSocketClient} ws WebSocket client
  * @param {string} gameId game Id
- * @param {GameStates} state of the game
+ * @param {GameStatesEnum} state of the game
  * @param {string} callerConnectionId caller's connection Id
  * @param {string[]} allConnectionIds connection ids from all the currently connected users
  * @param {boolean} sendToAll flag to whether sent to all users or not
@@ -58,7 +58,7 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
 export const broadcastGameUpdate = async (
   ws: WebSocketClient,
   gameId: string,
-  state: GameStates,
+  state: GameStatesEnum,
   callerConnectionId: string,
   allConnectionIds: string[],
   sendToAll = false,
@@ -100,14 +100,14 @@ export const broadcastGameUpdate = async (
  * Broadcast a message about who is joining the game with the IN_GAME_MESSAGE action
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} callerConnectionId caller's connection Id
- * @param {WebSocketActions.JOIN_GAME | WebSocketActions.LEAVE_GAME} action join or leave game action
+ * @param {WebSocketActionsEnum.JOIN_GAME | WebSocketActionsEnum.LEAVE_GAME} action join or leave game action
  * @param {string[]} connectionIds connection Ids of all users who are in the same game
  * @param {string} callerUsername caller's username
  */
 export const broadcastInGameMessage = async (
   ws: WebSocketClient,
   callerConnectionId: string,
-  action: WebSocketActions.JOIN_GAME | WebSocketActions.LEAVE_GAME,
+  action: WebSocketActionsEnum.JOIN_GAME | WebSocketActionsEnum.LEAVE_GAME,
   connectionIds: string[],
   callerUsername: string | undefined = undefined,
 ): Promise<void> => {
@@ -123,7 +123,7 @@ export const broadcastInGameMessage = async (
   }
 
   // Format message
-  const actionWord: string = action === WebSocketActions.JOIN_GAME ? 'joined' : 'left';
+  const actionWord: string = action === WebSocketActionsEnum.JOIN_GAME ? 'joined' : 'left';
   const message = `${username || callerConnectionId} just ${actionWord} the game.`;
   console.log('broadcastInGameMessage, In game message:', message);
 
@@ -164,9 +164,14 @@ export const broadcastInGameUpdate = async (
   return usersInGame;
 };
 
-export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, usersInGame: User[]): Promise<void> => {
+export const broadcastGameStart = async (
+  ws: WebSocketClient,
+  gameId: string,
+  hostConnectionId: string,
+  usersInGame: User[],
+): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(usersInGame);
-  const { hands } = await initGameState(gameId, connectionIds);
+  const { hands } = await initGameState(gameId, hostConnectionId, connectionIds);
 
   const promises = connectionIds.map((connectionId) => {
     const tiles = getHandByConnectionId(hands, connectionId);
@@ -205,14 +210,19 @@ export const broadcastDrawTileToUser = async (
  * Broadcast a tile string that is discarded by a user to all users in the game.
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} tile tile discarded by a user
+ * @param callerConnectionId caller's connection Id
  * @param {string[]} connectionIds connectionIds connection Ids of all users who are in the same game
  */
 export const broadcastPlayedTileToUsers = async (
   ws: WebSocketClient,
   tile: string,
+  callerConnectionId: string,
   connectionIds: string[],
 ): Promise<string> => {
-  const wsResponse = createPlayTileResponse({ tile });
+  const wsResponse = createPlayTileResponse({
+    connectionId: callerConnectionId,
+    tile,
+  });
 
   await Promise.all(
     connectionIds.map((connectionId) => {

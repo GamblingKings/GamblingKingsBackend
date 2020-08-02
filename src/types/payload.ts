@@ -1,6 +1,6 @@
 import { Game } from '../models/Game';
 import { User } from '../models/User';
-import { GameStates, UserStates } from '../enums/states';
+import { GameStatesEnum, UserStatesEnum } from '../enums/states';
 
 /* ----------------------------------------------------------------------------
  * WebSocket Payload
@@ -27,7 +27,7 @@ export interface LambdaEventBodyPayloadOptions {
 
 export interface UserUpdatePayload {
   user: User;
-  state: UserStates;
+  state: UserStatesEnum;
 }
 
 export interface GetAllUsersPayload {
@@ -40,7 +40,7 @@ export interface CreateGamePayload {
 
 export interface GameUpdatePayload {
   game: Game;
-  state: GameStates;
+  state: GameStatesEnum;
 }
 
 export interface GetAllGamesPayload {
@@ -79,5 +79,6 @@ export interface DrawTilePayload {
 }
 
 export interface PlayTilePayload {
+  connectionId: string;
   tile: string;
 }

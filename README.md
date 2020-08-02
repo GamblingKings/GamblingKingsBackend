@@ -201,7 +201,7 @@ yarn start
 }
 ```
 
-`PLAY_TILE` (_TO BE IMPLEMENTED_)
+`PLAY_TILE`
 
 ```json
 {

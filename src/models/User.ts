@@ -1,8 +1,8 @@
 /**
- * User interface
+ * User interface representing Connections table schema
  */
 export interface User {
-  connectionId: string;
+  readonly connectionId: string;
   username?: string;
   gameId?: string;
 }

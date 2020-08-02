@@ -37,12 +37,12 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     return response(500, err);
   }
 
-  const { users, gameLoadedCount } = game;
+  const { host, users, gameLoadedCount } = game;
   try {
     // Start game if 4 users' game page has been loaded
     // TODO: can probably add user ready logic to this
     if (gameLoadedCount === 4) {
-      await broadcastGameStart(ws, gameId, users);
+      await broadcastGameStart(ws, gameId, host.connectionId, users);
       return response(200, 'Game started (after game page loaded) successfully');
     }
 
