@@ -4,6 +4,7 @@ import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
 import { GameState, UserHand } from '../models/GameState';
 import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
+import { Game } from '../models/Game';
 
 const DEFAULT_GAME_STATE_PARAMS = [
   'gameId',
@@ -282,3 +283,18 @@ export const changeTurn = async (gameId: string): Promise<GameState | undefined>
 // ): Promise<GameState | undefined> => {
 //   return {} as GameState;
 // };
+
+export const deleteGameState = async (gameId: string): Promise<GameState | undefined> => {
+  const deleteParams: DocumentClient.DeleteItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId,
+    },
+    ReturnValues: 'ALL_OLD',
+  };
+
+  const res = await DB.delete(deleteParams).promise();
+  console.log('\ndeleteGame result:', res);
+
+  return parseDynamoDBAttribute<GameState>(res);
+};

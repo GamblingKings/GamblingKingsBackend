@@ -4,7 +4,7 @@ import { response } from '../utils/responseHelper';
 import { Logger } from '../utils/Logger';
 import { WebSocketAPIGatewayEvent } from '../types/event';
 import { LambdaResponse } from '../types/response';
-import { removeUserFromGame } from '../dynamodb/gameDBService';
+import { deleteGame, getGameByGameId, removeUserFromGame } from '../dynamodb/gameDBService';
 import { User } from '../models/User';
 import { WebSocketClient } from '../websocket/WebSocketClient';
 import { UserStatesEnum } from '../enums/states';
@@ -12,6 +12,7 @@ import { Game } from '../models/Game';
 import { sendUpdates } from './functionsHelper';
 import { broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';
 import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
+import { deleteGameState } from '../dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -56,18 +57,24 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     await broadcastUserUpdate(ws, connectionId, UserStatesEnum.DISCONNECTED, connectionIds);
 
     // Delete user from Connections Table
-    const deletedUser = await deleteConnection(connectionId);
+    const deletedUser = (await deleteConnection(connectionId)) as User;
 
     // Additional cleanup when user disconnect
-    if (deletedUser) {
-      // 1. Remove the disconnected user from the game
-      const updatedGame = await cleanupUserWhenDisconnect(ws, deletedUser);
+    // 1. Remove the disconnected user from the game
+    const updatedGame = await cleanupUserWhenDisconnect(ws, deletedUser);
 
-      // 2. Delete the game if the user is the host of the game and send updates to other users
-      // (see comments in the function for more details)
-      if (updatedGame) {
-        await sendUpdates(ws, deletedUser.connectionId, updatedGame, deletedUser.username, connectionIds);
-      }
+    // 2. Delete the game if the user is the host of the game and send updates to other users
+    // (see comments in the function for more details)
+    if (updatedGame) {
+      await sendUpdates(ws, deletedUser.connectionId, updatedGame, deletedUser.username, connectionIds);
+    }
+
+    // 3. Final cleanup if all users in the game are disconnected
+    const gameId = deletedUser.gameId as string;
+    const { users } = (await getGameByGameId(gameId)) as Game;
+    if (!users || users.length === 0) {
+      await deleteGame(gameId);
+      await deleteGameState(gameId);
     }
 
     return response(200, 'Connection deleted successfully');
