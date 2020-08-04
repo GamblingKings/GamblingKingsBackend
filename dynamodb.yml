@@ -1,0 +1,40 @@
+Resources:
+  Connections:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Connections
+      AttributeDefinitions:
+        - AttributeName: connectionId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: connectionId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  Games:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Games
+      AttributeDefinitions:
+        - AttributeName: gameId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: gameId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  GameState:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: GameState
+      AttributeDefinitions:
+        - AttributeName: gameId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: gameId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5

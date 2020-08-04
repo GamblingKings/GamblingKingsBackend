@@ -1,5 +1,8 @@
 service: gamblingkingsbackend
 
+#######################################
+# Plugins
+#######################################
 plugins:
   - serverless-webpack
   #######################################
@@ -31,6 +34,9 @@ custom:
     # Uncomment only if you already have a DynamoDB running locally
     # noStart: true
 
+#######################################
+# Provider
+#######################################
 provider:
   name: aws
   runtime: nodejs12.x
@@ -85,6 +91,9 @@ provider:
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
 
+#######################################
+# Lambda Functions
+#######################################
 package:
   individually: true
 
@@ -150,45 +159,8 @@ functions:
     events:
       - websocket: PLAY_TILE
 
-# you can add CloudFormation resource templates here
+#######################################
+# Resources (e.g. dynamoDB tables)
+#######################################
 resources:
-  Resources:
-    Connections:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Connections
-        AttributeDefinitions:
-          - AttributeName: connectionId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: connectionId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-    Games:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Games
-        AttributeDefinitions:
-          - AttributeName: gameId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: gameId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-    GameState:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: GameState
-        AttributeDefinitions:
-          - AttributeName: gameId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: gameId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+  - ${file(./dynamodb.yml)}
