@@ -1,11 +1,11 @@
 import { Handler } from 'aws-lambda';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaResponse } from '../types/response';
-import { Logger } from '../utils/Logger';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { WebSocketClient } from '../websocket/WebSocketClient';
-import { response } from '../utils/responseHelper';
-import { broadcastDrawTileToUser } from '../websocket/broadcast/gameBroadcast';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaResponse } from '../../types/response';
+import { Logger } from '../../utils/Logger';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
+import { response } from '../../utils/responseHelper';
+import { broadcastDrawTileToUser } from '../../websocket/broadcast/gameBroadcast';
 
 /**
  * Handler for drawing a tile from the mahjong wall.

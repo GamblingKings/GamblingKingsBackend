@@ -89,60 +89,64 @@ package:
   individually: true
 
 functions:
-  onConnect:
-    handler: src/functions/onConnect.handler
-    events:
-      - websocket: $connect
-  onDisconnect:
-    handler: src/functions/onDisconnect.handler
-    events:
-      - websocket: $disconnect
+  # Default handler
   defaultHandler:
     handler: src/functions/defaultMessage.handler
     events:
       - websocket: $default
+  # Connection handlers
+  onConnect:
+    handler: src/functions/connection/onConnect.handler
+    events:
+      - websocket: $connect
+  onDisconnect:
+    handler: src/functions/connection/onDisconnect.handler
+    events:
+      - websocket: $disconnect
   onSetUsername:
-    handler: src/functions/onSetUsername.handler
+    handler: src/functions/connection/onSetUsername.handler
     events:
       - websocket: SET_USERNAME
-  onGetAllUsers:
-    handler: src/functions/onGetAllUsers.handler
-    events:
-      - websocket: GET_ALL_USERS
+  # Lobby handlers
   onCreateGame:
-    handler: src/functions/onCreateGame.handler
+    handler: src/functions/lobby/onCreateGame.handler
     events:
       - websocket: CREATE_GAME
+  onGetAllUsers:
+    handler: src/functions/lobby/onGetAllUsers.handler
+    events:
+      - websocket: GET_ALL_USERS
   onGetAllGames:
-    handler: src/functions/onGetAllGames.handler
+    handler: src/functions/lobby/onGetAllGames.handler
     events:
       - websocket: GET_ALL_GAMES
   onSendMessage:
-    handler: src/functions/onSendMessage.handler
+    handler: src/functions/lobby/onSendMessage.handler
     events:
       - websocket: SEND_MESSAGE
   onJoinGame:
-    handler: src/functions/onJoinGame.handler
+    handler: src/functions/lobby/onJoinGame.handler
     events:
       - websocket: JOIN_GAME
   onLeaveGame:
-    handler: src/functions/onLeaveGame.handler
+    handler: src/functions/lobby/onLeaveGame.handler
     events:
       - websocket: LEAVE_GAME
   onStartGame:
-    handler: src/functions/onStartGame.handler
+    handler: src/functions/lobby/onStartGame.handler
     events:
       - websocket: START_GAME
+  # Game handlers
   onGamePageLoad:
-    handler: src/functions/onGamePageLoad.handler
+    handler: src/functions/game/onGamePageLoad.handler
     events:
       - websocket: GAME_PAGE_LOAD
   onDrawTile:
-    handler: src/functions/onDrawTile.handler
+    handler: src/functions/game/onDrawTile.handler
     events:
       - websocket: DRAW_TILE
   onPlayTile:
-    handler: src/functions/onPlayTile.handler
+    handler: src/functions/game/onPlayTile.handler
     events:
       - websocket: PLAY_TILE
 

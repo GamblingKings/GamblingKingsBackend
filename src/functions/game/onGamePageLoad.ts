@@ -1,18 +1,18 @@
 import { Handler } from 'aws-lambda';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaResponse } from '../types/response';
-import { response } from '../utils/responseHelper';
-import { Logger } from '../utils/Logger';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { incrementGameLoadedCount } from '../dynamodb/gameDBService';
-import { WebSocketClient } from '../websocket/WebSocketClient';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaResponse } from '../../types/response';
+import { response } from '../../utils/responseHelper';
+import { Logger } from '../../utils/Logger';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { incrementGameLoadedCount } from '../../dynamodb/gameDBService';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
 import {
   createGamePageLoadResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
-} from '../websocket/createWSResponse';
-import { Game } from '../models/Game';
-import { broadcastGameStart } from '../websocket/broadcast/gameBroadcast';
+} from '../../websocket/createWSResponse';
+import { Game } from '../../models/Game';
+import { broadcastGameStart } from '../../websocket/broadcast/gameBroadcast';
 
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onGamePageLoad.ts');

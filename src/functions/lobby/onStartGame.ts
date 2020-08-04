@@ -1,16 +1,16 @@
 import { Handler } from 'aws-lambda';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaResponse, WebSocketResponse } from '../types/response';
-import { response } from '../utils/responseHelper';
-import { Logger } from '../utils/Logger';
-import { startGame } from '../dynamodb/gameDBService';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { WebSocketClient } from '../websocket/WebSocketClient';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaResponse, WebSocketResponse } from '../../types/response';
+import { response } from '../../utils/responseHelper';
+import { Logger } from '../../utils/Logger';
+import { startGame } from '../../dynamodb/gameDBService';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
 import {
   createStartGameResponse,
   successWebSocketResponse,
   failedWebSocketResponse,
-} from '../websocket/createWSResponse';
+} from '../../websocket/createWSResponse';
 
 const REQUIRED_NUMBER_OF_USERS = 4;
 

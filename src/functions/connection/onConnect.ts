@@ -1,9 +1,9 @@
 import { Handler } from 'aws-lambda';
-import { saveConnection } from '../dynamodb/userDBService';
-import { response } from '../utils/responseHelper';
-import { Logger } from '../utils/Logger';
-import { WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaResponse } from '../types/response';
+import { saveConnection } from '../../dynamodb/userDBService';
+import { response } from '../../utils/responseHelper';
+import { Logger } from '../../utils/Logger';
+import { WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaResponse } from '../../types/response';
 
 /**
  * Handler for websocket connection.

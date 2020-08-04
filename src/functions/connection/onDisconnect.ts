@@ -1,18 +1,18 @@
 import { Handler } from 'aws-lambda';
-import { deleteConnection, getAllConnections } from '../dynamodb/userDBService';
-import { response } from '../utils/responseHelper';
-import { Logger } from '../utils/Logger';
-import { WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaResponse } from '../types/response';
-import { deleteGame, getGameByGameId, removeUserFromGame } from '../dynamodb/gameDBService';
-import { User } from '../models/User';
-import { WebSocketClient } from '../websocket/WebSocketClient';
-import { UserStatesEnum } from '../enums/states';
-import { Game } from '../models/Game';
-import { sendUpdates } from './functionsHelper';
-import { broadcastUserUpdate } from '../websocket/broadcast/userBroadcast';
-import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
-import { deleteGameState } from '../dynamodb/gameStateDBService';
+import { deleteConnection, getAllConnections } from '../../dynamodb/userDBService';
+import { response } from '../../utils/responseHelper';
+import { Logger } from '../../utils/Logger';
+import { WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaResponse } from '../../types/response';
+import { deleteGame, getGameByGameId, removeUserFromGame } from '../../dynamodb/gameDBService';
+import { User } from '../../models/User';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
+import { UserStatesEnum } from '../../enums/states';
+import { Game } from '../../models/Game';
+import { sendUpdates } from '../functionsHelper';
+import { broadcastUserUpdate } from '../../websocket/broadcast/userBroadcast';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
+import { deleteGameState } from '../../dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions

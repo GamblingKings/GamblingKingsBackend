@@ -1,24 +1,24 @@
 import * as LambdaTester from 'lambda-tester';
-import { handler } from '../../src/functions/onDisconnect';
-import * as userFunctions from '../../src/dynamodb/userDBService';
-import * as gamesFunctions from '../../src/dynamodb/gameDBService';
-import * as gameStateFunctions from '../../src/dynamodb/gameStateDBService';
-import { response } from '../../src/utils/responseHelper';
-import { createEvent } from './functionsTestHelpers';
-import { LambdaResponse } from '../../src/types/response';
+import { handler } from '../../../src/functions/connection/onDisconnect';
+import * as userFunctions from '../../../src/dynamodb/userDBService';
+import * as gamesFunctions from '../../../src/dynamodb/gameDBService';
+import * as gameStateFunctions from '../../../src/dynamodb/gameStateDBService';
+import { response } from '../../../src/utils/responseHelper';
+import { createEvent } from '../functionsTestHelpers';
+import { LambdaResponse } from '../../../src/types/response';
 import {
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_USERNAME1,
   FAKE_USERNAME2,
   TEST_GAME_OBJECT1,
-} from '../testConstants';
-import { saveConnection, setGameIdForUser, setUsername } from '../../src/dynamodb/userDBService';
-import { addUserToGame, createGame, getGameByGameId } from '../../src/dynamodb/gameDBService';
-import { Game } from '../../src/models/Game';
-import { getConnectionIdsFromUsers } from '../../src/utils/broadcastHelper';
+} from '../../testConstants';
+import { saveConnection, setGameIdForUser, setUsername } from '../../../src/dynamodb/userDBService';
+import { addUserToGame, createGame, getGameByGameId } from '../../../src/dynamodb/gameDBService';
+import { Game } from '../../../src/models/Game';
+import { getConnectionIdsFromUsers } from '../../../src/utils/broadcastHelper';
 
-jest.mock('../../src/websocket/WebSocketClient');
+jest.mock('../../../src/websocket/WebSocketClient');
 
 describe('test onDisconnect', () => {
   let game: Game;

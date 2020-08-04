@@ -1,21 +1,21 @@
 import { Handler } from 'aws-lambda';
-import { addUserToGame } from '../dynamodb/gameDBService';
-import { response } from '../utils/responseHelper';
-import { Logger } from '../utils/Logger';
-import { WebSocketClient } from '../websocket/WebSocketClient';
+import { addUserToGame } from '../../dynamodb/gameDBService';
+import { response } from '../../utils/responseHelper';
+import { Logger } from '../../utils/Logger';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
 import {
   createJoinGameResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
-} from '../websocket/createWSResponse';
-import { removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
-import { Game } from '../models/Game';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { LambdaResponse } from '../types/response';
-import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
-import { setGameIdForUser } from '../dynamodb/userDBService';
-import { broadcastInGameMessage, broadcastInGameUpdate } from '../websocket/broadcast/gameBroadcast';
+} from '../../websocket/createWSResponse';
+import { removeDynamoDocumentVersion } from '../../dynamodb/dbHelper';
+import { Game } from '../../models/Game';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { LambdaResponse } from '../../types/response';
+import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
+import { setGameIdForUser } from '../../dynamodb/userDBService';
+import { broadcastInGameMessage, broadcastInGameUpdate } from '../../websocket/broadcast/gameBroadcast';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions

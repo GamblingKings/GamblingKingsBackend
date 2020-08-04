@@ -1,11 +1,11 @@
 import { Handler } from 'aws-lambda';
-import { response } from '../utils/responseHelper';
-import { WebSocketClient } from '../websocket/WebSocketClient';
-import { Logger } from '../utils/Logger';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { LambdaResponse } from '../types/response';
-import { broadcastMessage } from '../websocket/broadcast/messageBroadcast';
+import { response } from '../../utils/responseHelper';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
+import { Logger } from '../../utils/Logger';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { LambdaResponse } from '../../types/response';
+import { broadcastMessage } from '../../websocket/broadcast/messageBroadcast';
 
 /**
  * Handler for sending a message to all the users (or connections).
