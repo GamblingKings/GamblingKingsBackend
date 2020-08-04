@@ -2,6 +2,7 @@ import * as LambdaTester from 'lambda-tester';
 import { handler } from '../../src/functions/onDisconnect';
 import * as userFunctions from '../../src/dynamodb/userDBService';
 import * as gamesFunctions from '../../src/dynamodb/gameDBService';
+import * as gameStateFunctions from '../../src/dynamodb/gameStateDBService';
 import { response } from '../../src/utils/responseHelper';
 import { createEvent } from './functionsTestHelpers';
 import { LambdaResponse } from '../../src/types/response';
@@ -34,6 +35,8 @@ describe('test onDisconnect', () => {
   let deleteConnectionSpy: jest.SpyInstance;
   let getAllConnectionsSpy: jest.SpyInstance;
   let removeUserFromGameSpy: jest.SpyInstance;
+  let deleteGameSpy: jest.SpyInstance;
+  let deleteGameStateSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     await saveConnection(FAKE_CONNECTION_ID1);
@@ -50,6 +53,8 @@ describe('test onDisconnect', () => {
     deleteConnectionSpy = jest.spyOn(userFunctions, 'deleteConnection');
     getAllConnectionsSpy = jest.spyOn(userFunctions, 'getAllConnections');
     removeUserFromGameSpy = jest.spyOn(gamesFunctions, 'removeUserFromGame');
+    deleteGameSpy = jest.spyOn(gamesFunctions, 'deleteGame');
+    deleteGameStateSpy = jest.spyOn(gameStateFunctions, 'deleteGameState');
   });
 
   afterEach(() => {
@@ -69,6 +74,8 @@ describe('test onDisconnect', () => {
     expect(getAllConnectionsSpy).toHaveBeenCalledTimes(1);
     expect(removeUserFromGameSpy).toHaveBeenCalledTimes(1);
     expect(deleteConnectionSpy).toHaveBeenCalledWith(FAKE_CONNECTION_ID1);
+    expect(deleteGameSpy).toHaveBeenCalledTimes(1);
+    expect(deleteGameStateSpy).toHaveBeenCalledTimes(1);
 
     // User is host, game should be deleted
     const updatedGame = await getGameByGameId(gameId);

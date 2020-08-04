@@ -66,15 +66,23 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // 2. Delete the game if the user is the host of the game and send updates to other users
     // (see comments in the function for more details)
     if (updatedGame) {
-      await sendUpdates(ws, deletedUser.connectionId, updatedGame, deletedUser.username, connectionIds);
-    }
+      const updateResult = await sendUpdates(
+        ws,
+        deletedUser.connectionId,
+        updatedGame,
+        deletedUser.username,
+        connectionIds,
+      );
 
-    // 3. Final cleanup if all users in the game are disconnected
-    const gameId = deletedUser.gameId as string;
-    const { users } = (await getGameByGameId(gameId)) as Game;
-    if (!users || users.length === 0) {
-      await deleteGame(gameId);
-      await deleteGameState(gameId);
+      // 3. Final cleanup if all users in the game are disconnected
+      if (updateResult && !updateResult.isGameDeleted) {
+        const gameId = deletedUser.gameId as string;
+        const { users } = (await getGameByGameId(gameId)) as Game;
+        if (!users || users.length === 0) {
+          await deleteGame(gameId);
+          await deleteGameState(gameId);
+        }
+      }
     }
 
     return response(200, 'Connection deleted successfully');

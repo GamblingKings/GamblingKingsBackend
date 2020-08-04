@@ -4,7 +4,6 @@ import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
 import { GameState, UserHand } from '../models/GameState';
 import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
-import { Game } from '../models/Game';
 
 const DEFAULT_GAME_STATE_PARAMS = [
   'gameId',
@@ -17,6 +16,9 @@ const DEFAULT_GAME_STATE_PARAMS = [
   'currentTurn',
 ];
 
+/* ----------------------------------------------------------------------------
+ * Put
+ * ------------------------------------------------------------------------- */
 /**
  * Initialize the game by generating a mahjong wall,
  * 4 hands of mahjong, and save the initial game state to the db
@@ -62,6 +64,9 @@ export const initGameState = async (
   return initialGame;
 };
 
+/* ----------------------------------------------------------------------------
+ * Get
+ * ------------------------------------------------------------------------- */
 /**
  * Get the current game state by game Id.
  * @param {string} gameId game Id
@@ -107,6 +112,24 @@ export const getUserHandsInGame = async (gameId: string, connectionId: string): 
   return getHandByConnectionId(hands, connectionId);
 };
 
+export const getCurrentDealer = async (gameId: string): Promise<number | undefined> => {
+  const currentState = await getGameStateByGameId(gameId, ['dealer']);
+  return currentState?.dealer;
+};
+
+export const getCurrentWind = async (gameId: string): Promise<number | undefined> => {
+  const currentState = await getGameStateByGameId(gameId, ['currentWind']);
+  return currentState?.currentWind;
+};
+
+export const getCurrentTurn = async (gameId: string): Promise<number | undefined> => {
+  const currentGameState = await getGameStateByGameId(gameId, ['currentTurn']);
+  return currentGameState?.currentTurn;
+};
+
+/* ----------------------------------------------------------------------------
+ * Update
+ * ------------------------------------------------------------------------- */
 /**
  * Increment the tile index by 1.
  * @param {string} gameId Game Id
@@ -151,11 +174,6 @@ export const drawTile = async (gameId: string): Promise<string> => {
   return tileDrawn;
 };
 
-export const getCurrentDealer = async (gameId: string): Promise<number | undefined> => {
-  const currentState = await getGameStateByGameId(gameId, ['dealer']);
-  return currentState?.dealer;
-};
-
 export const changeDealer = async (gameId: string): Promise<GameState | undefined> => {
   const currentGameState = await getGameStateByGameId(gameId);
 
@@ -193,11 +211,6 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
   return parseDynamoDBAttribute<GameState>(res);
 };
 
-export const getCurrentWind = async (gameId: string): Promise<number | undefined> => {
-  const currentState = await getGameStateByGameId(gameId, ['currentWind']);
-  return currentState?.currentWind;
-};
-
 export const changeWind = async (gameId: string): Promise<GameState | undefined> => {
   const currentGameState = await getGameStateByGameId(gameId);
 
@@ -233,11 +246,6 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
   console.log('\nchangeWind result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
-};
-
-export const getCurrentTurn = async (gameId: string): Promise<number | undefined> => {
-  const currentGameState = await getGameStateByGameId(gameId, ['currentTurn']);
-  return currentGameState?.currentTurn;
 };
 
 export const changeTurn = async (gameId: string): Promise<GameState | undefined> => {
@@ -284,6 +292,9 @@ export const changeTurn = async (gameId: string): Promise<GameState | undefined>
 //   return {} as GameState;
 // };
 
+/* ----------------------------------------------------------------------------
+ * Delete
+ * ------------------------------------------------------------------------- */
 export const deleteGameState = async (gameId: string): Promise<GameState | undefined> => {
   const deleteParams: DocumentClient.DeleteItemInput = {
     TableName: GAME_STATE_TABLE,

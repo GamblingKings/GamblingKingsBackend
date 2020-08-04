@@ -10,6 +10,7 @@ import {
 } from '../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 import { deleteGameState } from '../dynamodb/gameStateDBService';
+import { sendUpdateResult } from '../types/gameUpdate';
 
 /**
  * Helper function to send updates to other users in the game when a user leaves the game.
@@ -25,7 +26,7 @@ export const sendUpdates = async (
   updatedGame: Game,
   username: string | undefined = undefined,
   allConnectionIds: string[] = [],
-): Promise<void> => {
+): Promise<sendUpdateResult> => {
   const connectionIds = getConnectionIdsFromUsers(updatedGame.users);
   await broadcastInGameMessage(ws, connectionId, WebSocketActionsEnum.LEAVE_GAME, connectionIds, username);
 
@@ -42,6 +43,8 @@ export const sendUpdates = async (
    * 1) send IN_GAME_UPDATE
    */
 
+  const updateResult: sendUpdateResult = { isGameDeleted: false };
+
   // If the game is not started yet
   if (!started) {
     // If the host leaves the game,
@@ -52,11 +55,14 @@ export const sendUpdates = async (
       await broadcastGameUpdate(ws, gameId, GameStatesEnum.DELETED, connectionId, allConnectionIds, true);
       await deleteGame(gameId);
       await deleteGameState(gameId);
-      return;
+      updateResult.isGameDeleted = true;
+      return updateResult;
     }
   }
 
   // If other user leaves the game, DON'T delete the game and
   // 1) send IN_GAME_UPDATE to other users in the game,
   await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
+
+  return updateResult;
 };
