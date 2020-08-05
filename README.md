@@ -37,11 +37,11 @@ yarn run dev:cleanup
 yarn run install_dep
 ```
 
-2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](src/dynamodb/db.ts) and [WebSocketClient.ts](src/websocket/WebSocketClient.ts)
+2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml)
 
 3. (**Important**) Increase max space size for Node (otherwise, webpack may not work in your local machine)
 
-```
+```shell script
 export NODE_OPTIONS="--max-old-space-size=8192"
 ```
 
@@ -118,7 +118,7 @@ yarn start
   "action": "CREATE_GAME",
   "payload": {
     "game": {
-      "gameName": "Chow Yun-fat，the Mhajong King",
+      "gameName": "Chow Yun-fat，the Mahjong King",
       "gameType": "Mahjong",
       "gameVersion": "Japanese"
     }
@@ -224,7 +224,7 @@ yarn start
 7. `DRAW_TILE`: Draw one tile and send it to a user in the game
 8. `LEAVE_GAME`: To remove user from the Games table if user disconnects or manually leave a game.
    Note: if the user leaving the game is the game host, the game will be deleted
-9. `PLAY_TILE`: _TO BE IMPLEMENTED_
+9. `PLAY_TILE`: Send a played tile to all users in the game
 
 ## Testing
 
@@ -236,11 +236,11 @@ yarn start
 
 - [jest.config.js](./jest.config.js)
 - [jest-dynalite-config.js](./jest-dynalite-config.js)
-- [global.d.ts](__test__/global.d.ts): for ide or editor to recognize jest-extended library
+- [global.d.ts](./global.d.ts): for ide or editor to recognize jest-extended library
 
 ### Test folder
 
-- See [**test**](./src/__test__)
+- See [**test**](./__test__)
 
 ## TODOs on Optimization and Future Refactoring
 

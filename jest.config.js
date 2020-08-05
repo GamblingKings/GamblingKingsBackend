@@ -14,6 +14,7 @@ module.exports = {
     'src/dynamodb/**/*.ts',
     'src/games/**/*.ts',
     'src/models/**/*.ts',
+    'src/enums/**/*.ts',
     'src/types/**/*.ts',
     'src/utils/**/*.ts',
 
