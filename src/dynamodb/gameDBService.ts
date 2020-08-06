@@ -268,6 +268,10 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
   return parseDynamoDBAttribute<Game>(res);
 };
 
+/**
+ * Increment game page loaded count to 4 before GAME_START lambda can be called
+ * @param {string} gameId Game Id
+ */
 export const incrementGameLoadedCount = async (gameId: string): Promise<Game | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,

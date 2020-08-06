@@ -21,13 +21,11 @@ import {
   FAKE_GAME_ID,
   NON_EXISTING_GAME_ID,
 } from '../testConstants';
-import { DEFAULT_MAX_USERS_IN_GAME } from '../../src/utils/constants';
+import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from '../../src/utils/constants';
 import { GameState, UserHand } from '../../src/models/GameState';
 import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
-const MAX_WALL_LENGTH = 144;
-const DEFAULT_HAND_LENGTH = 13;
 
 /* ----------------------------------------------------------------------------
  * Test initGameState
@@ -127,7 +125,7 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
     expect(connectionId).toBe(FAKE_CONNECTION_ID1);
 
     const mapperKeys = Object.keys(TileMapper);
-    expect(hand).toHaveLength(13);
+    expect(hand).toHaveLength(DEFAULT_HAND_LENGTH);
 
     hand.forEach((tileStringDef: string) => expect(mapperKeys.includes(tileStringDef)).toBeTruthy());
   });

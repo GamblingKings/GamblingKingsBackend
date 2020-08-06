@@ -1,4 +1,5 @@
 import { HongKongWall } from '../../../../src/games/mahjong/Wall/version/HongKongWall';
+import { DEFAULT_HAND_LENGTH } from '../../../../src/utils/constants';
 
 const DEFAULT_WALL_LENGTH = 144;
 
@@ -10,14 +11,14 @@ test('wall to have DEFAULT_WALL_LENGTH tiles when initialized', () => {
 test('Generate hand will yield a hand of 13 tiles', () => {
   const wall = new HongKongWall();
   const hand = wall.generateHand();
-  expect(hand).toHaveLength(13);
+  expect(hand).toHaveLength(DEFAULT_HAND_LENGTH);
 });
 
 test('Generate hand increment wall index by 13', () => {
   const wall = new HongKongWall();
   const hand = wall.generateHand();
-  expect(hand).toHaveLength(13);
-  expect(wall.getCurrentTileIndex()).toBe(13);
+  expect(hand).toHaveLength(DEFAULT_HAND_LENGTH);
+  expect(wall.getCurrentTileIndex()).toBe(DEFAULT_HAND_LENGTH);
 });
 
 test('Generate hand will take tiles from the correct indexes', () => {
@@ -27,7 +28,7 @@ test('Generate hand will take tiles from the correct indexes', () => {
   wall.generateHand();
   const hand = wall.generateHand();
 
-  const tilesDrawn = [...wall.getTiles().slice(13, 13 * 2)];
+  const tilesDrawn = [...wall.getTiles().slice(DEFAULT_HAND_LENGTH, DEFAULT_HAND_LENGTH * 2)];
 
   let same = true;
 
