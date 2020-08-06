@@ -28,4 +28,9 @@ module.exports = {
       },
     ],
   },
+  watch: true,
+  watchOptions: {
+    aggregateTimeout: 0,
+    ignored: ['__test__/**/*.test.ts', 'node_modules/**'],
+  },
 };

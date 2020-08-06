@@ -13,7 +13,9 @@ plugins:
 
 custom:
   webpack:
-    includeModules: true
+    webpackConfig: 'webpack.config.js'
+    includeModules: false
+    packager: 'yarn'
   serverless-offline:
     useChildProcesses: true
   #######################################
