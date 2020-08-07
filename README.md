@@ -14,6 +14,7 @@
 - Typescript
 - Serverless
 - Java Runtime Engine (JRE) version 6.x or newer
+- (**Important**) Add a `config` file under `.aws` folder (`C:\Users\USERNAME\.aws\config` for Windows and `~/.aws/config` for Unix-based systems)
 
 ### Start local development
 
@@ -239,6 +240,7 @@ yarn start
 8. `LEAVE_GAME`: To remove user from the Games table if user disconnects or manually leave a game.
    Note: if the user leaving the game is the game host, the game will be deleted
 9. `PLAY_TILE`: Send a played tile to all users in the game
+10. `PLAYED_TILE_INTERACTION` \* 3: Interact with a played tile to make a meld (Consecutive, Triplet, or Quad), and the backend will decide who can take this tile based on meld priority. If all three other users decide not to take the tile, the tile can be skipped and not taken by anyone.
 
 ## Testing
 
