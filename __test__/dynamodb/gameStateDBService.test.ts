@@ -437,7 +437,7 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
       playedTile: '1_BAMBOO',
       connectionId: FAKE_CONNECTION_ID1,
       possibleMeld: MeldEnum.CONSECUTIVE,
-      skip: false,
+      skipInteraction: false,
     };
 
     // Test function call
@@ -464,7 +464,7 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
       playedTile: '9_DOT',
       connectionId: FAKE_CONNECTION_ID1,
       possibleMeld: MeldEnum.CONSECUTIVE,
-      skip: false,
+      skipInteraction: false,
     };
     const expectedPlayedTileList: PlayedTile[] = [
       expectedPlayedTile,
@@ -497,7 +497,7 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
       playedTile: '1_BAMBOO',
       connectionId: FAKE_CONNECTION_ID1,
       possibleMeld: MeldEnum.CONSECUTIVE,
-      skip: false,
+      skipInteraction: false,
     };
     const errorMsg = 'The conditional request failed';
 

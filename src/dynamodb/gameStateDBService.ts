@@ -55,7 +55,7 @@ export const initGameState = async (
     currentWind: 0, // Start with East
     currentTurn: 0, // Game start from host
     interactionCount: 0,
-    playedTile: [],
+    playedTileInteractions: [],
   };
 
   const putParam: DocumentClient.PutItemInput = {
@@ -140,8 +140,8 @@ export const getCurrentWind = async (gameId: string): Promise<number | undefined
  * @param {string} gameId Game Id
  */
 export const getCurrentPlayedTile = async (gameId: string): Promise<PlayedTile[] | undefined> => {
-  const currentGameState = await getGameStateByGameId(gameId, ['playedTile']);
-  return currentGameState?.playedTile;
+  const currentGameState = await getGameStateByGameId(gameId, ['playedTileInteractions']);
+  return currentGameState?.playedTileInteractions;
 };
 
 /**
@@ -287,13 +287,13 @@ export const setPlayedTileInteraction = async (
   connectionId: string,
   playedTile: string,
   meld: string,
-  skip = false,
+  skipInteraction = false,
 ): Promise<GameState | undefined> => {
   const playedTileVal: PlayedTile = {
     connectionId,
     playedTile,
     possibleMeld: meld,
-    skip,
+    skipInteraction,
   };
 
   const updateParam: DocumentClient.UpdateItemInput = {
@@ -304,12 +304,12 @@ export const setPlayedTileInteraction = async (
     ConditionExpression: 'attribute_exists(#gameIdKey) AND #interactionCountKey < :maxUserCount',
     UpdateExpression: `
       ADD #interactionCountKey :incrementIndexBy
-      SET #playedTileKey = list_append(#playedTileKey, :playedTileVal)
+      SET #playedTileInteractionsKey = list_append(#playedTileInteractionsKey, :playedTileVal)
     `,
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
       '#interactionCountKey': 'interactionCount',
-      '#playedTileKey': 'playedTile',
+      '#playedTileInteractionsKey': 'playedTileInteractions',
     },
     ExpressionAttributeValues: {
       ':incrementIndexBy': 1,
@@ -334,12 +334,12 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
     ConditionExpression: 'attribute_exists(#gameIdKey)',
     UpdateExpression: `
       SET #interactionCountKey = :initialInteractionCountVal,
-          #playedTileKey = :emptyPlayedTileVal
+          #playedTileInteractionsKey = :emptyPlayedTileVal
     `,
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
       '#interactionCountKey': 'interactionCount',
-      '#playedTileKey': 'playedTile',
+      '#playedTileInteractionsKey': 'playedTileInteractions',
     },
     ExpressionAttributeValues: {
       ':initialInteractionCountVal': 0,

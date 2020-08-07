@@ -33,9 +33,9 @@ import { User } from '../../models/User';
 export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: WebSocketClient): Promise<void> => {
   const users = (await getUsersInGame(gameId)) as User[];
   const connectionIds = getConnectionIdsFromUsers(users);
-  const playedTileInteractionList = (await getCurrentPlayedTile(gameId)) as PlayedTile[];
-  const interactions: PlayedTile[] = playedTileInteractionList.filter((playedTileInteraction) => {
-    return !playedTileInteraction.skip;
+  const playedTileInteractions = (await getCurrentPlayedTile(gameId)) as PlayedTile[];
+  const interactions: PlayedTile[] = playedTileInteractions.filter((playedTileInteraction) => {
+    return !playedTileInteraction.skipInteraction;
   });
 
   let messageSent = false;

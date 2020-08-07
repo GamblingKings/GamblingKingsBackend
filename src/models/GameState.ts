@@ -9,7 +9,7 @@ export interface GameState {
   currentIndex: number;
   currentWind: number;
   currentTurn: number;
-  playedTile?: PlayedTile[];
+  playedTileInteractions?: PlayedTile[];
   interactionCount?: number;
 }
 
@@ -17,7 +17,7 @@ export interface PlayedTile {
   playedTile: string;
   possibleMeld: string | undefined;
   connectionId: string;
-  skip: boolean;
+  skipInteraction: boolean;
 }
 
 /**
