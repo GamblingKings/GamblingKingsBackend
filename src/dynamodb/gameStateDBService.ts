@@ -2,7 +2,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, GAME_STATE_TABLE } from '../utils/constants';
 import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
-import { GameState, UserHand } from '../models/GameState';
+import { GameState, PlayedTile, UserHand } from '../models/GameState';
 import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
 
 /* ----------------------------------------------------------------------------
@@ -54,6 +54,8 @@ export const initGameState = async (
     dealer: 0,
     currentWind: 0, // Start with East
     currentTurn: 0, // Game start from host
+    interactionCount: 0,
+    playedTile: [],
   };
 
   const putParam: DocumentClient.PutItemInput = {
@@ -134,12 +136,21 @@ export const getCurrentWind = async (gameId: string): Promise<number | undefined
 };
 
 /**
- * Get the current turn in a game.
+ * Get the current played tile.
  * @param {string} gameId Game Id
  */
-export const getCurrentTurn = async (gameId: string): Promise<number | undefined> => {
-  const currentGameState = await getGameStateByGameId(gameId, ['currentTurn']);
-  return currentGameState?.currentTurn;
+export const getCurrentPlayedTile = async (gameId: string): Promise<PlayedTile[] | undefined> => {
+  const currentGameState = await getGameStateByGameId(gameId, ['playedTile']);
+  return currentGameState?.playedTile;
+};
+
+/**
+ * Get the current interaction count for the played tile.
+ * @param {string} gameId Game Id
+ */
+export const getInteractionCount = async (gameId: string): Promise<number | undefined> => {
+  const currentGameState = await getGameStateByGameId(gameId, ['interactionCount']);
+  return currentGameState?.interactionCount;
 };
 
 /* ----------------------------------------------------------------------------
@@ -271,53 +282,48 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
   return parseDynamoDBAttribute<GameState>(res);
 };
 
-/**
- * Change turn number in a game.
- * @param {string} gameId Game Id
- */
-export const changeTurn = async (gameId: string): Promise<GameState | undefined> => {
-  const currentGameState = await getGameStateByGameId(gameId);
-
-  if (!currentGameState) {
-    throw Error('changeTurn: game state not found');
-  }
-
-  const { currentTurn } = currentGameState;
-  let nextTurn: number;
-
-  // reset wind num
-  if (currentTurn === 3) nextTurn = 0;
-  else nextTurn = currentTurn + 1;
+export const setPlayedTileInteraction = async (
+  gameId: string,
+  connectionId: string,
+  playedTile: string,
+  meld: string,
+  skip = false,
+): Promise<GameState | undefined> => {
+  const playedTileVal: PlayedTile = {
+    connectionId,
+    playedTile,
+    possibleMeld: meld,
+    skip,
+  };
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
     Key: {
       gameId,
     },
-    ConditionExpression: ':currentTurnVal < :maxUserCount',
-    UpdateExpression: 'SET #currentTurnKey = :currentTurnVal',
+    ConditionExpression: 'attribute_exists(#gameIdKey) AND #interactionCountKey < :maxUserCount',
+    UpdateExpression: `
+      ADD #interactionCountKey :incrementIndexBy
+      SET #playedTileKey = list_append(#playedTileKey, :playedTileVal)
+    `,
     ExpressionAttributeNames: {
-      '#currentTurnKey': 'currentTurn',
+      '#gameIdKey': 'gameId',
+      '#interactionCountKey': 'interactionCount',
+      '#playedTileKey': 'playedTile',
     },
     ExpressionAttributeValues: {
-      ':currentTurnVal': nextTurn,
+      ':incrementIndexBy': 1,
       ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
+      ':playedTileVal': [playedTileVal],
     },
     ReturnValues: 'ALL_NEW',
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nchangeTurn result:', res);
+  console.log('\nincrementPlayedTileInteractionCount result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
-
-// export const incrementPlayedTileInteraction = async (
-//   gameId: string,
-//   meldType: MeldEnum,
-// ): Promise<GameState | undefined> => {
-//   return {} as GameState;
-// };
 
 /* ----------------------------------------------------------------------------
  * Delete

@@ -1,17 +1,18 @@
 import * as gameStateDBFunctions from '../../src/dynamodb/gameStateDBService';
 import {
   changeDealer,
-  changeTurn,
   changeWind,
   drawTile,
   getCurrentDealer,
-  getCurrentTurn,
+  getCurrentPlayedTile,
   getCurrentWallByGameId,
   getCurrentWind,
   getGameStateByGameId,
+  getInteractionCount,
   getUserHandsInGame,
   incrementCurrentTileIndex,
   initGameState,
+  setPlayedTileInteraction,
 } from '../../src/dynamodb/gameStateDBService';
 import {
   FAKE_CONNECTION_ID1,
@@ -22,8 +23,9 @@ import {
   NON_EXISTING_GAME_ID,
 } from '../testConstants';
 import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from '../../src/utils/constants';
-import { GameState, UserHand } from '../../src/models/GameState';
+import { GameState, PlayedTile, UserHand } from '../../src/models/GameState';
 import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
+import { MeldEnum } from '../../src/enums/MeldEnum';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
 
@@ -401,54 +403,116 @@ describe('test changeWind, getCurrentWind', () => {
 });
 
 /* ----------------------------------------------------------------------------
- * Test changeTurn, getCurrentTurn
+ * Test incrementPlayedTileInteractionCount, getCurrentPlayedTile, getInteractionCount
  * ------------------------------------------------------------------------- */
-describe('test changeTurn, getCurrentTurn', () => {
+describe('test incrementPlayedTileInteractionCount', () => {
   let gameState: GameState;
   let gameId: string;
-  let currentTurn: number;
 
-  // Spy
-  let changeTurnSpy: jest.SpyInstance;
+  let setPlayedTileInteractionSpy: jest.SpyInstance;
+  let getInteractionCountSpy: jest.SpyInstance;
+  let getCurrentPlayedTileSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
     gameId = gameState.gameId;
-    currentTurn = gameState.currentTurn;
 
-    changeTurnSpy = jest.spyOn(gameStateDBFunctions, 'changeTurn');
+    setPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'setPlayedTileInteraction');
+    getInteractionCountSpy = jest.spyOn(gameStateDBFunctions, 'getInteractionCount');
+    getCurrentPlayedTileSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentPlayedTile');
   });
 
   afterEach(() => {
-    changeTurnSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
-  test('it should update turn', async () => {
-    expect(currentTurn).toBe(0);
-    expect(await getCurrentTurn(gameId)).toBe(0);
+  test('it should set playedTile list and increment interaction count correctly', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
 
-    const response = (await changeTurn(gameId)) as GameState;
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    const expectedPlayedTile: PlayedTile = {
+      playedTile: '1_BAMBOO',
+      connectionId: FAKE_CONNECTION_ID1,
+      possibleMeld: MeldEnum.CONSECUTIVE,
+      skip: false,
+    };
 
     // Test function call
-    expect(changeTurnSpy).toHaveBeenCalledTimes(1);
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(1);
 
     // Test response
-    expect(response.currentTurn).toBe(1);
-    expect(await getCurrentTurn(gameId)).toBe(1);
+    expect(await getInteractionCount(gameId)).toBe(1);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([expectedPlayedTile]);
   });
 
-  test('it should fail if game does not exist', async () => {
-    expect(currentTurn).toBe(0);
-    expect(await getCurrentTurn(gameId)).toBe(0);
+  test('it should set playedTile list and count concurrently', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
 
-    const func = changeTurn(NON_EXISTING_GAME_ID);
-    const errorMsg = 'changeTurn: game state not found';
+    await Promise.all(
+      CONNECTION_IDS.map((connectionId) => {
+        return setPlayedTileInteraction(gameId, connectionId, '9_DOT', MeldEnum.CONSECUTIVE);
+      }),
+    );
+    const expectedPlayedTile: PlayedTile = {
+      playedTile: '9_DOT',
+      connectionId: FAKE_CONNECTION_ID1,
+      possibleMeld: MeldEnum.CONSECUTIVE,
+      skip: false,
+    };
+    const expectedPlayedTileList: PlayedTile[] = [
+      expectedPlayedTile,
+      { ...expectedPlayedTile, connectionId: FAKE_CONNECTION_ID2 },
+      { ...expectedPlayedTile, connectionId: FAKE_CONNECTION_ID3 },
+      { ...expectedPlayedTile, connectionId: FAKE_CONNECTION_ID4 },
+    ];
 
     // Test function call
-    expect(changeTurnSpy).toHaveBeenCalledTimes(1);
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(4);
+
+    // Test response
+    expect(await getInteractionCount(gameId)).toBe(4);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers(expectedPlayedTileList);
+  });
+
+  test('it should throw error when interaction count exceeds 4', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
+
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    const func = setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    const expectedPlayedTile: PlayedTile = {
+      playedTile: '1_BAMBOO',
+      connectionId: FAKE_CONNECTION_ID1,
+      possibleMeld: MeldEnum.CONSECUTIVE,
+      skip: false,
+    };
+    const errorMsg = 'The conditional request failed';
+
+    // Test function call
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(5);
 
     // Test response
     await expect(func).rejects.toThrow(errorMsg);
-    expect(await getCurrentTurn(gameId)).toBe(0);
+    expect(await getInteractionCount(gameId)).toBe(4);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([
+      expectedPlayedTile,
+      expectedPlayedTile,
+      expectedPlayedTile,
+      expectedPlayedTile,
+    ]);
   });
 });
