@@ -325,6 +325,35 @@ export const setPlayedTileInteraction = async (
   return parseDynamoDBAttribute<GameState>(res);
 };
 
+export const resetPlayedTileInteraction = async (gameId: string): Promise<GameState | undefined> => {
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId,
+    },
+    ConditionExpression: 'attribute_exists(#gameIdKey)',
+    UpdateExpression: `
+      SET #interactionCountKey = :initialInteractionCountVal,
+          #playedTileKey = :emptyPlayedTileVal
+    `,
+    ExpressionAttributeNames: {
+      '#gameIdKey': 'gameId',
+      '#interactionCountKey': 'interactionCount',
+      '#playedTileKey': 'playedTile',
+    },
+    ExpressionAttributeValues: {
+      ':initialInteractionCountVal': 0,
+      ':emptyPlayedTileVal': [],
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await DB.update(updateParam).promise();
+  console.log('\nincrementPlayedTileInteractionCount result:', res);
+
+  return parseDynamoDBAttribute<GameState>(res);
+};
+
 /* ----------------------------------------------------------------------------
  * Delete
  * ------------------------------------------------------------------------- */

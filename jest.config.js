@@ -14,7 +14,6 @@ module.exports = {
     'src/dynamodb/**/*.ts',
     'src/games/**/*.ts',
     'src/models/**/*.ts',
-    'src/enums/**/*.ts',
     'src/types/**/*.ts',
     'src/utils/**/*.ts',
 
@@ -22,6 +21,7 @@ module.exports = {
     '!src/functions/**/*.ts',
     '!src/websocket/broadcast/**/*.ts',
     '!src/dynamodb/**/db.ts',
+    '!src/enums/**/*.ts',
   ],
   setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
   preset: 'jest-dynalite',

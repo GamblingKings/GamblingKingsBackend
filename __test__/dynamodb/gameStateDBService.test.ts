@@ -12,6 +12,7 @@ import {
   getUserHandsInGame,
   incrementCurrentTileIndex,
   initGameState,
+  resetPlayedTileInteraction,
   setPlayedTileInteraction,
 } from '../../src/dynamodb/gameStateDBService';
 import {
@@ -403,9 +404,9 @@ describe('test changeWind, getCurrentWind', () => {
 });
 
 /* ----------------------------------------------------------------------------
- * Test incrementPlayedTileInteractionCount, getCurrentPlayedTile, getInteractionCount
+ * Test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCount
  * ------------------------------------------------------------------------- */
-describe('test incrementPlayedTileInteractionCount', () => {
+describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCount', () => {
   let gameState: GameState;
   let gameId: string;
 
@@ -514,5 +515,53 @@ describe('test incrementPlayedTileInteractionCount', () => {
       expectedPlayedTile,
       expectedPlayedTile,
     ]);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test resetPlayedTileInteraction
+ * ------------------------------------------------------------------------- */
+describe('test resetPlayedTileInteraction', () => {
+  let gameState: GameState;
+  let gameId: string;
+
+  let setPlayedTileInteractionSpy: jest.SpyInstance;
+  let getInteractionCountSpy: jest.SpyInstance;
+  let getCurrentPlayedTileSpy: jest.SpyInstance;
+  let resetPlayedTileInteractionSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameId = gameState.gameId;
+
+    setPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'setPlayedTileInteraction');
+    getInteractionCountSpy = jest.spyOn(gameStateDBFunctions, 'getInteractionCount');
+    getCurrentPlayedTileSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentPlayedTile');
+    resetPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'resetPlayedTileInteraction');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should reset interaction count and playedTile list', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
+
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_CHARACTER', MeldEnum.CONSECUTIVE);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID2, '3_DOT', MeldEnum.TRIPLET);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID3, '9_BAMBOO', MeldEnum.CONSECUTIVE);
+    await resetPlayedTileInteraction(gameId);
+
+    // Test function call
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(3);
+    expect(resetPlayedTileInteractionSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([]);
   });
 });

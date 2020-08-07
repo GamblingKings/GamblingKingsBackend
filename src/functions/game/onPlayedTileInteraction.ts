@@ -12,7 +12,12 @@ import {
   successWebSocketResponse,
 } from '../../websocket/createWSResponse';
 import { MeldEnum } from '../../enums/MeldEnum';
-import { getCurrentPlayedTile, getInteractionCount, setPlayedTileInteraction } from '../../dynamodb/gameStateDBService';
+import {
+  getCurrentPlayedTile,
+  getInteractionCount,
+  resetPlayedTileInteraction,
+  setPlayedTileInteraction,
+} from '../../dynamodb/gameStateDBService';
 import { GameState, PlayedTile } from '../../models/GameState';
 import { DEFAULT_MAX_USERS_IN_GAME } from '../../utils/constants';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
@@ -114,8 +119,15 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // Compare meld type and send message based on priority
     console.log('newInteractionCount:', newInteractionCount);
+    let interactionEnded = false;
     if (newInteractionCount === 3) {
+      interactionEnded = true;
       await compareTileInteractionAndSendUpdate(gameId, ws);
+    }
+
+    // Reset interactionCount to be 0 and playedTile list to empty
+    if (interactionEnded) {
+      await resetPlayedTileInteraction(gameId);
     }
 
     return response(200, 'Tile interaction is successful');
