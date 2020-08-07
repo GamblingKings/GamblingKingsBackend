@@ -160,6 +160,10 @@ functions:
     handler: src/functions/game/onPlayTile.handler
     events:
       - websocket: PLAY_TILE
+  onPlayedTileInteraction:
+    handler: src/functions/game/onPlayedTileInteraction.handler
+    events:
+      - websocket: PLAYED_TILE_INTERACTION
 
 #######################################
 # Resources (e.g. dynamoDB tables)

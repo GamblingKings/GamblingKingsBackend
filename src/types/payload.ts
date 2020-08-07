@@ -26,6 +26,7 @@ export interface LambdaEventBodyPayloadOptions {
   tile?: string;
   playedTile?: string;
   meldType?: string;
+  skipInteraction?: boolean;
 }
 
 export interface UserUpdatePayload {
@@ -89,5 +90,11 @@ export interface PlayTilePayload {
 export interface PlayedTileInteractionPayload {
   playedTile: string;
   meldType: string;
-  skip: boolean;
+  skipInteraction: boolean;
+}
+
+export interface InteractionSuccessPayload {
+  playedTile: string;
+  meldType: string;
+  connectionId: string;
 }

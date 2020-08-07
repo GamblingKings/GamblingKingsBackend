@@ -6,6 +6,19 @@ import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
 import { GameStatesEnum } from '../enums/states';
 import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from './dbHelper';
+import { User } from '../models/User';
+
+const DEFAULT_GAME_ATTRIBUTES = [
+  'gameId',
+  'host',
+  'users',
+  'gameLoadedCount',
+  'gameName',
+  'gameType',
+  'gameVersion',
+  'state',
+  'started',
+];
 
 /* ----------------------------------------------------------------------------
  * Interface
@@ -97,9 +110,14 @@ export const getGameByGameId = async (gameId: string): Promise<Game | undefined>
   };
 
   const res = await DB.get(getParam).promise();
-  console.log('\ngetGameByGameId result:', res);
+  console.log('\ngetGameStateByGameId result:', res);
 
   return parseDynamoDBItem<Game>(res);
+};
+
+export const getUsersInGame = async (gameId: string): Promise<User[] | undefined> => {
+  const game = await getGameByGameId(gameId);
+  return game?.users;
 };
 
 /* ----------------------------------------------------------------------------

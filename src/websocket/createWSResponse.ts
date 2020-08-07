@@ -7,6 +7,7 @@ import {
   GetAllUsersPayload,
   InGameMessagePayload,
   InGameUpdatePayload,
+  InteractionSuccessPayload,
   JoinGamePayload,
   LambdaEventBodyPayloadOptions,
   LeaveGamePayload,
@@ -212,6 +213,11 @@ export const createLoginSuccessResponse = (): WebSocketResponse => {
 export const createLoginFailureResponse = (errorMessage: string): WebSocketResponse => {
   const wsResponse = createWSResponse(WebSocketActionsEnum.LOGIN_SUCCESS, {});
   return failedWebSocketResponse(wsResponse, errorMessage);
+};
+
+export const createInteractionSuccessResponse = (payload: InteractionSuccessPayload): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActionsEnum.INTERACTION_SUCCESS, payload);
+  return successWebSocketResponse(wsResponse);
 };
 
 /* ----------------------------------------------------------------------------
