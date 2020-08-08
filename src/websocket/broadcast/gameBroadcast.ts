@@ -164,12 +164,7 @@ export const broadcastInGameUpdate = async (
   return usersInGame;
 };
 
-export const broadcastGameStart = async (
-  ws: WebSocketClient,
-  gameId: string,
-  hostConnectionId: string,
-  usersInGame: User[],
-): Promise<void> => {
+export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, usersInGame: User[]): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(usersInGame);
   const { hands } = await initGameState(gameId, connectionIds);
 
