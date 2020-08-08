@@ -17,8 +17,11 @@ module.exports = {
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '.webpack'),
     filename: '[name].js',
+    sourceMapFilename: '[file].map',
   },
-  externals: [nodeExternals()],
+  // Build code + packages into one js file,
+  // hence need to remove this line + set includeModules: false in serverless.yml
+  // externals: [nodeExternals()],
   module: {
     rules: [
       {

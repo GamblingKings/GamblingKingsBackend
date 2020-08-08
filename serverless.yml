@@ -14,10 +14,8 @@ plugins:
 custom:
   webpack:
     webpackConfig: 'webpack.config.js'
-    includeModules: true
+    includeModules: false
     packager: 'yarn'
-  serverless-offline:
-    useChildProcesses: true
   #######################################
   # Uncomment this for local dev only
   #######################################
@@ -44,6 +42,7 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-west-2
+  memorySize: 256 # optional, in MB, default is 1024
 
   websocketsApiName: mahjong-websocket
   websocketsApiRouteSelectionExpression: $request.body.action # custom routes are selected by the value of the action property in the body
