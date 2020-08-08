@@ -9,4 +9,10 @@ export const GAME_STATE_TABLE = 'GameState';
  * Default Document Version
  */
 export const DEFAULT_DOCUMENT_VERSION = 1;
+
+/**
+ * Mahjong Constants
+ */
 export const DEFAULT_MAX_USERS_IN_GAME = 4;
+export const DEFAULT_HAND_LENGTH = 13;
+export const MAX_WALL_LENGTH = 144;

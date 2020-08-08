@@ -13,6 +13,7 @@ import { HonorTiles } from '../Tile/HonorTiles';
 import { simpleTileInit } from './init/Simple';
 import { honorTileInit } from './init/Honor';
 import { TileFactory } from '../Tile/TileFactory';
+import { DEFAULT_HAND_LENGTH } from '../../../utils/constants';
 
 export abstract class Wall {
   static DEFAULT_NUM_OF_TILE = 4;
@@ -84,7 +85,7 @@ export abstract class Wall {
    */
   public generateHand(): string[] {
     const hand: string[] = [];
-    for (let i = 0; i < 13; i += 1) {
+    for (let i = 0; i < DEFAULT_HAND_LENGTH; i += 1) {
       const currentTile = this.tiles[this.currentTileIndex];
       hand.push(currentTile);
       this.currentTileIndex += 1;

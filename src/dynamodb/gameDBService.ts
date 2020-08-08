@@ -4,8 +4,9 @@ import { Game } from '../models/Game';
 import { DEFAULT_DOCUMENT_VERSION, DEFAULT_MAX_USERS_IN_GAME, GAMES_TABLE } from '../utils/constants';
 import { DB } from './db';
 import { getUserByConnectionId } from './userDBService';
-import { GameStates } from '../enums/states';
+import { GameStatesEnum } from '../enums/states';
 import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from './dbHelper';
+import { User } from '../models/User';
 
 /* ----------------------------------------------------------------------------
  * Interface
@@ -18,7 +19,7 @@ interface CreateGameParams {
 }
 
 /* ----------------------------------------------------------------------------
- * Game
+ * Put
  * ------------------------------------------------------------------------- */
 /**
  * Create a game that takes in a list of connection Ids (users) and write to the Games Table.
@@ -48,7 +49,7 @@ export const createGame = async ({
     gameName: gameName || '',
     gameType: gameType || '',
     gameVersion: gameVersion || '',
-    state: GameStates.CREATED,
+    state: GameStatesEnum.CREATED,
     started: false,
     gameLoadedCount: 0,
 
@@ -67,6 +68,9 @@ export const createGame = async ({
   return game;
 };
 
+/* ----------------------------------------------------------------------------
+ * Get
+ * ------------------------------------------------------------------------- */
 /**
  * Get all the games (rows) from the Games Table.
  */
@@ -94,11 +98,19 @@ export const getGameByGameId = async (gameId: string): Promise<Game | undefined>
   };
 
   const res = await DB.get(getParam).promise();
-  console.log('\ngetGameByGameId result:', res);
+  console.log('\ngetGameStateByGameId result:', res);
 
   return parseDynamoDBItem<Game>(res);
 };
 
+export const getUsersInGame = async (gameId: string): Promise<User[] | undefined> => {
+  const game = await getGameByGameId(gameId);
+  return game?.users;
+};
+
+/* ----------------------------------------------------------------------------
+ * Update
+ * ------------------------------------------------------------------------- */
 /**
  * Add a user to an existing game.
  * @param {string} gameId game Id
@@ -219,25 +231,6 @@ export const removeUserFromGame = async (gameId: string, connectionId: string): 
 };
 
 /**
- * Delete game from Games Table.
- * @param {string} gameId game Id
- */
-export const deleteGame = async (gameId: string): Promise<Game | undefined> => {
-  const deleteParams: DocumentClient.DeleteItemInput = {
-    TableName: GAMES_TABLE,
-    Key: {
-      gameId,
-    },
-    ReturnValues: 'ALL_OLD',
-  };
-
-  const res = await DB.delete(deleteParams).promise();
-  console.log('\ndeleteGame result:', res);
-
-  return parseDynamoDBAttribute<Game>(res);
-};
-
-/**
  * Set game started flag to true.
  * @param {string} gameId game Id
  * @param {string} callerConnectionId caller's connection id
@@ -281,6 +274,10 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
   return parseDynamoDBAttribute<Game>(res);
 };
 
+/**
+ * Increment game page loaded count to 4 before GAME_START lambda can be called
+ * @param {string} gameId Game Id
+ */
 export const incrementGameLoadedCount = async (gameId: string): Promise<Game | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
@@ -313,6 +310,28 @@ export const incrementGameLoadedCount = async (gameId: string): Promise<Game | u
 
   const res = await DB.update(updateParam).promise();
   console.log('\nincrementUserReadyCount result:', res);
+
+  return parseDynamoDBAttribute<Game>(res);
+};
+
+/* ----------------------------------------------------------------------------
+ * Delete
+ * ------------------------------------------------------------------------- */
+/**
+ * Delete game from Games Table.
+ * @param {string} gameId game Id
+ */
+export const deleteGame = async (gameId: string): Promise<Game | undefined> => {
+  const deleteParams: DocumentClient.DeleteItemInput = {
+    TableName: GAMES_TABLE,
+    Key: {
+      gameId,
+    },
+    ReturnValues: 'ALL_OLD',
+  };
+
+  const res = await DB.delete(deleteParams).promise();
+  console.log('\ndeleteGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };

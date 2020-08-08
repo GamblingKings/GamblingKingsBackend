@@ -7,23 +7,25 @@ import {
   GetAllUsersPayload,
   InGameMessagePayload,
   InGameUpdatePayload,
+  InteractionSuccessPayload,
   JoinGamePayload,
   LambdaEventBodyPayloadOptions,
   LeaveGamePayload,
+  PlayedTileInteractionPayload,
   PlayTilePayload,
   SendMessagePayload,
   UserUpdatePayload,
 } from '../types/payload';
 import { WebSocketResponse } from '../types/response';
-import { WebSocketActions } from '../enums/WebSocketActions';
+import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
 
 /**
  * Create a websocket response object.
- * @param {WebSocketActions} action one of the actions from WebSocketActions
+ * @param {WebSocketActionsEnum} action one of the actions from WebSocketActions
  * @param {LambdaEventBodyPayloadOptions} payload one of the payload options from LambdaEventBodyPayloadOptions
  */
 const createWSResponse = <T extends LambdaEventBodyPayloadOptions>(
-  action: WebSocketActions,
+  action: WebSocketActionsEnum,
   payload: T,
 ): WebSocketResponse => {
   return {
@@ -41,7 +43,7 @@ const createWSResponse = <T extends LambdaEventBodyPayloadOptions>(
  * @param {GetAllUsersPayload} payload payload object
  */
 export const createGetAllUsersResponse = (payload: GetAllUsersPayload): WebSocketResponse => {
-  return createWSResponse<GetAllUsersPayload>(WebSocketActions.GET_ALL_USERS, payload);
+  return createWSResponse<GetAllUsersPayload>(WebSocketActionsEnum.GET_ALL_USERS, payload);
 };
 
 /**
@@ -49,7 +51,7 @@ export const createGetAllUsersResponse = (payload: GetAllUsersPayload): WebSocke
  * @param {UserUpdatePayload} payload payload object
  */
 export const createUserUpdateResponse = (payload: UserUpdatePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.USER_UPDATE, payload);
+  return createWSResponse(WebSocketActionsEnum.USER_UPDATE, payload);
 };
 
 /* ----------------------------------------------------------------------------
@@ -61,7 +63,7 @@ export const createUserUpdateResponse = (payload: UserUpdatePayload): WebSocketR
  * @param {GetAllGamesPayload} payload payload object
  */
 export const createGetAllGamesResponse = (payload: GetAllGamesPayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.GET_ALL_GAMES, payload);
+  return createWSResponse(WebSocketActionsEnum.GET_ALL_GAMES, payload);
 };
 
 /**
@@ -70,7 +72,7 @@ export const createGetAllGamesResponse = (payload: GetAllGamesPayload): WebSocke
  */
 export const createGameResponse = (payload: CreateGamePayload | undefined): WebSocketResponse => {
   const wsPayload = payload || {};
-  return createWSResponse(WebSocketActions.CREATE_GAME, wsPayload);
+  return createWSResponse(WebSocketActionsEnum.CREATE_GAME, wsPayload);
 };
 
 /**
@@ -79,7 +81,7 @@ export const createGameResponse = (payload: CreateGamePayload | undefined): WebS
  */
 export const createJoinGameResponse = (payload: JoinGamePayload | undefined): WebSocketResponse => {
   const wsPayload = payload || {};
-  return createWSResponse(WebSocketActions.JOIN_GAME, wsPayload);
+  return createWSResponse(WebSocketActionsEnum.JOIN_GAME, wsPayload);
 };
 
 /**
@@ -88,7 +90,7 @@ export const createJoinGameResponse = (payload: JoinGamePayload | undefined): We
  */
 export const createLeaveResponse = (payload: LeaveGamePayload | undefined): WebSocketResponse => {
   const wsPayload = payload || {};
-  return createWSResponse(WebSocketActions.LEAVE_GAME, wsPayload);
+  return createWSResponse(WebSocketActionsEnum.LEAVE_GAME, wsPayload);
 };
 
 /**
@@ -96,7 +98,7 @@ export const createLeaveResponse = (payload: LeaveGamePayload | undefined): WebS
  * @param {GameUpdatePayload} payload object
  */
 export const createGameUpdateResponse = (payload: GameUpdatePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.GAME_UPDATE, payload);
+  return createWSResponse(WebSocketActionsEnum.GAME_UPDATE, payload);
 };
 
 /**
@@ -104,7 +106,7 @@ export const createGameUpdateResponse = (payload: GameUpdatePayload): WebSocketR
  * @param {InGameUpdatePayload} payload payload object
  */
 export const createInGameUpdateResponse = (payload: InGameUpdatePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.IN_GAME_UPDATE, payload);
+  return createWSResponse(WebSocketActionsEnum.IN_GAME_UPDATE, payload);
 };
 
 /**
@@ -118,21 +120,21 @@ export const createInGameMessageResponse = (username: string, message: string): 
     message,
     time: new Date().toISOString(),
   };
-  return createWSResponse(WebSocketActions.IN_GAME_MESSAGE, wsPayload);
+  return createWSResponse(WebSocketActionsEnum.IN_GAME_MESSAGE, wsPayload);
 };
 
 /**
  * Create START_GAME response object.
  */
 export const createStartGameResponse = (): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.START_GAME, {});
+  return createWSResponse(WebSocketActionsEnum.START_GAME, {});
 };
 
 /**
  * Create GAME_PAGE_LOAD response object.
  */
 export const createGamePageLoadResponse = (): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.GAME_PAGE_LOAD, {});
+  return createWSResponse(WebSocketActionsEnum.GAME_PAGE_LOAD, {});
 };
 
 /**
@@ -140,7 +142,7 @@ export const createGamePageLoadResponse = (): WebSocketResponse => {
  * @param {GameStartPayload} payload payload object
  */
 export const createGameStartResponse = (payload: GameStartPayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.GAME_START, payload);
+  return createWSResponse(WebSocketActionsEnum.GAME_START, payload);
 };
 
 /**
@@ -148,7 +150,7 @@ export const createGameStartResponse = (payload: GameStartPayload): WebSocketRes
  * @param {DrawTilePayload} payload payload object
  */
 export const createDrawTileResponse = (payload: DrawTilePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.DRAW_TILE, payload);
+  return createWSResponse(WebSocketActionsEnum.DRAW_TILE, payload);
 };
 
 /**
@@ -156,7 +158,15 @@ export const createDrawTileResponse = (payload: DrawTilePayload): WebSocketRespo
  * @param {DrawTilePayload} payload payload object
  */
 export const createPlayTileResponse = (payload: PlayTilePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActions.PLAY_TILE, payload);
+  return createWSResponse(WebSocketActionsEnum.PLAY_TILE, payload);
+};
+
+/**
+ * Create PLAYED_TILE_INTERACTION response object.
+ * @param {DrawTilePayload} payload payload object
+ */
+export const createPlayedTileInteractionResponse = (payload: PlayedTileInteractionPayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.PLAYED_TILE_INTERACTION, payload);
 };
 
 /* ----------------------------------------------------------------------------
@@ -192,7 +202,7 @@ export const failedWebSocketResponse = (
  * Create LOGIN_SUCCESS success response object.
  */
 export const createLoginSuccessResponse = (): WebSocketResponse => {
-  const wsResponse = createWSResponse(WebSocketActions.LOGIN_SUCCESS, {});
+  const wsResponse = createWSResponse(WebSocketActionsEnum.LOGIN_SUCCESS, {});
   return successWebSocketResponse(wsResponse);
 };
 
@@ -201,8 +211,17 @@ export const createLoginSuccessResponse = (): WebSocketResponse => {
  * @param {string} errorMessage error message during login
  */
 export const createLoginFailureResponse = (errorMessage: string): WebSocketResponse => {
-  const wsResponse = createWSResponse(WebSocketActions.LOGIN_SUCCESS, {});
+  const wsResponse = createWSResponse(WebSocketActionsEnum.LOGIN_SUCCESS, {});
   return failedWebSocketResponse(wsResponse, errorMessage);
+};
+
+/**
+ * Create INTERACTION_SUCCESS response object.
+ * @param {string} payload payload object
+ */
+export const createInteractionSuccessResponse = (payload: InteractionSuccessPayload): WebSocketResponse => {
+  const wsResponse = createWSResponse(WebSocketActionsEnum.INTERACTION_SUCCESS, payload);
+  return successWebSocketResponse(wsResponse);
 };
 
 /* ----------------------------------------------------------------------------
@@ -220,5 +239,5 @@ export const createSendMessageResponse = ({ username, message }: SendMessagePayl
     message,
     time: new Date().toISOString(),
   };
-  return createWSResponse(WebSocketActions.SEND_MESSAGE, wsPayload);
+  return createWSResponse(WebSocketActionsEnum.SEND_MESSAGE, wsPayload);
 };

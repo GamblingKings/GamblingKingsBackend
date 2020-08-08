@@ -1,13 +1,13 @@
 import { Handler } from 'aws-lambda';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaResponse } from '../types/response';
-import { Logger } from '../utils/Logger';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { WebSocketClient } from '../websocket/WebSocketClient';
-import { response } from '../utils/responseHelper';
-import { broadcastPlayedTileToUsers } from '../websocket/broadcast/gameBroadcast';
-import { getGameByGameId } from '../dynamodb/gameDBService';
-import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaResponse } from '../../types/response';
+import { Logger } from '../../utils/Logger';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
+import { response } from '../../utils/responseHelper';
+import { broadcastPlayedTileToUsers } from '../../websocket/broadcast/gameBroadcast';
+import { getGameByGameId } from '../../dynamodb/gameDBService';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
 /**
  * Handler for drawing a tile from the mahjong wall.
@@ -35,7 +35,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     }
 
     // Send the tile that is played by a user
-    await broadcastPlayedTileToUsers(ws, tile, connectionIds);
+    await broadcastPlayedTileToUsers(ws, tile, connectionId, connectionIds);
 
     return response(200, 'Tile discarded successfully');
   } catch (err) {

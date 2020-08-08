@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const slsw = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
 
 const { isLocal } = slsw.lib.webpack;
 
@@ -17,8 +16,8 @@ module.exports = {
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '.webpack'),
     filename: '[name].js',
+    sourceMapFilename: '[file].map',
   },
-  externals: [nodeExternals()],
   module: {
     rules: [
       {
@@ -27,5 +26,10 @@ module.exports = {
         loader: 'ts-loader',
       },
     ],
+  },
+  watch: true,
+  watchOptions: {
+    aggregateTimeout: 0,
+    ignored: ['__test__/**/*.test.ts', 'node_modules/**'],
   },
 };

@@ -14,6 +14,7 @@
 - Typescript
 - Serverless
 - Java Runtime Engine (JRE) version 6.x or newer
+- (**Important**) Add a `config` file under `.aws` folder (`C:\Users\USERNAME\.aws\config` for Windows and `~/.aws/config` for Unix-based systems)
 
 ### Start local development
 
@@ -37,11 +38,11 @@ yarn run dev:cleanup
 yarn run install_dep
 ```
 
-2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml), [db.ts](src/dynamodb/db.ts) and [WebSocketClient.ts](src/websocket/WebSocketClient.ts)
+2. Remember to uncomment the code for local dev in [serverless.yml](./serverless.yml)
 
 3. (**Important**) Increase max space size for Node (otherwise, webpack may not work in your local machine)
 
-```
+```shell script
 export NODE_OPTIONS="--max-old-space-size=8192"
 ```
 
@@ -118,7 +119,7 @@ yarn start
   "action": "CREATE_GAME",
   "payload": {
     "game": {
-      "gameName": "Chow Yun-fat，the Mhajong King",
+      "gameName": "Chow Yun-fat，the Mahjong King",
       "gameType": "Mahjong",
       "gameVersion": "Japanese"
     }
@@ -201,7 +202,7 @@ yarn start
 }
 ```
 
-`PLAY_TILE` (_TO BE IMPLEMENTED_)
+`PLAY_TILE`
 
 ```json
 {
@@ -209,6 +210,20 @@ yarn start
   "payload": {
     "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c",
     "tile": "1_DOT"
+  }
+}
+```
+
+`PLAYED_TILE_INTERACTION`
+
+```json
+{
+  "action": "PLAYED_TILE_INTERACTION",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c",
+    "playedTile": "1_DOT",
+    "meldType": "TRIPLET",
+    "skipInteraction": false
   }
 }
 ```
@@ -224,7 +239,8 @@ yarn start
 7. `DRAW_TILE`: Draw one tile and send it to a user in the game
 8. `LEAVE_GAME`: To remove user from the Games table if user disconnects or manually leave a game.
    Note: if the user leaving the game is the game host, the game will be deleted
-9. `PLAY_TILE`: _TO BE IMPLEMENTED_
+9. `PLAY_TILE`: Send a played tile to all users in the game
+10. `PLAYED_TILE_INTERACTION` \* 3: Interact with a played tile to make a meld (Consecutive, Triplet, or Quad), and the backend will decide who can take this tile based on meld priority. If all three other users decide not to take the tile, the tile can be skipped and not taken by anyone.
 
 ## Testing
 
@@ -236,11 +252,11 @@ yarn start
 
 - [jest.config.js](./jest.config.js)
 - [jest-dynalite-config.js](./jest-dynalite-config.js)
-- [global.d.ts](__test__/global.d.ts): for ide or editor to recognize jest-extended library
+- [global.d.ts](./global.d.ts): for ide or editor to recognize jest-extended library
 
 ### Test folder
 
-- See [**test**](./src/__test__)
+- See [**test**](./__test__)
 
 ## TODOs on Optimization and Future Refactoring
 

@@ -31,14 +31,15 @@ import {
   UserUpdatePayload,
 } from '../../src/types/payload';
 import {
+  FAKE_CONNECTION_ID1,
   TEST_GAME_OBJECT1,
   TEST_GAME_OBJECT2,
   TEST_USER_OBJECT1,
   TEST_USER_OBJECT2,
   TEST_USER_OBJECT3,
 } from '../testConstants';
-import { WebSocketActions } from '../../src/enums/WebSocketActions';
-import { GameStates, UserStates } from '../../src/enums/states';
+import { WebSocketActionsEnum } from '../../src/enums/WebSocketActionsEnum';
+import { GameStatesEnum, UserStatesEnum } from '../../src/enums/states';
 import { WebSocketResponse } from '../../src/types/response';
 import { Game } from '../../src/models/Game';
 
@@ -61,7 +62,7 @@ describe('test createGetAllUsersResponse', () => {
     users: TEST_USERS_LIST,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.GET_ALL_USERS,
+    action: WebSocketActionsEnum.GET_ALL_USERS,
     payload: {
       users: TEST_USERS_LIST,
     },
@@ -78,13 +79,13 @@ describe('test createGetAllUsersResponse', () => {
 describe('test createUserUpdateResponse', () => {
   const testUserUpdatePayload: UserUpdatePayload = {
     user: TEST_USER_OBJECT1,
-    state: UserStates.CONNECTED,
+    state: UserStatesEnum.CONNECTED,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.USER_UPDATE,
+    action: WebSocketActionsEnum.USER_UPDATE,
     payload: {
       user: TEST_USER_OBJECT1,
-      state: UserStates.CONNECTED,
+      state: UserStatesEnum.CONNECTED,
     },
   };
 
@@ -105,7 +106,7 @@ describe('test createGetAllGamesResponse', () => {
     games: TEST_GAMES_LIST,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.GET_ALL_GAMES,
+    action: WebSocketActionsEnum.GET_ALL_GAMES,
     payload: {
       games: TEST_GAMES_LIST,
     },
@@ -125,7 +126,7 @@ describe('test createGameResponse', () => {
       game: TEST_GAME_1,
     };
     const expectedResponse: WebSocketResponse = {
-      action: WebSocketActions.CREATE_GAME,
+      action: WebSocketActionsEnum.CREATE_GAME,
       payload: {
         game: TEST_GAME_1,
       },
@@ -141,7 +142,7 @@ describe('test createGameResponse', () => {
       game: {} as Game,
     };
     const expectedResponse: WebSocketResponse = {
-      action: WebSocketActions.CREATE_GAME,
+      action: WebSocketActionsEnum.CREATE_GAME,
       payload: {
         game: {} as Game,
       },
@@ -159,7 +160,7 @@ describe('test createJoinGameResponse', () => {
       game: TEST_GAME_1,
     };
     const expectedResponse: WebSocketResponse = {
-      action: WebSocketActions.JOIN_GAME,
+      action: WebSocketActionsEnum.JOIN_GAME,
       payload: {
         game: TEST_GAME_1,
       },
@@ -175,7 +176,7 @@ describe('test createJoinGameResponse', () => {
       game: {} as Game,
     };
     const expectedResponse: WebSocketResponse = {
-      action: WebSocketActions.JOIN_GAME,
+      action: WebSocketActionsEnum.JOIN_GAME,
       payload: {
         game: {} as Game,
       },
@@ -192,7 +193,7 @@ describe('test createLeaveGameResponse', () => {
     game: TEST_GAME_1,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.LEAVE_GAME,
+    action: WebSocketActionsEnum.LEAVE_GAME,
     payload: {
       game: TEST_GAME_1,
     },
@@ -209,13 +210,13 @@ describe('test createLeaveGameResponse', () => {
 describe('test createGameUpdateResponse', () => {
   const testGameUpdatePayload: GameUpdatePayload = {
     game: TEST_GAME_1,
-    state: GameStates.CREATED,
+    state: GameStatesEnum.CREATED,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.GAME_UPDATE,
+    action: WebSocketActionsEnum.GAME_UPDATE,
     payload: {
       game: TEST_GAME_1,
-      state: GameStates.CREATED,
+      state: GameStatesEnum.CREATED,
     },
   };
 
@@ -232,7 +233,7 @@ describe('test createInGameUpdateResponse', () => {
     users: TEST_USERS_LIST,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.IN_GAME_UPDATE,
+    action: WebSocketActionsEnum.IN_GAME_UPDATE,
     payload: {
       users: TEST_USERS_LIST,
     },
@@ -263,7 +264,7 @@ describe('test createStartGameResponse', () => {
   test('it should get the correct response', () => {
     const response = createStartGameResponse();
     const expectedResponse = {
-      action: WebSocketActions.START_GAME,
+      action: WebSocketActionsEnum.START_GAME,
       payload: {},
     };
 
@@ -276,7 +277,7 @@ describe('test createGamePageLoadResponse', () => {
   test('it should get the correct response', () => {
     const response = createGamePageLoadResponse();
     const expectedResponse = {
-      action: WebSocketActions.GAME_PAGE_LOAD,
+      action: WebSocketActionsEnum.GAME_PAGE_LOAD,
       payload: {},
     };
 
@@ -290,7 +291,7 @@ describe('test createGameStartResponse', () => {
     const testTiles = '';
     const response = createGameStartResponse({ tiles: testTiles });
     const expectedResponse = {
-      action: WebSocketActions.GAME_START,
+      action: WebSocketActionsEnum.GAME_START,
       payload: {
         tiles: testTiles,
       },
@@ -306,7 +307,7 @@ describe('test createDrawTileResponse', () => {
     const testTile = '1_DOT';
     const response = createDrawTileResponse({ tile: testTile });
     const expectedResponse = {
-      action: WebSocketActions.DRAW_TILE,
+      action: WebSocketActionsEnum.DRAW_TILE,
       payload: {
         tile: testTile,
       },
@@ -320,15 +321,17 @@ describe('test createDrawTileResponse', () => {
 describe('test createPlayTileResponse', () => {
   test('it should get the correct response', () => {
     const testTile = '2_DOT';
-    const response = createPlayTileResponse({ tile: testTile });
+    const response = createPlayTileResponse({ tile: testTile, connectionId: FAKE_CONNECTION_ID1 });
+    const expectedPayload = {
+      tile: testTile,
+      connectionId: FAKE_CONNECTION_ID1,
+    };
     const expectedResponse = {
-      action: WebSocketActions.PLAY_TILE,
-      payload: {
-        tile: testTile,
-      },
+      action: WebSocketActionsEnum.PLAY_TILE,
+      payload: expectedPayload,
     };
 
-    expect(response.payload).toStrictEqual({ tile: testTile });
+    expect(response.payload).toStrictEqual(expectedPayload);
     expect(response).toStrictEqual(expectedResponse);
   });
 });
@@ -339,14 +342,14 @@ describe('test createPlayTileResponse', () => {
 describe('test successWebSocketResponse', () => {
   const testPayload: GameUpdatePayload = {
     game: TEST_GAME_1,
-    state: GameStates.CREATED,
+    state: GameStatesEnum.CREATED,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.GAME_UPDATE,
+    action: WebSocketActionsEnum.GAME_UPDATE,
     payload: {
       success: true,
       game: TEST_GAME_1,
-      state: GameStates.CREATED,
+      state: GameStatesEnum.CREATED,
     },
   };
 
@@ -362,15 +365,15 @@ describe('test failedWebSocketResponse', () => {
   const testErrorMsg = 'test error message';
   const testPayload: GameUpdatePayload = {
     game: TEST_GAME_1,
-    state: GameStates.CREATED,
+    state: GameStatesEnum.CREATED,
   };
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.GAME_UPDATE,
+    action: WebSocketActionsEnum.GAME_UPDATE,
     payload: {
       success: false,
       error: testErrorMsg,
       game: TEST_GAME_1,
-      state: GameStates.CREATED,
+      state: GameStatesEnum.CREATED,
     },
   };
 
@@ -385,7 +388,7 @@ describe('test failedWebSocketResponse', () => {
 
 describe('test createLoginSuccessResponse', () => {
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.LOGIN_SUCCESS,
+    action: WebSocketActionsEnum.LOGIN_SUCCESS,
     payload: {
       success: true,
     },
@@ -402,7 +405,7 @@ describe('test createLoginSuccessResponse', () => {
 describe('test createLoginFailureResponse', () => {
   const errorMsg = 'test error msg';
   const expectedResponse: WebSocketResponse = {
-    action: WebSocketActions.LOGIN_SUCCESS,
+    action: WebSocketActionsEnum.LOGIN_SUCCESS,
     payload: {
       success: false,
       error: errorMsg,

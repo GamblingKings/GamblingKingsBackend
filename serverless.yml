@@ -1,5 +1,8 @@
 service: gamblingkingsbackend
 
+#######################################
+# Plugins
+#######################################
 plugins:
   - serverless-webpack
   #######################################
@@ -10,9 +13,9 @@ plugins:
 
 custom:
   webpack:
-    includeModules: true
-  serverless-offline:
-    useChildProcesses: true
+    webpackConfig: 'webpack.config.js'
+    includeModules: false
+    packager: 'yarn'
   #######################################
   # Uncomment this for local dev only
   #######################################
@@ -31,11 +34,15 @@ custom:
     # Uncomment only if you already have a DynamoDB running locally
     # noStart: true
 
+#######################################
+# Provider
+#######################################
 provider:
   name: aws
   runtime: nodejs12.x
   stage: dev
   region: us-west-2
+  memorySize: 256 # optional, in MB, default is 1024
 
   websocketsApiName: mahjong-websocket
   websocketsApiRouteSelectionExpression: $request.body.action # custom routes are selected by the value of the action property in the body
@@ -85,106 +92,80 @@ provider:
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
 
+#######################################
+# Lambda Functions
+#######################################
 package:
   individually: true
 
 functions:
-  onConnect:
-    handler: src/functions/onConnect.handler
-    events:
-      - websocket: $connect
-  onDisconnect:
-    handler: src/functions/onDisconnect.handler
-    events:
-      - websocket: $disconnect
+  # Default handler
   defaultHandler:
     handler: src/functions/defaultMessage.handler
     events:
       - websocket: $default
+  # Connection handlers
+  onConnect:
+    handler: src/functions/connection/onConnect.handler
+    events:
+      - websocket: $connect
+  onDisconnect:
+    handler: src/functions/connection/onDisconnect.handler
+    events:
+      - websocket: $disconnect
   onSetUsername:
-    handler: src/functions/onSetUsername.handler
+    handler: src/functions/connection/onSetUsername.handler
     events:
       - websocket: SET_USERNAME
-  onGetAllUsers:
-    handler: src/functions/onGetAllUsers.handler
-    events:
-      - websocket: GET_ALL_USERS
+  # Lobby handlers
   onCreateGame:
-    handler: src/functions/onCreateGame.handler
+    handler: src/functions/lobby/onCreateGame.handler
     events:
       - websocket: CREATE_GAME
+  onGetAllUsers:
+    handler: src/functions/lobby/onGetAllUsers.handler
+    events:
+      - websocket: GET_ALL_USERS
   onGetAllGames:
-    handler: src/functions/onGetAllGames.handler
+    handler: src/functions/lobby/onGetAllGames.handler
     events:
       - websocket: GET_ALL_GAMES
   onSendMessage:
-    handler: src/functions/onSendMessage.handler
+    handler: src/functions/lobby/onSendMessage.handler
     events:
       - websocket: SEND_MESSAGE
   onJoinGame:
-    handler: src/functions/onJoinGame.handler
+    handler: src/functions/lobby/onJoinGame.handler
     events:
       - websocket: JOIN_GAME
   onLeaveGame:
-    handler: src/functions/onLeaveGame.handler
+    handler: src/functions/lobby/onLeaveGame.handler
     events:
       - websocket: LEAVE_GAME
   onStartGame:
-    handler: src/functions/onStartGame.handler
+    handler: src/functions/lobby/onStartGame.handler
     events:
       - websocket: START_GAME
+  # Game handlers
   onGamePageLoad:
-    handler: src/functions/onGamePageLoad.handler
+    handler: src/functions/game/onGamePageLoad.handler
     events:
       - websocket: GAME_PAGE_LOAD
   onDrawTile:
-    handler: src/functions/onDrawTile.handler
+    handler: src/functions/game/onDrawTile.handler
     events:
       - websocket: DRAW_TILE
   onPlayTile:
-    handler: src/functions/onPlayTile.handler
+    handler: src/functions/game/onPlayTile.handler
     events:
       - websocket: PLAY_TILE
+  onPlayedTileInteraction:
+    handler: src/functions/game/onPlayedTileInteraction.handler
+    events:
+      - websocket: PLAYED_TILE_INTERACTION
 
-# you can add CloudFormation resource templates here
+#######################################
+# Resources (e.g. dynamoDB tables)
+#######################################
 resources:
-  Resources:
-    Connections:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Connections
-        AttributeDefinitions:
-          - AttributeName: connectionId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: connectionId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-    Games:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Games
-        AttributeDefinitions:
-          - AttributeName: gameId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: gameId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-    GameState:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: GameState
-        AttributeDefinitions:
-          - AttributeName: gameId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: gameId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+  - ${file(./dynamodb.yml)}

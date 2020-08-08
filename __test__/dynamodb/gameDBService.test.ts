@@ -6,6 +6,7 @@ import {
   deleteGame,
   getAllGames,
   getGameByGameId,
+  getUsersInGame,
   incrementGameLoadedCount,
   removeUserFromGame,
   startGame,
@@ -151,6 +152,35 @@ describe('test getAllGames', () => {
     const response = await getAllGames();
     expect(response).toHaveLength(0);
     expect(response).toIncludeSameMembers([]);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test getUsersInGame
+ * ------------------------------------------------------------------------- */
+describe('test getUsersInGame', () => {
+  let gameId: string;
+
+  beforeEach(async () => {
+    // Create a test user
+    await saveConnection(FAKE_CONNECTION_ID1);
+
+    // Create a game
+    const game = await createGame({
+      ...TEST_GAME_OBJECT1,
+      creatorConnectionId: FAKE_CONNECTION_ID1,
+    });
+    gameId = game.gameId;
+  });
+
+  test('it should get a users in a game by gameId', async () => {
+    const response = await getUsersInGame(gameId);
+    expect(response).toStrictEqual([TEST_USER_OBJECT1]);
+  });
+
+  test('it should get undefined if the game does not exist', async () => {
+    const response = await getGameByGameId(NON_EXISTING_GAME_ID);
+    expect(response).toBeUndefined();
   });
 });
 

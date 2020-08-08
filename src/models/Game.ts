@@ -2,7 +2,7 @@ import { User } from './User';
 import { HasVersion } from './Version';
 
 /**
- * Game interface
+ * Game interface representing Games table schema
  */
 export interface Game extends HasVersion {
   readonly gameId: string;

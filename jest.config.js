@@ -21,6 +21,7 @@ module.exports = {
     '!src/functions/**/*.ts',
     '!src/websocket/broadcast/**/*.ts',
     '!src/dynamodb/**/db.ts',
+    '!src/enums/**/*.ts',
   ],
   setupFilesAfterEnv: ['./jest.setup.js', 'jest-extended'],
   preset: 'jest-dynalite',

@@ -1,5 +1,5 @@
 import { LambdaEventBodyPayloadOptions } from './payload';
-import { WebSocketActions } from '../enums/WebSocketActions';
+import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
 
 /* ----------------------------------------------------------------------------
  * Lambda
@@ -31,6 +31,6 @@ export interface LambdaResponseHeader {
  * Websocket response type for the frontend client
  */
 export interface WebSocketResponse {
-  action: WebSocketActions;
+  action: WebSocketActionsEnum;
   payload: LambdaEventBodyPayloadOptions;
 }

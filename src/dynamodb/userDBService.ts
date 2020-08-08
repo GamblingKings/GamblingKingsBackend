@@ -5,7 +5,7 @@ import { DB } from './db';
 import { parseDynamoDBAttribute, parseDynamoDBItem, parseDynamoDBItemList } from './dbHelper';
 
 /* ----------------------------------------------------------------------------
- * User DB Service
+ * Put
  * ------------------------------------------------------------------------- */
 /**
  * Save new connection with connectionId to the Connections Table.
@@ -26,57 +26,9 @@ export const saveConnection = async (connectionId: string): Promise<User> => {
   return { connectionId } as User;
 };
 
-/**
- * Remove connection by connectionId from the Connections Table.
- * @param {string} connectionId connectionId from event.requestContext
- */
-export const deleteConnection = async (connectionId: string): Promise<User | undefined> => {
-  const deleteParams: DocumentClient.DeleteItemInput = {
-    TableName: CONNECTIONS_TABLE,
-    Key: {
-      connectionId,
-    },
-    ReturnValues: 'ALL_OLD',
-  };
-
-  const res = await DB.delete(deleteParams).promise();
-  console.log('\ndeleteConnection result:', res);
-
-  return parseDynamoDBAttribute<User>(res);
-};
-
-/**
- * Set username for a connection.
- * @param {string} connectionId connectionId
- * @param {string} username username
- */
-export const setUsername = async (connectionId: string, username: string): Promise<User | undefined> => {
-  const updateParams: DocumentClient.UpdateItemInput = {
-    TableName: CONNECTIONS_TABLE,
-    Key: {
-      connectionId,
-    },
-    // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
-    // and username cannot be empty string
-    ConditionExpression: 'attribute_exists(#connectionIdKey) and :usernameVal <> :emptyString',
-    UpdateExpression: 'SET #usernameKey = :usernameVal',
-    ExpressionAttributeNames: {
-      '#connectionIdKey': 'connectionId',
-      '#usernameKey': 'username',
-    },
-    ExpressionAttributeValues: {
-      ':usernameVal': username.trim(),
-      ':emptyString': '',
-    },
-    ReturnValues: 'ALL_NEW',
-  };
-
-  const res = await DB.update(updateParams).promise();
-  console.log('\nsetUserName result:', res);
-
-  return parseDynamoDBAttribute<User>(res);
-};
-
+/* ----------------------------------------------------------------------------
+ * Get
+ * ------------------------------------------------------------------------- */
 /**
  * Get all connections (rows) from the Connections Table.
  */
@@ -108,6 +60,41 @@ export const getUserByConnectionId = async (connectionId: string): Promise<User 
   console.log('\ngetUserByConnectionId result:', res);
 
   return parseDynamoDBItem<User>(res);
+};
+
+/* ----------------------------------------------------------------------------
+ * Update
+ * ------------------------------------------------------------------------- */
+/**
+ * Set username for a connection.
+ * @param {string} connectionId connectionId
+ * @param {string} username username
+ */
+export const setUsername = async (connectionId: string, username: string): Promise<User | undefined> => {
+  const updateParams: DocumentClient.UpdateItemInput = {
+    TableName: CONNECTIONS_TABLE,
+    Key: {
+      connectionId,
+    },
+    // user must exist (to prevent creating a new user if the user does not exist with the given connectionId)
+    // and username cannot be empty string
+    ConditionExpression: 'attribute_exists(#connectionIdKey) and :usernameVal <> :emptyString',
+    UpdateExpression: 'SET #usernameKey = :usernameVal',
+    ExpressionAttributeNames: {
+      '#connectionIdKey': 'connectionId',
+      '#usernameKey': 'username',
+    },
+    ExpressionAttributeValues: {
+      ':usernameVal': username.trim(),
+      ':emptyString': '',
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await DB.update(updateParams).promise();
+  console.log('\nsetUserName result:', res);
+
+  return parseDynamoDBAttribute<User>(res);
 };
 
 /**
@@ -164,6 +151,28 @@ export const removeGameIdFromUser = async (connectionId: string): Promise<User |
 
   const res = await DB.update(updateParam).promise();
   console.log('\nremoveGameIdFromUser result:', res);
+
+  return parseDynamoDBAttribute<User>(res);
+};
+
+/* ----------------------------------------------------------------------------
+ * Delete
+ * ------------------------------------------------------------------------- */
+/**
+ * Remove connection by connectionId from the Connections Table.
+ * @param {string} connectionId connectionId from event.requestContext
+ */
+export const deleteConnection = async (connectionId: string): Promise<User | undefined> => {
+  const deleteParams: DocumentClient.DeleteItemInput = {
+    TableName: CONNECTIONS_TABLE,
+    Key: {
+      connectionId,
+    },
+    ReturnValues: 'ALL_OLD',
+  };
+
+  const res = await DB.delete(deleteParams).promise();
+  console.log('\ndeleteConnection result:', res);
 
   return parseDynamoDBAttribute<User>(res);
 };

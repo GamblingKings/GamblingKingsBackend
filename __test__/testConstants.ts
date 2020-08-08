@@ -1,5 +1,5 @@
 import { DEFAULT_DOCUMENT_VERSION } from '../src/utils/constants';
-import { GameStates } from '../src/enums/states';
+import { GameStatesEnum } from '../src/enums/states';
 
 /* ----------------------------------------------------------------------------
  * User
@@ -33,7 +33,7 @@ export const TEST_GAME_OBJECT1 = {
   gameType: FAKE_GAME_TYPE1,
   gameVersion: FAKE_GAME_VERSION1,
   started: false,
-  state: GameStates.CREATED,
+  state: GameStatesEnum.CREATED,
   version: DEFAULT_DOCUMENT_VERSION,
   gameLoadedCount: 0,
 };
@@ -44,7 +44,7 @@ export const TEST_GAME_OBJECT2 = {
   gameType: FAKE_GAME_TYPE2,
   gameVersion: FAKE_GAME_VERSION2,
   started: false,
-  state: GameStates.CREATED,
+  state: GameStatesEnum.CREATED,
   version: DEFAULT_DOCUMENT_VERSION,
   gameLoadedCount: 0,
 };

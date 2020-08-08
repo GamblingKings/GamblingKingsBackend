@@ -1,21 +1,21 @@
 import { Handler } from 'aws-lambda';
-import { addUserToGame } from '../dynamodb/gameDBService';
-import { response } from '../utils/responseHelper';
-import { Logger } from '../utils/Logger';
-import { WebSocketClient } from '../websocket/WebSocketClient';
+import { addUserToGame } from '../../dynamodb/gameDBService';
+import { response } from '../../utils/responseHelper';
+import { Logger } from '../../utils/Logger';
+import { WebSocketClient } from '../../websocket/WebSocketClient';
 import {
   createJoinGameResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
-} from '../websocket/createWSResponse';
-import { removeDynamoDocumentVersion } from '../dynamodb/dbHelper';
-import { Game } from '../models/Game';
-import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../types/event';
-import { LambdaEventBodyPayloadOptions } from '../types/payload';
-import { LambdaResponse } from '../types/response';
-import { WebSocketActions } from '../enums/WebSocketActions';
-import { setGameIdForUser } from '../dynamodb/userDBService';
-import { broadcastInGameMessage, broadcastInGameUpdate } from '../websocket/broadcast/gameBroadcast';
+} from '../../websocket/createWSResponse';
+import { removeDynamoDocumentVersion } from '../../dynamodb/dbHelper';
+import { Game } from '../../models/Game';
+import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
+import { LambdaEventBodyPayloadOptions } from '../../types/payload';
+import { LambdaResponse } from '../../types/response';
+import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
+import { setGameIdForUser } from '../../dynamodb/userDBService';
+import { broadcastInGameMessage, broadcastInGameUpdate } from '../../websocket/broadcast/gameBroadcast';
 
 /* ----------------------------------------------------------------------------
  * Handler Helper Functions
@@ -57,7 +57,7 @@ const joinGame = async (ws: WebSocketClient, connectionId: string, gameId: strin
 const joinGameSendUpdates = async (ws: WebSocketClient, connectionId: string, updatedGame: Game): Promise<void> => {
   // Send IN_GAME_MESSAGE to other users in the game
   const connectionIds = updatedGame.users.map((user) => user.connectionId);
-  await broadcastInGameMessage(ws, connectionId, WebSocketActions.JOIN_GAME, connectionIds);
+  await broadcastInGameMessage(ws, connectionId, WebSocketActionsEnum.JOIN_GAME, connectionIds);
 
   // Send IN_GAME_UPDATE with the updated users list to other users in the game
   await broadcastInGameUpdate(ws, connectionId, updatedGame.users);

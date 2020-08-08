@@ -1,11 +1,19 @@
 import * as gameStateDBFunctions from '../../src/dynamodb/gameStateDBService';
 import {
+  changeDealer,
+  changeWind,
   drawTile,
+  getCurrentDealer,
+  getCurrentPlayedTile,
   getCurrentWallByGameId,
+  getCurrentWind,
   getGameStateByGameId,
+  getInteractionCount,
   getUserHandsInGame,
   incrementCurrentTileIndex,
   initGameState,
+  resetPlayedTileInteraction,
+  setPlayedTileInteraction,
 } from '../../src/dynamodb/gameStateDBService';
 import {
   FAKE_CONNECTION_ID1,
@@ -13,14 +21,14 @@ import {
   FAKE_CONNECTION_ID3,
   FAKE_CONNECTION_ID4,
   FAKE_GAME_ID,
+  NON_EXISTING_GAME_ID,
 } from '../testConstants';
-import { DEFAULT_MAX_USERS_IN_GAME } from '../../src/utils/constants';
-import { GameState, UserHand } from '../../src/models/GameState';
+import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from '../../src/utils/constants';
+import { GameState, PlayedTile, UserHand } from '../../src/models/GameState';
 import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
+import { MeldEnum } from '../../src/enums/MeldEnum';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
-const MAX_WALL_LENGTH = 144;
-const DEFAULT_HAND_LENGTH = 13;
 
 /* ----------------------------------------------------------------------------
  * Test initGameState
@@ -84,6 +92,9 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
       wall,
       hands,
       currentIndex: DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
+      currentTurn: 0,
+      currentWind: 0,
+      dealer: 0,
     };
 
     // Test function calls
@@ -117,7 +128,7 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
     expect(connectionId).toBe(FAKE_CONNECTION_ID1);
 
     const mapperKeys = Object.keys(TileMapper);
-    expect(hand).toHaveLength(13);
+    expect(hand).toHaveLength(DEFAULT_HAND_LENGTH);
 
     hand.forEach((tileStringDef: string) => expect(mapperKeys.includes(tileStringDef)).toBeTruthy());
   });
@@ -233,5 +244,324 @@ describe('test drawsTile', () => {
     // Test response
     expect(tileDrawn).toBe(tileToBeDrawn);
     expect(newGameState.currentIndex).toBe(currentIndex + 1);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test changeDealer, getCurrentDealer
+ * ------------------------------------------------------------------------- */
+describe('test changeDealer, getCurrentDealer', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let currentDealerIndex: number;
+
+  // Spy
+  let changeDealerSpy: jest.SpyInstance;
+  let getDealerSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    currentDealerIndex = gameState.dealer;
+
+    changeDealerSpy = jest.spyOn(gameStateDBFunctions, 'changeDealer');
+    getDealerSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentDealer');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should change the dealer to the next available index', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentDealerIndex).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+
+    const response = (await changeDealer(gameId)) as GameState;
+
+    // Test function call
+    expect(changeDealerSpy).toHaveBeenCalledTimes(1);
+    expect(getDealerSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.dealer).toBe(1);
+    expect(await getCurrentDealer(gameId)).toBe(1);
+  });
+
+  test('it should reset index to 0 when max index is reached', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentDealerIndex).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+
+    await changeDealer(gameId);
+    await changeDealer(gameId);
+    await changeDealer(gameId);
+    const response = (await changeDealer(gameId)) as GameState;
+
+    // Test function call
+    expect(changeDealerSpy).toHaveBeenCalledTimes(4);
+    expect(getDealerSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.dealer).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+  });
+
+  test('it should throw error when the game does not exist', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentDealerIndex).toBe(0);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+
+    const func = changeDealer(NON_EXISTING_GAME_ID);
+    const errorMsg = 'changeDealer: game state not found';
+
+    // Test function call
+    expect(changeDealerSpy).toHaveBeenCalledTimes(1);
+    expect(getDealerSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    await expect(func).rejects.toThrow(errorMsg);
+    expect(await getCurrentDealer(gameId)).toBe(0);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test changeWind, getCurrentWind
+ * ------------------------------------------------------------------------- */
+describe('test changeWind, getCurrentWind', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let currentWindNum: number;
+
+  // Spy
+  let changeWindSpy: jest.SpyInstance;
+  let getWindSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    currentWindNum = gameState.currentWind;
+
+    changeWindSpy = jest.spyOn(gameStateDBFunctions, 'changeWind');
+    getWindSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentWind');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should change to the next wind number', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentWindNum).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+
+    const response = (await changeWind(gameId)) as GameState;
+
+    // Test function call
+    expect(changeWindSpy).toHaveBeenCalledTimes(1);
+    expect(getWindSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.currentWind).toBe(1);
+    expect(await getCurrentWind(gameId)).toBe(1);
+  });
+
+  test('it should reset index to 0 when max wind number is reached', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentWindNum).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+
+    await changeWind(gameId);
+    await changeWind(gameId);
+    await changeWind(gameId);
+    const response = (await changeWind(gameId)) as GameState;
+
+    // Test function call
+    expect(changeWindSpy).toHaveBeenCalledTimes(4);
+    expect(getWindSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(response.currentWind).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+  });
+
+  test('it should throw error when the game does not exist', async () => {
+    // Initial dealer should be user at the 0 index
+    expect(currentWindNum).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
+
+    const func = changeWind(NON_EXISTING_GAME_ID);
+    const errorMsg = 'changeWind: game state not found';
+
+    // Test function call
+    expect(changeWindSpy).toHaveBeenCalledTimes(1);
+    expect(getWindSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    await expect(func).rejects.toThrow(errorMsg);
+    expect(await getCurrentWind(gameId)).toBe(0);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCount
+ * ------------------------------------------------------------------------- */
+describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCount', () => {
+  let gameState: GameState;
+  let gameId: string;
+
+  let setPlayedTileInteractionSpy: jest.SpyInstance;
+  let getInteractionCountSpy: jest.SpyInstance;
+  let getCurrentPlayedTileSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+
+    setPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'setPlayedTileInteraction');
+    getInteractionCountSpy = jest.spyOn(gameStateDBFunctions, 'getInteractionCount');
+    getCurrentPlayedTileSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentPlayedTile');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should set playedTile list and increment interaction count correctly', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
+
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    const expectedPlayedTile: PlayedTile = {
+      playedTile: '1_BAMBOO',
+      connectionId: FAKE_CONNECTION_ID1,
+      possibleMeld: MeldEnum.CONSECUTIVE,
+      skipInteraction: false,
+    };
+
+    // Test function call
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(await getInteractionCount(gameId)).toBe(1);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([expectedPlayedTile]);
+  });
+
+  test('it should set playedTile list and count concurrently', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
+
+    await Promise.all(
+      CONNECTION_IDS.map((connectionId) => {
+        return setPlayedTileInteraction(gameId, connectionId, '9_DOT', MeldEnum.CONSECUTIVE);
+      }),
+    );
+    const expectedPlayedTile: PlayedTile = {
+      playedTile: '9_DOT',
+      connectionId: FAKE_CONNECTION_ID1,
+      possibleMeld: MeldEnum.CONSECUTIVE,
+      skipInteraction: false,
+    };
+    const expectedPlayedTileList: PlayedTile[] = [
+      expectedPlayedTile,
+      { ...expectedPlayedTile, connectionId: FAKE_CONNECTION_ID2 },
+      { ...expectedPlayedTile, connectionId: FAKE_CONNECTION_ID3 },
+      { ...expectedPlayedTile, connectionId: FAKE_CONNECTION_ID4 },
+    ];
+
+    // Test function call
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(4);
+
+    // Test response
+    expect(await getInteractionCount(gameId)).toBe(4);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers(expectedPlayedTileList);
+  });
+
+  test('it should throw error when interaction count exceeds 4', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
+
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    const func = setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    const expectedPlayedTile: PlayedTile = {
+      playedTile: '1_BAMBOO',
+      connectionId: FAKE_CONNECTION_ID1,
+      possibleMeld: MeldEnum.CONSECUTIVE,
+      skipInteraction: false,
+    };
+    const errorMsg = 'The conditional request failed';
+
+    // Test function call
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(5);
+
+    // Test response
+    await expect(func).rejects.toThrow(errorMsg);
+    expect(await getInteractionCount(gameId)).toBe(4);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([
+      expectedPlayedTile,
+      expectedPlayedTile,
+      expectedPlayedTile,
+      expectedPlayedTile,
+    ]);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test resetPlayedTileInteraction
+ * ------------------------------------------------------------------------- */
+describe('test resetPlayedTileInteraction', () => {
+  let gameState: GameState;
+  let gameId: string;
+
+  let setPlayedTileInteractionSpy: jest.SpyInstance;
+  let getInteractionCountSpy: jest.SpyInstance;
+  let getCurrentPlayedTileSpy: jest.SpyInstance;
+  let resetPlayedTileInteractionSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+
+    setPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'setPlayedTileInteraction');
+    getInteractionCountSpy = jest.spyOn(gameStateDBFunctions, 'getInteractionCount');
+    getCurrentPlayedTileSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentPlayedTile');
+    resetPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'resetPlayedTileInteraction');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should reset interaction count and playedTile list', async () => {
+    // Initial count should be 0
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
+
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_CHARACTER', MeldEnum.CONSECUTIVE);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID2, '3_DOT', MeldEnum.TRIPLET);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID3, '9_BAMBOO', MeldEnum.CONSECUTIVE);
+    await resetPlayedTileInteraction(gameId);
+
+    // Test function call
+    expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentPlayedTileSpy).toHaveBeenCalledTimes(1);
+    expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(3);
+    expect(resetPlayedTileInteractionSpy).toHaveBeenCalledTimes(1);
+
+    // Test response
+    expect(await getInteractionCount(gameId)).toBe(0);
+    expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([]);
   });
 });
