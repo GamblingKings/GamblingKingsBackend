@@ -30,7 +30,7 @@
     "@types/uuid": "^8.0.1",
     "@typescript-eslint/eslint-plugin": "^3.8.0",
     "@typescript-eslint/parser": "^3.8.0",
-    "aws-sdk": "^2.728.0",
+    "aws-sdk": "^2.729.0",
     "aws-sdk-mock": "^5.1.0",
     "eslint": "7.6.0",
     "eslint-config-airbnb-base": "14.2.0",
@@ -51,7 +51,6 @@
     "ts-loader": "^8.0.2",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
-    "webpack-node-externals": "^2.5.1",
     "wscat": "^4.0.1"
   }
 }

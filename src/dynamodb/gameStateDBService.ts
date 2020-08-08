@@ -26,14 +26,9 @@ const DEFAULT_GAME_STATE_PARAMS = [
  * Initialize the game by generating a mahjong wall,
  * 4 hands of mahjong, and save the initial game state to the db
  * @param {string} gameId game Id
- * @param hostConnectionId host connection Id
  * @param {string} connectionIds connection Ids of all the users in a game
  */
-export const initGameState = async (
-  gameId: string,
-  hostConnectionId: string,
-  connectionIds: string[],
-): Promise<GameState> => {
+export const initGameState = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
   const initialWall = new HongKongWall();
 
   // Generate hand for each user

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const slsw = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
 
 const { isLocal } = slsw.lib.webpack;
 
@@ -19,9 +18,6 @@ module.exports = {
     filename: '[name].js',
     sourceMapFilename: '[file].map',
   },
-  // Build code + packages into one js file,
-  // hence need to remove this line + set includeModules: false in serverless.yml
-  // externals: [nodeExternals()],
   module: {
     rules: [
       {

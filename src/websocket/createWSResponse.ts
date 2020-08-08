@@ -215,6 +215,10 @@ export const createLoginFailureResponse = (errorMessage: string): WebSocketRespo
   return failedWebSocketResponse(wsResponse, errorMessage);
 };
 
+/**
+ * Create INTERACTION_SUCCESS response object.
+ * @param {string} payload payload object
+ */
 export const createInteractionSuccessResponse = (payload: InteractionSuccessPayload): WebSocketResponse => {
   const wsResponse = createWSResponse(WebSocketActionsEnum.INTERACTION_SUCCESS, payload);
   return successWebSocketResponse(wsResponse);

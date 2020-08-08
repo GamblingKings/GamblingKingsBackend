@@ -35,7 +35,7 @@ const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTIO
  * ------------------------------------------------------------------------- */
 describe('test initGameState', () => {
   test('it should init a game with a wall and 4 hands to users', async () => {
-    const response = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    const response = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
 
     // Test game Id and remaining tiles in the wall
     const { gameId, wall, hands } = response;
@@ -72,7 +72,7 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     wall = gameState.wall;
     hands = gameState.hands;
@@ -177,7 +177,7 @@ describe('test incrementCurrentTileIndex', () => {
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     currentIndex = gameState.currentIndex;
 
@@ -219,7 +219,7 @@ describe('test drawsTile', () => {
   let getGameStateByGameIdSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     wall = gameState.wall;
     currentIndex = gameState.currentIndex;
@@ -260,7 +260,7 @@ describe('test changeDealer, getCurrentDealer', () => {
   let getDealerSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     currentDealerIndex = gameState.dealer;
 
@@ -338,7 +338,7 @@ describe('test changeWind, getCurrentWind', () => {
   let getWindSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     currentWindNum = gameState.currentWind;
 
@@ -415,7 +415,7 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
   let getCurrentPlayedTileSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
 
     setPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'setPlayedTileInteraction');
@@ -531,7 +531,7 @@ describe('test resetPlayedTileInteraction', () => {
   let resetPlayedTileInteractionSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    gameState = await initGameState(FAKE_GAME_ID, FAKE_CONNECTION_ID1, CONNECTION_IDS);
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
 
     setPlayedTileInteractionSpy = jest.spyOn(gameStateDBFunctions, 'setPlayedTileInteraction');

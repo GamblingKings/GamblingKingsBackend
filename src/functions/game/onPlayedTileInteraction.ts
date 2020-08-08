@@ -82,6 +82,10 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
   });
 };
 
+/**
+ * Handler for interacting with a tile.
+ * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
+ */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onPlayedTileInteraction.ts');
 

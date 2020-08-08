@@ -171,7 +171,7 @@ export const broadcastGameStart = async (
   usersInGame: User[],
 ): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(usersInGame);
-  const { hands } = await initGameState(gameId, hostConnectionId, connectionIds);
+  const { hands } = await initGameState(gameId, connectionIds);
 
   const promises = connectionIds.map((connectionId) => {
     const tiles = getHandByConnectionId(hands, connectionId);
