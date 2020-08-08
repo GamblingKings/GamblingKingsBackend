@@ -6,7 +6,6 @@ import { Logger } from '../../utils/Logger';
 import { InteractionSuccessPayload, LambdaEventBodyPayloadOptions } from '../../types/payload';
 import { WebSocketClient } from '../../websocket/WebSocketClient';
 import {
-  createInteractionSuccessResponse,
   createPlayedTileInteractionResponse,
   failedWebSocketResponse,
   successWebSocketResponse,
@@ -23,6 +22,7 @@ import { DEFAULT_MAX_USERS_IN_GAME } from '../../utils/constants';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
 import { User } from '../../models/User';
+import { broadcastInteractionSuccess } from '../../websocket/broadcast/gameStateBroadcast';
 
 /**
  * Compare played tile interaction and decide whose can make meld base on meld priority.
@@ -56,8 +56,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
      */
     if (!messageSent && (meld === MeldEnum.TRIPLET || meld === MeldEnum.QUAD)) {
       messageSent = true;
-      const successWsResponse = createInteractionSuccessResponse(wsPayload);
-      return Promise.all(connectionIds.map((user) => ws.send(successWsResponse, user)));
+      return broadcastInteractionSuccess(ws, wsPayload, connectionIds);
     }
 
     /**
@@ -71,11 +70,11 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
 
     // If no one make a Triplet or Quad, then a user can make consecutive if there is any
     if (!messageSent && meld === MeldEnum.CONSECUTIVE && numOfConsecutive === 1) {
-      const msg = createInteractionSuccessResponse({
+      const newWsPayload = {
         ...wsPayload,
         connectionId,
-      });
-      return Promise.all(connectionIds.map((user) => ws.send(msg, user)));
+      };
+      return broadcastInteractionSuccess(ws, newWsPayload, connectionIds);
     }
 
     return wsPayload;
