@@ -221,7 +221,7 @@ yarn start
   "action": "PLAYED_TILE_INTERACTION",
   "payload": {
     "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c",
-    "playedTile": "1_DOT",
+    "playedTiles": ["1_DOT", "1_DOT", "1_DOT"],
     "meldType": "TRIPLET",
     "skipInteraction": false
   }
