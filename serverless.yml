@@ -175,6 +175,10 @@ functions:
     handler: src/functions/game/onPlayedTileInteraction.handler
     events:
       - websocket: PLAYED_TILE_INTERACTION
+  onWinRound:
+    handler: src/functions/game/onWinRound.handler
+    events:
+      - websocket: WIN_ROUND
 
 #######################################
 # Resources (e.g. dynamoDB tables)

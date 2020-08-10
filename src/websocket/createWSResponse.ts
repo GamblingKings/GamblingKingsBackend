@@ -169,6 +169,13 @@ export const createPlayedTileInteractionResponse = (payload: PlayedTileInteracti
   return createWSResponse(WebSocketActionsEnum.PLAYED_TILE_INTERACTION, payload);
 };
 
+/**
+ * Create WIN_ROUND response object.
+ * @param {WinRoundPayload} payload payload object
+ */
+export const createOnWinRoundResponse = (payload: PlayedTileInteractionPayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
+};
 /* ----------------------------------------------------------------------------
  * Success and Failure Response
  * ------------------------------------------------------------------------- */
