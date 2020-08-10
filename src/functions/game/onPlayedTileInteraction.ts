@@ -33,22 +33,38 @@ import { broadcastInteractionSuccess } from '../../websocket/broadcast/gameState
 export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: WebSocketClient): Promise<void> => {
   const users = (await getUsersInGame(gameId)) as User[];
   const connectionIds = getConnectionIdsFromUsers(users);
+
   const playedTileInteractions = (await getCurrentPlayedTile(gameId)) as PlayedTile[];
   const interactions: PlayedTile[] = playedTileInteractions.filter((playedTileInteraction) => {
     return !playedTileInteraction.skipInteraction;
   });
 
+  // If there are 3 skips (empty interactions array),
+  // send message with skipInteraction: true to client
+  if (interactions.length === 0) {
+    await broadcastInteractionSuccess(
+      ws,
+      {
+        meldType: '',
+        playedTiles: [],
+        skipInteraction: true,
+      },
+      connectionIds,
+    );
+    return;
+  }
+
   let messageSent = false;
   let connectionId: string;
   let numOfConsecutive = 0;
   interactions.forEach((i): unknown => {
-    const { connectionId: cid, playedTile: tile } = i;
-    const meld = i.possibleMeld as string;
+    const { connectionId: cid, playedTiles: tile, meldType: meld } = i;
 
     const wsPayload: InteractionSuccessPayload = {
       connectionId: cid,
       meldType: meld,
-      playedTile: tile,
+      playedTiles: tile,
+      skipInteraction: false,
     };
 
     /**
@@ -93,13 +109,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
-  const playedTile = payload.playedTile as string;
+  const playedTiles = payload.playedTiles as string[];
   const meldType = payload.meldType as string;
   const skipInteraction = payload.skipInteraction as boolean;
 
   console.log('Incrementing interaction count and decide which meld type takes priority');
   const ws = new WebSocketClient(event.requestContext);
-  const playedTileResponse = { playedTile, meldType, skipInteraction };
+  const playedTileResponse = { playedTiles, meldType, skipInteraction };
   const playedTileInteractionResponse = createPlayedTileInteractionResponse(playedTileResponse);
   try {
     // Get current interaction count
@@ -112,7 +128,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
       newGameState = (await setPlayedTileInteraction(
         gameId,
         connectionId,
-        playedTile,
+        playedTiles,
         meldType,
         skipInteraction,
       )) as GameState;

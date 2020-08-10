@@ -23,7 +23,7 @@ export interface LambdaEventBodyPayloadOptions {
   time?: string;
   tiles?: string;
   tile?: string;
-  playedTile?: string;
+  playedTiles?: string[];
   meldType?: string;
   skipInteraction?: boolean;
 }
@@ -87,13 +87,14 @@ export interface PlayTilePayload {
 }
 
 export interface PlayedTileInteractionPayload {
-  playedTile: string;
+  playedTiles: string[];
   meldType: string;
   skipInteraction: boolean;
 }
 
 export interface InteractionSuccessPayload {
-  playedTile: string;
+  playedTiles: string[];
   meldType: string;
-  connectionId: string;
+  skipInteraction: boolean;
+  connectionId?: string;
 }

@@ -14,8 +14,8 @@ export interface GameState {
 }
 
 export interface PlayedTile {
-  playedTile: string;
-  possibleMeld: string | undefined;
+  playedTiles: string[];
+  meldType: string;
   connectionId: string;
   skipInteraction: boolean;
 }

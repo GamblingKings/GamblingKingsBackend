@@ -16,12 +16,15 @@ import {
   setPlayedTileInteraction,
 } from '../../src/dynamodb/gameStateDBService';
 import {
+  CONDITIONAL_FAILED_MSG,
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_CONNECTION_ID3,
   FAKE_CONNECTION_ID4,
   FAKE_GAME_ID,
   NON_EXISTING_GAME_ID,
+  TEST_TILES_CONSECUTIVE,
+  TEST_TILES_TRIPLET,
 } from '../testConstants';
 import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from '../../src/utils/constants';
 import { GameState, PlayedTile, UserHand } from '../../src/models/GameState';
@@ -432,11 +435,11 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
     expect(await getInteractionCount(gameId)).toBe(0);
     expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
 
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE, false);
     const expectedPlayedTile: PlayedTile = {
-      playedTile: '1_BAMBOO',
+      playedTiles: TEST_TILES_CONSECUTIVE,
       connectionId: FAKE_CONNECTION_ID1,
-      possibleMeld: MeldEnum.CONSECUTIVE,
+      meldType: MeldEnum.CONSECUTIVE,
       skipInteraction: false,
     };
 
@@ -457,13 +460,13 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
 
     await Promise.all(
       CONNECTION_IDS.map((connectionId) => {
-        return setPlayedTileInteraction(gameId, connectionId, '9_DOT', MeldEnum.CONSECUTIVE);
+        return setPlayedTileInteraction(gameId, connectionId, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE);
       }),
     );
     const expectedPlayedTile: PlayedTile = {
-      playedTile: '9_DOT',
+      playedTiles: TEST_TILES_CONSECUTIVE,
       connectionId: FAKE_CONNECTION_ID1,
-      possibleMeld: MeldEnum.CONSECUTIVE,
+      meldType: MeldEnum.CONSECUTIVE,
       skipInteraction: false,
     };
     const expectedPlayedTileList: PlayedTile[] = [
@@ -488,18 +491,23 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
     expect(await getInteractionCount(gameId)).toBe(0);
     expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
 
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
-    const func = setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_BAMBOO', MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE, false);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE, false);
+    const func = setPlayedTileInteraction(
+      gameId,
+      FAKE_CONNECTION_ID1,
+      TEST_TILES_CONSECUTIVE,
+      MeldEnum.CONSECUTIVE,
+      false,
+    );
     const expectedPlayedTile: PlayedTile = {
-      playedTile: '1_BAMBOO',
+      playedTiles: TEST_TILES_CONSECUTIVE,
       connectionId: FAKE_CONNECTION_ID1,
-      possibleMeld: MeldEnum.CONSECUTIVE,
+      meldType: MeldEnum.CONSECUTIVE,
       skipInteraction: false,
     };
-    const errorMsg = 'The conditional request failed';
 
     // Test function call
     expect(getInteractionCountSpy).toHaveBeenCalledTimes(1);
@@ -507,7 +515,7 @@ describe('test setPlayedTileInteraction, getCurrentPlayedTile, getInteractionCou
     expect(setPlayedTileInteractionSpy).toHaveBeenCalledTimes(5);
 
     // Test response
-    await expect(func).rejects.toThrow(errorMsg);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
     expect(await getInteractionCount(gameId)).toBe(4);
     expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([
       expectedPlayedTile,
@@ -549,9 +557,9 @@ describe('test resetPlayedTileInteraction', () => {
     expect(await getInteractionCount(gameId)).toBe(0);
     expect(await getCurrentPlayedTile(gameId)).toStrictEqual([]);
 
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, '1_CHARACTER', MeldEnum.CONSECUTIVE);
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID2, '3_DOT', MeldEnum.TRIPLET);
-    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID3, '9_BAMBOO', MeldEnum.CONSECUTIVE);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID1, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID2, TEST_TILES_TRIPLET, MeldEnum.TRIPLET);
+    await setPlayedTileInteraction(gameId, FAKE_CONNECTION_ID3, TEST_TILES_CONSECUTIVE, MeldEnum.CONSECUTIVE);
     await resetPlayedTileInteraction(gameId);
 
     // Test function call

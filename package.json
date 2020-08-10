@@ -13,7 +13,7 @@
     "install_dep": "yarn install",
     "deploy": "aws-vault exec gamblingkings-sls --no-session -- serverless deploy",
     "remove": "aws-vault exec gamblingkings-sls --no-session -- serverless remove",
-    "start": "npm-run-all format dev:cleanup install_dep deploy",
+    "start": "NODE_OPTIONS=\"--max-old-space-size=8192\" npm-run-all format dev:cleanup install_dep deploy",
     "format": "prettier --write \"**/*.{js,ts,md,json,yml}\"",
     "lint": "eslint -c .eslintrc.yml . --ext .js,.ts --fix",
     "test": "jest && codecov"

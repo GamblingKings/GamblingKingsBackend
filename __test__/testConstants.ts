@@ -50,6 +50,12 @@ export const TEST_GAME_OBJECT2 = {
 };
 
 /* ----------------------------------------------------------------------------
+ * GameState
+ * ------------------------------------------------------------------------- */
+export const TEST_TILES_CONSECUTIVE = ['1_DOT', '2_DOT', '3_DOT'];
+export const TEST_TILES_TRIPLET = ['9_BAMBOO', '9_BAMBOO', '9_BAMBOO'];
+
+/* ----------------------------------------------------------------------------
  * Error
  * ------------------------------------------------------------------------- */
 export const CONDITIONAL_FAILED_MSG = 'The conditional request failed';

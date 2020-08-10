@@ -280,14 +280,14 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
 export const setPlayedTileInteraction = async (
   gameId: string,
   connectionId: string,
-  playedTile: string,
+  playedTiles: string[],
   meld: string,
   skipInteraction = false,
 ): Promise<GameState | undefined> => {
   const playedTileVal: PlayedTile = {
     connectionId,
-    playedTile,
-    possibleMeld: meld,
+    playedTiles,
+    meldType: meld,
     skipInteraction,
   };
 
