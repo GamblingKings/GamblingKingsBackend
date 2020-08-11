@@ -26,6 +26,7 @@ export interface LambdaEventBodyPayloadOptions {
   playedTiles?: string[];
   meldType?: string;
   skipInteraction?: boolean;
+  connectionId?: string;
 }
 
 export interface UserUpdatePayload {
@@ -87,6 +88,7 @@ export interface PlayTilePayload {
 }
 
 export interface PlayedTileInteractionPayload {
+  connectionId: string;
   playedTiles: string[];
   meldType: string;
   skipInteraction: boolean;

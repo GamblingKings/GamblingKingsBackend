@@ -229,7 +229,7 @@ export const createInteractionSuccessResponse = (payload: InteractionSuccessPayl
  * ------------------------------------------------------------------------- */
 
 /**
- * Create SEND_MESSAGE response object
+ * Create SEND_MESSAGE response object.
  * @param {string} username caller username
  * @param {string} message message to send to all users
  */
