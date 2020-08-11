@@ -23,14 +23,20 @@ import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
 import { User } from '../../models/User';
 import { broadcastInteractionSuccess } from '../../websocket/broadcast/gameStateBroadcast';
+import { findNextUser } from '../functionsHelper';
 
 /**
  * Compare played tile interaction and decide whose can make meld base on meld priority.
  * Send message to all user in the game about who can take the played tile.
  * @param {string} gameId Game Id
+ * @param {string} playedTileUserConnectionId Connection Id of user who played the tile
  * @param {WebSocketClient} ws WebSocketClient
  */
-export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: WebSocketClient): Promise<void> => {
+export const compareTileInteractionAndSendUpdate = async (
+  gameId: string,
+  playedTileUserConnectionId: string,
+  ws: WebSocketClient,
+): Promise<void> => {
   const users = (await getUsersInGame(gameId)) as User[];
   const connectionIds = getConnectionIdsFromUsers(users);
 
@@ -54,47 +60,57 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
     return;
   }
 
-  let messageSent = false;
-  let connectionId: string;
-  let numOfConsecutive = 0;
-  interactions.forEach((i): unknown => {
-    const { connectionId: cid, playedTiles: tile, meldType: meld } = i;
-
-    const wsPayload: InteractionSuccessPayload = {
-      connectionId: cid,
-      meldType: meld,
-      playedTiles: tile,
-      skipInteraction: false,
-    };
+  // Loop through interactions and determine which meld takes priority
+  // Precedence:
+  // 1. Triplet or Quad (once found, ignore other interaction objects)
+  // 2. Consecutive (only the next user to whom played the tile can make consecutive)
+  let tripletOrQuadPayload = {} as InteractionSuccessPayload;
+  let consecutivePayload = {} as InteractionSuccessPayload;
+  let canMakeTripletOrQuad = false;
+  // Not using forEach because breaking out of the forEach loop does not work
+  for (let i = 0; i < interactions.length; i += 1) {
+    const interaction: PlayedTile = interactions[i];
+    const { connectionId: cid, playedTiles: tile, meldType: meld } = interaction;
 
     /**
      * Making Triplet or Quad (Triplet and Quad takes precedence over Consecutive)
      */
-    if (!messageSent && (meld === MeldEnum.TRIPLET || meld === MeldEnum.QUAD)) {
-      messageSent = true;
-      return broadcastInteractionSuccess(ws, wsPayload, connectionIds);
+    if (meld === MeldEnum.TRIPLET || meld === MeldEnum.QUAD) {
+      canMakeTripletOrQuad = true;
+      tripletOrQuadPayload = {
+        connectionId: cid,
+        meldType: meld,
+        playedTiles: tile,
+        skipInteraction: false,
+      };
+      break; // once Triplet or Quad is found, break out of the for loop
     }
 
     /**
      * Making Consecutive
+     * Only one user (the next user to the user who played the tile) can make consecutive
      */
-    // Only one user (the next user to the user who played the tile) can make consecutive
-    if (meld === MeldEnum.CONSECUTIVE) {
-      numOfConsecutive += 1;
-      connectionId = cid;
-    }
+    if (!canMakeTripletOrQuad) {
+      // Found out who is the next user
+      const canMakeConsecutiveConnectionId = findNextUser(playedTileUserConnectionId, connectionIds);
 
-    // If no one make a Triplet or Quad, then a user can make consecutive if there is any
-    if (!messageSent && meld === MeldEnum.CONSECUTIVE && numOfConsecutive === 1) {
-      const newWsPayload = {
-        ...wsPayload,
-        connectionId,
-      };
-      return broadcastInteractionSuccess(ws, newWsPayload, connectionIds);
+      if (cid === canMakeConsecutiveConnectionId && meld === MeldEnum.CONSECUTIVE) {
+        consecutivePayload = {
+          connectionId: cid,
+          meldType: meld,
+          playedTiles: tile,
+          skipInteraction: false,
+        };
+      }
     }
+  }
 
-    return wsPayload;
-  });
+  const finalWsPayload: InteractionSuccessPayload = tripletOrQuadPayload || consecutivePayload;
+  console.log('Triplet Or Quad payload:', tripletOrQuadPayload);
+  console.log('Consecutive payload:', consecutivePayload);
+  console.log('Final INTERACTION_SUCCESS payload:', finalWsPayload);
+
+  await broadcastInteractionSuccess(ws, finalWsPayload, connectionIds);
 };
 
 /**
@@ -109,13 +125,14 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
+  const playedTileUserConnectionId = payload.connectionId as string;
   const playedTiles = payload.playedTiles as string[];
   const meldType = payload.meldType as string;
   const skipInteraction = payload.skipInteraction as boolean;
 
   console.log('Incrementing interaction count and decide which meld type takes priority');
   const ws = new WebSocketClient(event.requestContext);
-  const playedTileResponse = { playedTiles, meldType, skipInteraction };
+  const playedTileResponse = { playedTiles, meldType, skipInteraction, connectionId: playedTileUserConnectionId };
   const playedTileInteractionResponse = createPlayedTileInteractionResponse(playedTileResponse);
   try {
     // Get current interaction count
@@ -141,7 +158,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     let interactionEnded = false;
     if (newInteractionCount === 3) {
       interactionEnded = true;
-      await compareTileInteractionAndSendUpdate(gameId, ws);
+      await compareTileInteractionAndSendUpdate(gameId, playedTileUserConnectionId, ws);
     }
 
     // Reset interactionCount to be 0 and playedTile list to empty

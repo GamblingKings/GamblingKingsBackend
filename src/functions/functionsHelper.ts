@@ -12,6 +12,7 @@ import { getConnectionIdsFromUsers } from '../utils/broadcastHelper';
 import { deleteGameState } from '../dynamodb/gameStateDBService';
 import { sendUpdateResult } from '../types/gameUpdate';
 import { removeGameIdFromUser } from '../dynamodb/userDBService';
+import { DEFAULT_MAX_USERS_IN_GAME } from '../utils/constants';
 
 /**
  * Helper function to send updates to other users in the game when a user leaves the game.
@@ -75,4 +76,15 @@ export const sendUpdates = async (
   await broadcastInGameUpdate(ws, connectionId, updatedGame.users);
 
   return updateResult;
+};
+
+/**
+ * Find the next user to the one who played the tile.
+ * @param connectionId Current round user's connection Id
+ * @param connectionIds All connection Ids in a game (in fixed order in the db)
+ */
+export const findNextUser = (connectionId: string, connectionIds: string[]): string => {
+  const playedTileUserIndex = connectionIds.findIndex((cid) => cid === connectionId);
+  const canMakeConsecutiveIndex = playedTileUserIndex + 1 < DEFAULT_MAX_USERS_IN_GAME - 1 ? playedTileUserIndex + 1 : 0;
+  return connectionIds[canMakeConsecutiveIndex];
 };
