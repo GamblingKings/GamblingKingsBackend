@@ -15,6 +15,7 @@ import {
   PlayTilePayload,
   SendMessagePayload,
   UserUpdatePayload,
+  WinningTilesPayload,
 } from '../types/payload';
 import { WebSocketResponse } from '../types/response';
 import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
@@ -173,7 +174,7 @@ export const createPlayedTileInteractionResponse = (payload: PlayedTileInteracti
  * Create WIN_ROUND response object.
  * @param {WinRoundPayload} payload payload object
  */
-export const createOnWinRoundResponse = (payload: PlayedTileInteractionPayload): WebSocketResponse => {
+export const createOnWinRoundResponse = (payload: WinningTilesPayload): WebSocketResponse => {
   return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
 };
 /* ----------------------------------------------------------------------------

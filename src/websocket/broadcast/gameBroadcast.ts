@@ -10,6 +10,7 @@ import {
   createInGameMessageResponse,
   createInGameUpdateResponse,
   createPlayTileResponse,
+  createOnWinRoundResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
@@ -226,4 +227,17 @@ export const broadcastPlayedTileToUsers = async (
   );
 
   return tile;
+};
+
+/**
+ * Broadcast who won game and their winning tiles
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} connectionId connectionId of winner
+ * @param {string} tiles winning tiles
+ */
+export const broadcastWinningTiles = async (ws: WebSocketClient, connectionId: string, tiles: string) => {
+  const wsResponse = createOnWinRoundResponse({
+    tiles,
+    connectionId,
+  });
 };

@@ -99,3 +99,8 @@ export interface InteractionSuccessPayload {
   skipInteraction: boolean;
   connectionId?: string;
 }
+
+export interface WinningTilesPayload {
+  tiles: string;
+  connectionId?: string;
+}

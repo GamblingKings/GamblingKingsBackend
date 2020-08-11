@@ -210,8 +210,12 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
   let nextDealerIndex;
 
   // reset dealer index
-  if (currentDealerIndex === 3) nextDealerIndex = 0;
-  else nextDealerIndex = currentDealerIndex + 1;
+  if (currentDealerIndex === 3) {
+    nextDealerIndex = 0;
+    changeWind(gameId);
+  } else {
+    nextDealerIndex = currentDealerIndex + 1;
+  }
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
