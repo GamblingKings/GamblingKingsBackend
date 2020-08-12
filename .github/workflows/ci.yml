@@ -41,7 +41,7 @@ jobs:
         uses: 8398a7/action-slack@v3.6.1
         with:
           # Fields
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job # selectable (default: repo,message)
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
           # With Parameters
           channel: '#ci-cd'
           username: GamblingKings-CI-Bot
