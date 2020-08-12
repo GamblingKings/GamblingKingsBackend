@@ -42,7 +42,8 @@ jobs:
           author_name: ${{ github.actor }}
           status: ${{ job.status }}
           channel: '#ci-cd'
-          icon_url: 'https://images.app.goo.gl/5GgSiSCSQffpCMFM6'
+          username: GitHub Actions
+          icon_emoji: ':github_actions:'
           fields: all
           mention: here
           if_mention: failure,cancelled
