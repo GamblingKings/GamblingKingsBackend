@@ -41,7 +41,11 @@ jobs:
         with:
           author_name: ${{ github.actor }}
           status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job # selectable (default: repo,message)
+          channel: '#ci-cd'
+          icon_url: 'https://images.app.goo.gl/5GgSiSCSQffpCMFM6'
+          fields: all
+          mention: here
+          if_mention: failure,cancelled
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
         if: always() # Pick up events even if the job fails or is canceled.
