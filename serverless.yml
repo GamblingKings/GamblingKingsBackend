@@ -10,6 +10,7 @@ plugins:
   #######################################
   - serverless-offline
   - serverless-dynamodb-local
+  - offline-invalidate
 
 custom:
   webpack:

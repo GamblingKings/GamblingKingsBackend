@@ -4,13 +4,12 @@ import * as userFunctions from '../../../src/dynamodb/userDBService';
 import { response } from '../../../src/utils/responseHelper';
 import { createEvent } from '../functionsTestHelpers';
 import { LambdaResponse } from '../../../src/types/response';
-
-const TEST_CONNECTION_ID = 'test-onConnect-connectionId';
+import { FAKE_CONNECTION_ID1 } from '../../testConstants';
 
 describe('test onConnect', () => {
   const mockResponseJSON = { action: '', payload: { message: ' ' } };
   const event = createEvent({
-    connectionId: TEST_CONNECTION_ID,
+    connectionId: FAKE_CONNECTION_ID1,
     eventBodyJSON: mockResponseJSON,
   });
   let saveConnectionSpy: jest.SpyInstance;
@@ -34,7 +33,7 @@ describe('test onConnect', () => {
       });
 
     expect(saveConnectionSpy).toHaveBeenCalledTimes(1);
-    expect(saveConnectionSpy).toHaveBeenCalledWith(TEST_CONNECTION_ID);
+    expect(saveConnectionSpy).toHaveBeenCalledWith(FAKE_CONNECTION_ID1);
   });
 
   test('it should fail to save a connection', async () => {
@@ -49,6 +48,6 @@ describe('test onConnect', () => {
       });
 
     expect(saveConnectionSpy).toHaveBeenCalledTimes(1);
-    expect(saveConnectionSpy).toHaveBeenCalledWith(TEST_CONNECTION_ID);
+    expect(saveConnectionSpy).toHaveBeenCalledWith(FAKE_CONNECTION_ID1);
   });
 });
