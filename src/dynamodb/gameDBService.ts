@@ -246,6 +246,7 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
      * 2. started attribute should be either not exist or its value should be false before setting it to true
      *    (to prevent duplicate write to the game)
      * 3. the user calling the function must be the host of the game
+     * 4. the size of the uses array should be 4 (need 4 users to start a game)
      */
     ConditionExpression: `
       attribute_exists(#gameIdKey)
@@ -253,16 +254,20 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
       (attribute_not_exists(#startedKey) OR #startedKey = :notStartedVal)
       AND
       host.connectionId = :callerConnectionIdVal
+      AND
+      size(#usersKey) = :maxUserCount
     `,
     UpdateExpression: 'SET #startedKey = :startedVal',
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
       '#startedKey': 'started',
+      '#usersKey': 'users',
     },
     ExpressionAttributeValues: {
       ':startedVal': true,
       ':notStartedVal': false,
       ':callerConnectionIdVal': callerConnectionId,
+      ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
     },
     ReturnValues: 'ALL_NEW',
   };
