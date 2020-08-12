@@ -36,17 +36,20 @@ jobs:
           yarn test
 
       # Send slack notification
+      # Docs: https://action-slack.netlify.app/
       - name: Notify Slack
-        uses: 8398a7/action-slack@v3.2.0
+        uses: 8398a7/action-slack@v3.6.1
         with:
+          # Fields
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job # selectable (default: repo,message)
+          # With Parameters
+          channel: '#ci-cd'
+          username: GamblingKings-CI-Bot
           author_name: ${{ github.actor }}
           status: ${{ job.status }}
-          channel: '#ci-cd'
-          username: GitHub Actions
-          icon_emoji: ':github_actions:'
-          fields: all
           mention: here
           if_mention: failure,cancelled
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # optional
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
         if: always() # Pick up events even if the job fails or is canceled.
