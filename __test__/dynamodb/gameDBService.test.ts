@@ -532,7 +532,7 @@ describe('test startGame', () => {
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
   });
 
-  test('It should throw error if the there are less than 4 users in the game', async () => {
+  test('It should throw error if there are less than 4 users in the game', async () => {
     // Remove one user from the game
     await removeUserFromGame(gameId, FAKE_CONNECTION_ID4);
 
