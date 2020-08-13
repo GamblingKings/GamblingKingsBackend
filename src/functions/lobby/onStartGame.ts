@@ -12,8 +12,6 @@ import {
   failedWebSocketResponse,
 } from '../../websocket/createWSResponse';
 
-const REQUIRED_NUMBER_OF_USERS = 4;
-
 /**
  * Handler for starting a new game.
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
@@ -37,11 +35,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     if (updatedGame) {
       const { users } = updatedGame;
       const connectionsInGame = users.map((user) => user.connectionId);
-
-      // Check if the game has enough users to get started
-      if (!connectionsInGame || connectionsInGame.length < REQUIRED_NUMBER_OF_USERS) {
-        throw new Error(`Require ${REQUIRED_NUMBER_OF_USERS} users to start the game.`);
-      }
 
       // Send start game message to users in the game
       await Promise.all(

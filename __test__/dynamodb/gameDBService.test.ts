@@ -21,6 +21,7 @@ import {
   FAKE_CONNECTION_ID1,
   FAKE_CONNECTION_ID2,
   FAKE_CONNECTION_ID3,
+  FAKE_CONNECTION_ID4,
   FAKE_GAME_NAME1,
   FAKE_GAME_TYPE1,
   FAKE_GAME_VERSION1,
@@ -492,6 +493,9 @@ describe('test startGame', () => {
   beforeEach(async () => {
     // Create a test user
     await saveConnection(FAKE_CONNECTION_ID1);
+    await saveConnection(FAKE_CONNECTION_ID2);
+    await saveConnection(FAKE_CONNECTION_ID3);
+    await saveConnection(FAKE_CONNECTION_ID4);
 
     // Create a game (user with FAKE_CONNECTION_ID1 should be in the game after the game is successfully created)
     game = await createGame({
@@ -499,6 +503,11 @@ describe('test startGame', () => {
       creatorConnectionId: FAKE_CONNECTION_ID1,
     });
     gameId = game.gameId;
+
+    // Add three other users in the game
+    await addUserToGame(gameId, FAKE_CONNECTION_ID2);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID3);
+    await addUserToGame(gameId, FAKE_CONNECTION_ID4);
   });
 
   test('it should set the started game flag on the game to true', async () => {
@@ -519,11 +528,13 @@ describe('test startGame', () => {
   });
 
   test('It should throw error if the user who requests to start a game is not host', async () => {
-    // Create another user
-    await saveConnection(FAKE_CONNECTION_ID2);
+    const func = startGame(gameId, FAKE_CONNECTION_ID2);
+    await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
+  });
 
-    // Add the user to the game
-    await addUserToGame(gameId, FAKE_CONNECTION_ID2);
+  test('It should throw error if there are less than 4 users in the game', async () => {
+    // Remove one user from the game
+    await removeUserFromGame(gameId, FAKE_CONNECTION_ID4);
 
     const func = startGame(gameId, FAKE_CONNECTION_ID2);
     await expect(func).rejects.toThrow(CONDITIONAL_FAILED_MSG);
