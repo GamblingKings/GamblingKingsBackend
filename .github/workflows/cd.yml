@@ -1,16 +1,11 @@
 name: CD
 
 on:
-  # push:
-    # branches: [master]
-  pull_request:
+  push:
     branches: [master]
 
 jobs:
   cd:
-    # cd job depends on ci
-    needs: lint-format-test
-
     runs-on: ubuntu-latest
 
     steps:
@@ -19,9 +14,25 @@ jobs:
         with:
           node-version: '12'
 
-      # Install serverless
-      - name: Install serverless
-        run: yarn global add serverless
+      # Caching
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Restore from cache
+        uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # Install packages
+      - name: Install Packages
+        run: |
+          yarn install
+          yarn global add serverless
 
       # Deploy to aws
       - name: Deploy
@@ -43,7 +54,7 @@ jobs:
           username: GamblingKings-CD-Bot
           author_name: ${{ github.actor }}
           status: ${{ job.status }}
-          emoji_icon: ':mahjong:'
+          icon_emoji: ':mahjong:'
           mention: here
           if_mention: failure,cancelled
         env:
