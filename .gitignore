@@ -15,7 +15,7 @@ node_modules
 vscode
 *.zip
 .DS_Store
-*.lock
+package-lock.json
 *.log
 
 # Test
