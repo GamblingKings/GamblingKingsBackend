@@ -15,8 +15,16 @@ plugins:
 custom:
   webpack:
     webpackConfig: 'webpack.config.js'
-    includeModules: false
+    includeModules: true
     packager: 'yarn'
+    forceExclude:
+      - aws-sdk
+    packagerOptions:
+      scripts:
+        - yarn autoclean --init
+        - rm .yarnclean && cat .yarnclean >> .yarnclean && echo '\n*.ts' >> .yarnclean
+        - rm -rf node_modules/aws-sdk
+        - yarn autoclean --force
   #######################################
   # Uncomment this for local dev only
   #######################################
@@ -43,6 +51,8 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-west-2
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   memorySize: 512 # optional, in MB, default is 1024
 
   websocketsApiName: mahjong-websocket
@@ -92,6 +102,7 @@ provider:
       Ref: GameState
     API_REGION: '${self:provider.region}'
     NODE_PATH: /opt/nodejs:/opt/nodejs/node12/node_modules:/opt/nodejs/node_modules:/var/runtime/node_modules:/var/runtime:/var/task
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # Enable AWS connection reuse to reuse HTTP connections
 
 #######################################
 # Lambda Functions

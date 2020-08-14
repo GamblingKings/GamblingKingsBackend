@@ -9,6 +9,9 @@ node_modules
 # Webpack directories
 .webpack
 
+# Eslint
+.eslintcache
+
 # Misc
 .env
 .idea
@@ -17,6 +20,7 @@ vscode
 .DS_Store
 package-lock.json
 *.log
+.yarnclean
 
 # Test
 coverage

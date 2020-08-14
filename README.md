@@ -262,3 +262,7 @@ yarn start
 
 - [ ] Refactor and optimize addUserToGame call to DynamoDB
 - [ ] Refactor and optimize removeUserFromGame call to DynamoDB
+
+## Build Optimization
+
+See this article to know more about how to [optimize build time using typescript, serverless, webpack, and eslint](https://itnext.io/how-to-optimise-your-serverless-typescript-webpack-eslint-setup-for-performance-86d052284505)

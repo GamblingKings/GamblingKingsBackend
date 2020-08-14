@@ -10,8 +10,17 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["es2015"],
-    "rootDir": "./"
+    "rootDir": "./",
+    "removeComments": true
   },
   "include": ["./src/**/*.ts", "./__test__/**/*.ts", "global.d.ts"],
-  "exclude": ["node_modules/**/*", ".dynamodb/**/*", ".vscode/**/*"]
+  "exclude": [
+    "node_modules/**/*",
+    ".dynamodb/**/*",
+    ".vscode/**/*",
+    ".serverless/**/*",
+    ".webpack/**/*",
+    ".vscode/**/*",
+    "**/*.js"
+  ]
 }
