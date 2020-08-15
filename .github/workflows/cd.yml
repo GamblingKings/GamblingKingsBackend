@@ -1,17 +1,13 @@
-name: CI
+name: CD
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  lint-format-test:
+  cd:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -34,22 +30,17 @@ jobs:
 
       # Install dependencies
       - name: Install Packages
-        run: yarn install
-
-      # Linting with ESLint
-      - name: Lint
-        run: yarn lint
-
-      # Checking format with Prettier
-      - name: Check format
-        run: yarn format:check
-
-      # Running tests with Jest
-      - name: Test
         run: |
-          yarn global add codecov
-          export CODECOV_TOKEN="${{ secrets.CODECOV_TOKEN_BACKEND }}"
-          yarn test
+          yarn install
+          yarn global add serverless
+
+      # Deploy to aws
+      - name: Deploy
+        run: yarn run prod-start
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
 
       # Send slack notification
       # Docs: https://action-slack.netlify.app/
@@ -60,9 +51,10 @@ jobs:
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
           # With Parameters
           channel: '#ci-cd'
-          username: GamblingKings-CI-Bot
+          username: GamblingKings-CD-Bot
           author_name: ${{ github.actor }}
           status: ${{ job.status }}
+          icon_emoji: ':mahjong:'
           mention: here
           if_mention: failure,cancelled
         env:
