@@ -4,7 +4,6 @@ import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
 import { GameState, PlayedTile, UserHand } from '../models/GameState';
 import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
-import { broadcastGameUpdate } from '../websocket/broadcast/gameBroadcast';
 
 /* ----------------------------------------------------------------------------
  * Constants
