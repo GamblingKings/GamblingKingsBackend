@@ -11,6 +11,7 @@ import {
   createInGameUpdateResponse,
   createPlayTileResponse,
   createOnWinRoundResponse,
+  createUpdateGameStateResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
@@ -173,7 +174,7 @@ export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, us
     const tiles = getHandByConnectionId(hands, connectionId);
 
     // Put random tiles in response
-    const wsResponse = createGameStartResponse({ tiles: JSON.stringify(tiles) });
+    const wsResponse = createGameStartResponse({ tiles });
 
     // Send tiles as a string to each user in the game
     return ws.send(wsResponse, connectionId);
@@ -235,9 +236,36 @@ export const broadcastPlayedTileToUsers = async (
  * @param {string} connectionId connectionId of winner
  * @param {string} tiles winning tiles
  */
-export const broadcastWinningTiles = async (ws: WebSocketClient, connectionId: string, tiles: string) => {
+export const broadcastWinningTiles = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  connectionId: string,
+  tiles: string[],
+): Promise<void> => {
   const wsResponse = createOnWinRoundResponse({
-    tiles,
     connectionId,
+    tiles,
   });
+  await Promise.all(
+    connectionIds.map((cid) => {
+      return ws.send(wsResponse, cid);
+    }),
+  );
+};
+
+export const broadcastUpdateGameState = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  dealer: number,
+  wind: number,
+): Promise<void> => {
+  const wsResponse = createUpdateGameStateResponse({
+    dealer,
+    wind,
+  });
+  await Promise.all(
+    connectionIds.map((cid) => {
+      return ws.send(wsResponse, cid);
+    }),
+  );
 };

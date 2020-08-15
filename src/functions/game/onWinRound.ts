@@ -2,17 +2,21 @@ import { Handler } from 'aws-lambda';
 import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
 import { WebSocketClient } from '../../websocket/WebSocketClient';
 import { Logger } from '../../utils/Logger';
-import { response } from '../../utils/responseHelper';
-import { LambdaResponse } from '../../types/response';
 import { LambdaEventBodyPayloadOptions } from '../../types/payload';
-import { getGameStateByGameId, changeDealer } from '../../dynamodb/gameStateDBService';
+import { changeDealer, getCurrentDealer, getCurrentWind } from '../../dynamodb/gameStateDBService';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
+import { User } from '../../models/User';
+import {
+  broadcastWinningTiles,
+  broadcastUpdateGameState,
+  broadcastGameStart,
+} from '../../websocket/broadcast/gameBroadcast';
 // import { broadcastWinningTiles } from '../../websocket/broadcast/gameStateBroadcast';
 /**
  * Handler for interacting with a tile.
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
-export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
+export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<void> => {
   Logger.createLogTitle('onWinRound.ts');
 
   // Parse event
@@ -20,48 +24,34 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
-  const winningTiles = JSON.parse(payload.tiles as string);
+  const winningTiles = (payload.tiles as unknown) as string[];
   const ws = new WebSocketClient(event.requestContext);
 
-  // {action: "WIN_ROUND", payload: {
-  //   gameId: adfjas135151361346
-  //   tiles: ['tile1', 'tile2'],
-  //   points: 123412 // currently not implemented in frontend
-  //   connectionId: 12351235123515
-  // }}
-
-  // get users from game table
-
-  // get the gameid, tiles, from the payload, and grab the current game session from dynamodb
-  // compare the dealer with the connectionId(winner)
-  // if dealer is different, increment the dealer counter
-  // if dealer counter resets to 0, change wind
-
-  // send a web_socket payload {action: 'WINNING_TILES', payload: {
-  //   tiles: ['']
-  // }}
-
-  // send a web_socket payload
-  // {
-  //    action: 'UPDATE_GAME_STATE,
-  //    payload: { some state, i.e. dealer, wind }}
-
-  // wait 5 seconds before starting new round and sending {action: 'GAME_START', payload: { new tiles}} to all connections
-
   try {
-    // broadcastConnections(ws, )
-    const gameState = await getGameStateByGameId(gameId, ['dealer', 'users']);
-    // const users = await getUsersInGame(gameId);
+    const gameState = await Promise.all([getCurrentDealer(gameId), getUsersInGame(gameId)]);
+    const dealer = gameState[0] as number;
+    const users = gameState[1] as User[];
+    const connectionIds = users.map((user) => user.connectionId);
 
-    // if (gameState.Item.users[gameState.Item.dealer].connectionId === connectionId) {
-    //   changeDealer(gameId)
-    // }
+    // send winning tiles to all connections
+    await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
+    if (users[dealer].connectionId === connectionId) {
+      changeDealer(gameId);
+    }
 
-    console.log('gamestate', gameState);
-    // console.log('users', users);
-    return response(200, 'Tile drawn from wall successfully');
+    // get Updated dealer and Wind
+    const updatedGameState = await Promise.all([getCurrentDealer(gameId), getCurrentWind(gameId)]);
+    const updatedDealer = updatedGameState[0] as number;
+    const updatedWind = updatedGameState[1] as number;
+
+    // send current dealer and wind to all connections
+    await broadcastUpdateGameState(ws, connectionIds, updatedDealer, updatedWind);
+
+    // start new round and send new hands to user
+    setTimeout(async () => {
+      await broadcastGameStart(ws, gameId, users);
+    }, 5000);
   } catch (err) {
     console.error(JSON.stringify(err));
-    return response(500, 'Failed to draw a tile');
   }
 };

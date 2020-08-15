@@ -4,6 +4,7 @@ import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
 import { GameState, PlayedTile, UserHand } from '../models/GameState';
 import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
+import { broadcastGameUpdate } from '../websocket/broadcast/gameBroadcast';
 
 /* ----------------------------------------------------------------------------
  * Constants
@@ -196,6 +197,47 @@ export const drawTile = async (gameId: string): Promise<string> => {
 };
 
 /**
+ * Change wind number in a game.
+ * @param {string} gameId Game Id
+ */
+export const changeWind = async (gameId: string): Promise<GameState | undefined> => {
+  const currentGameState = await getGameStateByGameId(gameId);
+
+  if (!currentGameState) {
+    throw Error('changeWind: game state not found');
+  }
+
+  const { currentWind: currentWindNum } = currentGameState;
+  let nextWindNum: number;
+
+  // reset wind num
+  if (currentWindNum === 3) nextWindNum = 0;
+  else nextWindNum = currentWindNum + 1;
+
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId,
+    },
+    ConditionExpression: ':nextWindNum < :maxUserCount',
+    UpdateExpression: 'SET #currentWindKey = :nextWindNum',
+    ExpressionAttributeNames: {
+      '#currentWindKey': 'currentWind',
+    },
+    ExpressionAttributeValues: {
+      ':nextWindNum': nextWindNum,
+      ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await DB.update(updateParam).promise();
+  console.log('\nchangeWind result:', res);
+
+  return parseDynamoDBAttribute<GameState>(res);
+};
+
+/**
  * Change dealer number in a game.
  * @param {string} gameId Game Id
  */
@@ -236,47 +278,6 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
 
   const res = await DB.update(updateParam).promise();
   console.log('\nchangeDealer result:', res);
-
-  return parseDynamoDBAttribute<GameState>(res);
-};
-
-/**
- * Change wind number in a game.
- * @param {string} gameId Game Id
- */
-export const changeWind = async (gameId: string): Promise<GameState | undefined> => {
-  const currentGameState = await getGameStateByGameId(gameId);
-
-  if (!currentGameState) {
-    throw Error('changeWind: game state not found');
-  }
-
-  const { currentWind: currentWindNum } = currentGameState;
-  let nextWindNum: number;
-
-  // reset wind num
-  if (currentWindNum === 3) nextWindNum = 0;
-  else nextWindNum = currentWindNum + 1;
-
-  const updateParam: DocumentClient.UpdateItemInput = {
-    TableName: GAME_STATE_TABLE,
-    Key: {
-      gameId,
-    },
-    ConditionExpression: ':nextWindNum < :maxUserCount',
-    UpdateExpression: 'SET #currentWindKey = :nextWindNum',
-    ExpressionAttributeNames: {
-      '#currentWindKey': 'currentWind',
-    },
-    ExpressionAttributeValues: {
-      ':nextWindNum': nextWindNum,
-      ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
-    },
-    ReturnValues: 'ALL_NEW',
-  };
-
-  const res = await DB.update(updateParam).promise();
-  console.log('\nchangeWind result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -351,6 +352,47 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
   console.log('\nincrementPlayedTileInteractionCount result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
+};
+
+export const resetGameRound = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
+  const newWall = new HongKongWall();
+
+  // Generate hand for each user
+  const hands: UserHand[] = [];
+  connectionIds.forEach((connectionId: string) => {
+    const hand = {
+      connectionId,
+      hand: newWall.generateHand(),
+    };
+    hands.push(hand);
+  });
+
+  // TODO: This Update is currently incorrect
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId,
+    },
+    ConditionExpression: 'attribute_exists(#gameIdKey)',
+    UpdateExpression: `
+      SET #interactionCountKey = :initialInteractionCountVal,
+          #playedTileInteractionsKey = :emptyPlayedTileVal
+    `,
+    ExpressionAttributeNames: {
+      '#gameIdKey': 'gameId',
+      '#interactionCountKey': 'interactionCount',
+      '#playedTileInteractionsKey': 'playedTileInteractions',
+    },
+    ExpressionAttributeValues: {
+      ':initialInteractionCountVal': 0,
+      ':emptyPlayedTileVal': [],
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await DB.update(updateParam).promise();
+
+  return parseDynamoDBAttribute<GameState>(res) as GameState; // not undefined because gamestate will always be updated
 };
 
 /* ----------------------------------------------------------------------------
