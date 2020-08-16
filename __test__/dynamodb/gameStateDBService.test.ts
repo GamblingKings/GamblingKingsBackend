@@ -573,3 +573,32 @@ describe('test resetPlayedTileInteraction', () => {
     expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([]);
   });
 });
+
+/* ----------------------------------------------------------------------------
+ * Test startNewGameRound
+ * ------------------------------------------------------------------------- */
+describe('test startNewGameRound', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let prevHand: UserHand[];
+  let prevWall: string[];
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+    prevHand = gameState.hands;
+    prevWall = gameState.wall;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should change wall & hands and reset currentTurn', async () => {
+    const updatedGameState = await gameStateDBFunctions.startNewGameRound(gameId, CONNECTION_IDS);
+
+    expect(updatedGameState.currentTurn).toStrictEqual(0);
+    expect(updatedGameState.hands).not.toStrictEqual(prevHand);
+    expect(updatedGameState.wall).not.toStrictEqual(prevWall);
+  });
+});
