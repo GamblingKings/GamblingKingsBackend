@@ -17,7 +17,7 @@ import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
 import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
-import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
+import { drawTile, initGameState, startNewGameRound } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
 /* ----------------------------------------------------------------------------
@@ -268,4 +268,19 @@ export const broadcastUpdateGameState = async (
       return ws.send(wsResponse, cid);
     }),
   );
+};
+
+export const broadcastGameReset = async (ws: WebSocketClient, gameId: string, users: User[]): Promise<void> => {
+  const connectionIds = getConnectionIdsFromUsers(users);
+
+  // Get new hands and update dynamodb
+  const { hands } = await startNewGameRound(gameId, connectionIds);
+
+  const promises = connectionIds.map((connectionId) => {
+    const tiles = getHandByConnectionId(hands, connectionId);
+    const wsResponse = createGameStartResponse({ tiles });
+    return ws.send(wsResponse, connectionId);
+  });
+
+  await Promise.all(promises);
 };

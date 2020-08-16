@@ -11,15 +11,14 @@ import {
   broadcastUpdateGameState,
   broadcastGameStart,
 } from '../../websocket/broadcast/gameBroadcast';
-// import { broadcastWinningTiles } from '../../websocket/broadcast/gameStateBroadcast';
+
 /**
- * Handler for interacting with a tile.
+ * Handler for Winning Round
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<void> => {
   Logger.createLogTitle('onWinRound.ts');
 
-  // Parse event
   const { connectionId } = event.requestContext;
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
@@ -28,18 +27,22 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const ws = new WebSocketClient(event.requestContext);
 
   try {
+    // TODO: Deal with errors if gameid is invalid
     const gameState = await Promise.all([getCurrentDealer(gameId), getUsersInGame(gameId)]);
     const dealer = gameState[0] as number;
     const users = gameState[1] as User[];
     const connectionIds = users.map((user) => user.connectionId);
 
     // send winning tiles to all connections
+    // {action: "WINNING_TILES", payload: {tiles: ["TILE", "TILE"]}}
     await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
-    if (users[dealer].connectionId === connectionId) {
+
+    if (users[dealer].connectionId !== connectionId) {
       changeDealer(gameId);
     }
 
     // get Updated dealer and Wind
+    // {action: "UPDATE_GAME_STATE", payload: { dealer, wind}}
     const updatedGameState = await Promise.all([getCurrentDealer(gameId), getCurrentWind(gameId)]);
     const updatedDealer = updatedGameState[0] as number;
     const updatedWind = updatedGameState[1] as number;

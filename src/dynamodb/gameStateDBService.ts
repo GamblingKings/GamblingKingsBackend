@@ -353,7 +353,7 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
   return parseDynamoDBAttribute<GameState>(res);
 };
 
-export const resetGameRound = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
+export const startNewGameRound = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
   const newWall = new HongKongWall();
 
   // Generate hand for each user
@@ -366,27 +366,29 @@ export const resetGameRound = async (gameId: string, connectionIds: string[]): P
     hands.push(hand);
   });
 
-  // TODO: This Update is currently incorrect
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
     Key: {
       gameId,
     },
     ConditionExpression: 'attribute_exists(#gameIdKey)',
-    UpdateExpression: `
-      SET #interactionCountKey = :initialInteractionCountVal,
-          #playedTileInteractionsKey = :emptyPlayedTileVal
-    `,
     ExpressionAttributeNames: {
       '#gameIdKey': 'gameId',
-      '#interactionCountKey': 'interactionCount',
-      '#playedTileInteractionsKey': 'playedTileInteractions',
+      '#currentTurnKey': 'currentTurn',
+      '#wallKey': 'wall',
+      '#handsKey': 'hands',
     },
     ExpressionAttributeValues: {
-      ':initialInteractionCountVal': 0,
-      ':emptyPlayedTileVal': [],
+      ':initialCurrentTurn': 0,
+      ':initialWall': newWall,
+      ':initialHands': hands,
     },
     ReturnValues: 'ALL_NEW',
+    UpdateExpression: `
+      SET #currentTurnKey = :initialCurrentTurn,
+          #wallKey        = :initialWall,
+          #handsKey       = :initialHands
+    `,
   };
 
   const res = await DB.update(updateParam).promise();
