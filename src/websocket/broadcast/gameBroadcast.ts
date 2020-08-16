@@ -231,7 +231,7 @@ export const broadcastPlayedTileToUsers = async (
 };
 
 /**
- * Broadcast who won game and their winning tiles
+ * Broadcast who won game and their winning tiles to all users in game
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} connectionId connectionId of winner
  * @param {string} tiles winning tiles
@@ -253,6 +253,13 @@ export const broadcastWinningTiles = async (
   );
 };
 
+/**
+ * Broadcast updated game state after game round ends
+ * @param {WebSocketClient} ws WebSocketClient instance
+ * @param {string[]} connectionIds connectionIds of all users in game
+ * @param {number} dealer current dealer
+ * @param {number} wind current wind
+ */
 export const broadcastUpdateGameState = async (
   ws: WebSocketClient,
   connectionIds: string[],
@@ -270,6 +277,12 @@ export const broadcastUpdateGameState = async (
   );
 };
 
+/**
+ * Broadcast new hands to all users and Resets game round
+ * @param {WebSocketClient} ws WebSocketClient instance
+ * @param {string} gameId
+ * @param {User[]} users all users in gameId
+ */
 export const broadcastGameReset = async (ws: WebSocketClient, gameId: string, users: User[]): Promise<void> => {
   const connectionIds = getConnectionIdsFromUsers(users);
 

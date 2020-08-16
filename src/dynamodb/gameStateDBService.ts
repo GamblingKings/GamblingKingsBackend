@@ -353,6 +353,11 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
   return parseDynamoDBAttribute<GameState>(res);
 };
 
+/**
+ * Starts new game round with new hands, wall and reset game round values.
+ * @param gameId gameId
+ * @param connectionIds connectionIds of players in gameId
+ */
 export const startNewGameRound = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
   const newWall = new HongKongWall();
 

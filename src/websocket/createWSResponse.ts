@@ -172,13 +172,17 @@ export const createPlayedTileInteractionResponse = (payload: PlayedTileInteracti
 };
 
 /**
- * Create WIN_ROUND response object.
- * @param {WinRoundPayload} payload payload object
+ * Create WINNING_TILE response object for WIN_ROUND request
+ * @param {WinningTilesPayload} payload payload object
  */
-export const createOnWinRoundResponse = (payload: WinningTilesPayload): WebSocketResponse => {
+export const createWinningTilesResponse = (payload: WinningTilesPayload): WebSocketResponse => {
   return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
 };
 
+/**
+ * Create UPDATE_GAME_STATE response object for WIN_ROUND request
+ * @param {UpdateGameStatePayload} payload
+ */
 export const createUpdateGameStateResponse = (payload: UpdateGameStatePayload): WebSocketResponse => {
   return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
 };
