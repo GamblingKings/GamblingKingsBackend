@@ -10,7 +10,7 @@ import {
   createInGameMessageResponse,
   createInGameUpdateResponse,
   createPlayTileResponse,
-  createOnWinRoundResponse,
+  createWinningTilesResponse,
   createUpdateGameStateResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
@@ -242,7 +242,7 @@ export const broadcastWinningTiles = async (
   connectionId: string,
   tiles: string[],
 ): Promise<void> => {
-  const wsResponse = createOnWinRoundResponse({
+  const wsResponse = createWinningTilesResponse({
     connectionId,
     tiles,
   });
