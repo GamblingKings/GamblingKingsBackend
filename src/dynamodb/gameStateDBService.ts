@@ -377,22 +377,20 @@ export const startNewGameRound = async (gameId: string, connectionIds: string[])
       gameId,
     },
     ConditionExpression: 'attribute_exists(#gameIdKey)',
-    ExpressionAttributeNames: {
-      '#gameIdKey': 'gameId',
-      '#currentTurnKey': 'currentTurn',
-      '#wallKey': 'wall',
-      '#handsKey': 'hands',
-    },
     ExpressionAttributeValues: {
-      ':initialCurrentTurn': 0,
-      ':initialWall': newWall,
-      ':initialHands': hands,
+      ':initCurrentIndex': DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
+      ':initWall': newWall,
+      ':initHands': hands,
+      ':initInteractionCount': 0,
+      ':initPlayedTileInteractions': [],
     },
     ReturnValues: 'ALL_NEW',
     UpdateExpression: `
-      SET #currentTurnKey = :initialCurrentTurn,
-          #wallKey        = :initialWall,
-          #handsKey       = :initialHands
+      SET currentIndex           = :initCurrentIndex,
+          wall                   = :initWall,
+          hands                  = :initHands,
+          interactionCount       = :initInteractionCount,
+          playedTileInteractions = :initPlayedTileInteractions
     `,
   };
 
