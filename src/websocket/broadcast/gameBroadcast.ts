@@ -19,6 +19,7 @@ import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
 import { drawTile, initGameState, startNewGameRound } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
+import { GameState } from '../../models/GameState';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -273,17 +274,16 @@ export const broadcastUpdateGameState = async (
 /**
  * Broadcast new hands to all users and Resets game round
  * @param {WebSocketClient} ws WebSocketClient instance
- * @param {string} gameId
- * @param {User[]} users all users in gameId
+ * @param {string[]} connectionIds all user connection ids in a game
+ * @param {GameState} GameState Gamestate
  */
-export const broadcastGameReset = async (ws: WebSocketClient, gameId: string, users: User[]): Promise<void> => {
-  const connectionIds = getConnectionIdsFromUsers(users);
-
-  // Get new hands and update dynamodb
-  const { hands } = await startNewGameRound(gameId, connectionIds);
-
+export const broadcastGameReset = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  gameState: GameState,
+): Promise<void> => {
   const promises = connectionIds.map((connectionId) => {
-    const tiles = getHandByConnectionId(hands, connectionId);
+    const tiles = getHandByConnectionId(gameState.hands, connectionId);
     const wsResponse = createGameStartResponse({ tiles });
     return ws.send(wsResponse, connectionId);
   });

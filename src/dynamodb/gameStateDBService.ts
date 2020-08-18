@@ -417,9 +417,9 @@ export const startNewGameRound = async (gameId: string, connectionIds: string[])
     `,
   };
 
-  const res = await DB.update(updateParam).promise();
-
-  return parseDynamoDBAttribute<GameState>(res) as GameState; // not undefined because gamestate will always be updated
+  await DB.update(updateParam).promise();
+  const updatedGameState = (await changeDealer(gameId)) as GameState;
+  return updatedGameState;
 };
 
 /* ----------------------------------------------------------------------------

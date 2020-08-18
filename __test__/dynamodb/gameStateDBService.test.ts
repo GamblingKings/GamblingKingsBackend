@@ -599,6 +599,8 @@ describe('test startNewGameRound', () => {
     // Setup a game state of a mid-match
     prevGameState = (await testReplaceGameState({
       ...gameState,
+      dealer: 3,
+      currentWind: 1,
       currentIndex: 23,
       interactionCount: 27,
       playedTileInteractions: [
@@ -616,11 +618,13 @@ describe('test startNewGameRound', () => {
     jest.restoreAllMocks();
   });
 
-  test('it should change wall & hands and reset currentTurn', async () => {
+  test('it should reset some game state and update dealer/wind', async () => {
     // Game State should not be initial game state
     expect(prevGameState.currentIndex).not.toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
     expect(prevGameState.interactionCount).not.toBe(0);
     expect(prevGameState.playedTileInteractions).not.toStrictEqual([]);
+    expect(prevGameState.dealer).toBe(3);
+    expect(prevGameState.currentWind).toBe(1);
 
     // reset game round
     const updatedGameState = await gameStateDBFunctions.startNewGameRound(gameId, CONNECTION_IDS);
@@ -631,5 +635,7 @@ describe('test startNewGameRound', () => {
     expect(updatedGameState.wall).not.toStrictEqual(prevGameState.wall);
     expect(updatedGameState.interactionCount).toBe(0);
     expect(updatedGameState.playedTileInteractions).toStrictEqual([]);
+    expect(updatedGameState.dealer).toBe(0);
+    expect(updatedGameState.currentWind).toBe(prevGameState.currentWind + 1);
   });
 });
