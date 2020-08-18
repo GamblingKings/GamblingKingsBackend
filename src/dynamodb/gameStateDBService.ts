@@ -230,11 +230,7 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
   }
 
   const { currentWind: currentWindNum } = currentGameState;
-  let nextWindNum: number;
-
-  // reset wind num
-  if (currentWindNum === 3) nextWindNum = 0;
-  else nextWindNum = currentWindNum + 1;
+  const nextWindNum = (currentWindNum + 1) % 4;
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
@@ -271,15 +267,10 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
   }
 
   const { dealer: currentDealerIndex } = currentGameState;
-  let nextDealerIndex;
 
-  // reset dealer index
-  if (currentDealerIndex === 3) {
-    nextDealerIndex = 0;
-    await changeWind(gameId);
-  } else {
-    nextDealerIndex = currentDealerIndex + 1;
-  }
+  // increment dealer; also increment wind if dealer resets
+  const nextDealerIndex = (currentDealerIndex + 1) % 4;
+  if (nextDealerIndex === 0) await changeWind(gameId);
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
