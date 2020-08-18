@@ -9,9 +9,9 @@ import { User } from '../../models/User';
 import {
   broadcastWinningTiles,
   broadcastUpdateGameState,
-  broadcastGameStart,
   broadcastGameReset,
 } from '../../websocket/broadcast/gameBroadcast';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
 /**
  * Handler for Winning Round
@@ -32,7 +32,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const gameState = await Promise.all([getCurrentDealer(gameId), getUsersInGame(gameId)]);
     const dealer = gameState[0] as number;
     const users = gameState[1] as User[];
-    const connectionIds = users.map((user) => user.connectionId);
+    const connectionIds = getConnectionIdsFromUsers(users);
 
     // send winning tiles to all connections
     await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
