@@ -233,6 +233,7 @@ export const broadcastPlayedTileToUsers = async (
 /**
  * Broadcast who won game and their winning tiles to all users in game
  * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string[]} connectionIds connection ids of all users
  * @param {string} connectionId connectionId of winner
  * @param {string} tiles winning tiles
  */
@@ -246,11 +247,7 @@ export const broadcastWinningTiles = async (
     connectionId,
     tiles,
   });
-  await Promise.all(
-    connectionIds.map((cid) => {
-      return ws.send(wsResponse, cid);
-    }),
-  );
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
 };
 
 /**
@@ -270,11 +267,7 @@ export const broadcastUpdateGameState = async (
     dealer,
     wind,
   });
-  await Promise.all(
-    connectionIds.map((cid) => {
-      return ws.send(wsResponse, cid);
-    }),
-  );
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
 };
 
 /**
