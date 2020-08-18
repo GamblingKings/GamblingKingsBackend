@@ -253,7 +253,7 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
   // reset dealer index
   if (currentDealerIndex === 3) {
     nextDealerIndex = 0;
-    changeWind(gameId);
+    await changeWind(gameId);
   } else {
     nextDealerIndex = currentDealerIndex + 1;
   }
