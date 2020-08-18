@@ -62,15 +62,32 @@ export const compareTileInteractionAndSendUpdate = async (
 
   // Loop through interactions and determine which meld takes priority
   // Precedence:
-  // 1. Triplet or Quad (once found, ignore other interaction objects)
-  // 2. Consecutive (only the next user to whom played the tile can make consecutive)
+  // 1. Win game (once found, ignore all other interaction objects)
+  // 2. Triplet or Quad
+  // 3. Consecutive (only the next user to whom played the tile can make consecutive)
+  let winGamePayload = {} as InteractionSuccessPayload;
   let tripletOrQuadPayload = {} as InteractionSuccessPayload;
   let consecutivePayload = {} as InteractionSuccessPayload;
+  let canWinGame = false;
   let canMakeTripletOrQuad = false;
   // Not using forEach because breaking out of the forEach loop does not work
   for (let i = 0; i < interactions.length; i += 1) {
     const interaction: PlayedTile = interactions[i];
     const { connectionId: cid, playedTiles: tile, meldType: meld } = interaction;
+
+    /**
+     * Win game
+     */
+    if (meld === MeldEnum.WIN) {
+      canWinGame = true;
+      winGamePayload = {
+        connectionId: cid,
+        meldType: meld,
+        playedTiles: tile,
+        skipInteraction: false,
+      };
+      break; // once Win game is found, break out of the for loop
+    }
 
     /**
      * Making Triplet or Quad (Triplet and Quad takes precedence over Consecutive)
@@ -83,7 +100,6 @@ export const compareTileInteractionAndSendUpdate = async (
         playedTiles: tile,
         skipInteraction: false,
       };
-      break; // once Triplet or Quad is found, break out of the for loop
     }
 
     /**
@@ -105,12 +121,18 @@ export const compareTileInteractionAndSendUpdate = async (
     }
   }
 
-  const finalWsPayload: InteractionSuccessPayload = tripletOrQuadPayload || consecutivePayload;
-  console.log('Triplet Or Quad payload:', tripletOrQuadPayload);
-  console.log('Consecutive payload:', consecutivePayload);
-  console.log('Final INTERACTION_SUCCESS payload:', finalWsPayload);
+  if (canWinGame && JSON.stringify(winGamePayload) !== '{}') {
+    console.log('Win game payload:', winGamePayload);
 
-  await broadcastInteractionSuccess(ws, finalWsPayload, connectionIds);
+    await broadcastInteractionSuccess(ws, winGamePayload, connectionIds);
+  } else {
+    const finalWsPayload: InteractionSuccessPayload = tripletOrQuadPayload || consecutivePayload;
+    console.log('Triplet Or Quad payload:', tripletOrQuadPayload);
+    console.log('Consecutive payload:', consecutivePayload);
+    console.log('Final INTERACTION_SUCCESS payload:', finalWsPayload);
+
+    await broadcastInteractionSuccess(ws, finalWsPayload, connectionIds);
+  }
 };
 
 /**
