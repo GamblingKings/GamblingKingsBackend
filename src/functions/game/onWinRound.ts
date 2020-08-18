@@ -34,15 +34,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const connectionIds = users.map((user) => user.connectionId);
 
     // send winning tiles to all connections
-    // {action: "WINNING_TILES", payload: {tiles: ["TILE", "TILE"]}}
     await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
 
     if (users[dealer].connectionId !== connectionId) {
-      changeDealer(gameId);
+      await changeDealer(gameId);
     }
 
     // get Updated dealer and Wind
-    // {action: "UPDATE_GAME_STATE", payload: { dealer, wind}}
     const updatedGameState = await Promise.all([getCurrentDealer(gameId), getCurrentWind(gameId)]);
     const updatedDealer = updatedGameState[0] as number;
     const updatedWind = updatedGameState[1] as number;

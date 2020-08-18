@@ -151,6 +151,29 @@ export const getInteractionCount = async (gameId: string): Promise<number | unde
 /* ----------------------------------------------------------------------------
  * Update
  * ------------------------------------------------------------------------- */
+
+/*
+ * Add new game state or replace existing game state with the same game id into GAME_STATE_TABLE.
+ * Mainly to be used to easily add game states for testing purposes.
+ * FOR USE IN TESTING ONLY.
+ */
+export const testReplaceGameState = async (newGameState: GameState): Promise<GameState | undefined> => {
+  const putItemParm: DocumentClient.PutItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Item: newGameState,
+    ReturnValues: 'ALL_OLD',
+  };
+  const getItemParm: DocumentClient.GetItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId: newGameState.gameId,
+    },
+  };
+  await DB.put(putItemParm).promise();
+  const gs = await DB.get(getItemParm).promise();
+  return parseDynamoDBItem<GameState>(gs);
+};
+
 /**
  * Increment the tile index by 1.
  * @param {string} gameId Game Id
@@ -376,7 +399,7 @@ export const startNewGameRound = async (gameId: string, connectionIds: string[])
     Key: {
       gameId,
     },
-    ConditionExpression: 'attribute_exists(#gameIdKey)',
+    ConditionExpression: 'attribute_exists(gameId)',
     ExpressionAttributeValues: {
       ':initCurrentIndex': DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
       ':initWall': newWall,

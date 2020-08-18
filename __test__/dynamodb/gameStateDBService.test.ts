@@ -14,6 +14,7 @@ import {
   initGameState,
   resetPlayedTileInteraction,
   setPlayedTileInteraction,
+  testReplaceGameState,
 } from '../../src/dynamodb/gameStateDBService';
 import {
   CONDITIONAL_FAILED_MSG,
@@ -257,18 +258,22 @@ describe('test changeDealer, getCurrentDealer', () => {
   let gameState: GameState;
   let gameId: string;
   let currentDealerIndex: number;
+  let currentWind: number;
 
   // Spy
   let changeDealerSpy: jest.SpyInstance;
   let getDealerSpy: jest.SpyInstance;
+  let changeWindSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     currentDealerIndex = gameState.dealer;
+    currentWind = gameState.currentWind;
 
     changeDealerSpy = jest.spyOn(gameStateDBFunctions, 'changeDealer');
     getDealerSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentDealer');
+    changeWindSpy = jest.spyOn(gameStateDBFunctions, 'changeWind');
   });
 
   afterEach(() => {
@@ -291,10 +296,12 @@ describe('test changeDealer, getCurrentDealer', () => {
     expect(await getCurrentDealer(gameId)).toBe(1);
   });
 
-  test('it should reset index to 0 when max index is reached', async () => {
+  test('it should reset index to 0 when max index is reached and change wind', async () => {
     // Initial dealer should be user at the 0 index
     expect(currentDealerIndex).toBe(0);
+    expect(currentWind).toBe(0);
     expect(await getCurrentDealer(gameId)).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
 
     await changeDealer(gameId);
     await changeDealer(gameId);
@@ -304,10 +311,13 @@ describe('test changeDealer, getCurrentDealer', () => {
     // Test function call
     expect(changeDealerSpy).toHaveBeenCalledTimes(4);
     expect(getDealerSpy).toHaveBeenCalledTimes(1);
+    expect(changeWindSpy).toHaveBeenCalledTimes(1);
 
     // Test response
     expect(response.dealer).toBe(0);
     expect(await getCurrentDealer(gameId)).toBe(0);
+    expect(response.currentWind).toBe(1);
+    expect(await getCurrentWind(gameId)).toBe(1);
   });
 
   test('it should throw error when the game does not exist', async () => {
@@ -580,14 +590,26 @@ describe('test resetPlayedTileInteraction', () => {
 describe('test startNewGameRound', () => {
   let gameState: GameState;
   let gameId: string;
-  let prevHand: UserHand[];
-  let prevWall: string[];
+  let prevGameState: GameState;
 
   beforeEach(async () => {
     gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
-    prevHand = gameState.hands;
-    prevWall = gameState.wall;
+
+    // Setup a game state of a mid-match
+    prevGameState = (await testReplaceGameState({
+      ...gameState,
+      currentIndex: 23,
+      interactionCount: 27,
+      playedTileInteractions: [
+        {
+          playedTiles: TEST_TILES_CONSECUTIVE,
+          connectionId: FAKE_CONNECTION_ID1,
+          meldType: MeldEnum.CONSECUTIVE,
+          skipInteraction: false,
+        },
+      ],
+    })) as GameState;
   });
 
   afterEach(() => {
@@ -595,10 +617,19 @@ describe('test startNewGameRound', () => {
   });
 
   test('it should change wall & hands and reset currentTurn', async () => {
+    // Game State should not be initial game state
+    expect(prevGameState.currentIndex).not.toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
+    expect(prevGameState.interactionCount).not.toBe(0);
+    expect(prevGameState.playedTileInteractions).not.toStrictEqual([]);
+
+    // reset game round
     const updatedGameState = await gameStateDBFunctions.startNewGameRound(gameId, CONNECTION_IDS);
 
-    expect(updatedGameState.currentTurn).toStrictEqual(0);
-    expect(updatedGameState.hands).not.toStrictEqual(prevHand);
-    expect(updatedGameState.wall).not.toStrictEqual(prevWall);
+    // test response
+    expect(updatedGameState.currentIndex).toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
+    expect(updatedGameState.hands).not.toStrictEqual(prevGameState.hands);
+    expect(updatedGameState.wall).not.toStrictEqual(prevGameState.wall);
+    expect(updatedGameState.interactionCount).toBe(0);
+    expect(updatedGameState.playedTileInteractions).toStrictEqual([]);
   });
 });
