@@ -10,6 +10,7 @@ import {
   broadcastWinningTiles,
   broadcastUpdateGameState,
   broadcastGameStart,
+  broadcastGameReset,
 } from '../../websocket/broadcast/gameBroadcast';
 
 /**
@@ -50,7 +51,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     // start new round and send new hands to user
     setTimeout(async () => {
-      await broadcastGameStart(ws, gameId, users);
+      await broadcastGameReset(ws, gameId, users);
     }, 5000);
   } catch (err) {
     console.error(JSON.stringify(err));
