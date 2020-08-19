@@ -3,6 +3,7 @@ import { CONNECTIONS_TABLE, GAMES_TABLE, GAME_STATE_TABLE } from '../../src/util
 import { ddb } from '../../src/dynamodb/jestLocalDynamoDB';
 import { GameState } from '../../src/models/GameState';
 import { parseDynamoDBItem } from '../../src/dynamodb/dbHelper';
+import { getGameStateByGameId } from '../../src/dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------
  * Helper functions
@@ -48,13 +49,7 @@ export const testReplaceGameState = async (newGameState: GameState): Promise<Gam
     Item: newGameState,
     ReturnValues: 'ALL_OLD',
   };
-  const getItemParm: DocumentClient.GetItemInput = {
-    TableName: GAME_STATE_TABLE,
-    Key: {
-      gameId: newGameState.gameId,
-    },
-  };
+
   await ddb.put(putItemParm).promise();
-  const gs = await ddb.get(getItemParm).promise();
-  return parseDynamoDBItem<GameState>(gs);
+  return getGameStateByGameId(newGameState.gameId);
 };

@@ -13,12 +13,14 @@ import {
 } from '../../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { GameState } from '../../models/GameState';
+import { response } from '../../utils/responseHelper';
+import { LambdaResponse } from '../../types/response';
 
 /**
  * Handler for Winning Round
  * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
  */
-export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<void> => {
+export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onWinRound.ts');
 
   const { connectionId } = event.requestContext;
@@ -38,11 +40,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // send winning tiles to all connections
     await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
 
-    const updatedGameState = (await startNewGameRound(
+    const updatedGameState = await startNewGameRound(
       gameId,
       connectionIds,
       users[dealer].connectionId !== connectionId, // change dealer if winner is not currently a dealer
-    )) as GameState;
+    );
+
+    if (!updatedGameState) throw Error('cannot start new game round');
 
     // send current dealer and wind to all connections
     await broadcastUpdateGameState(ws, connectionIds, updatedGameState.dealer, updatedGameState.currentWind);
@@ -51,7 +55,10 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     setTimeout(async () => {
       await broadcastGameReset(ws, connectionIds, updatedGameState);
     }, 5000);
+
+    return response(200, 'New round started successfully');
   } catch (err) {
     console.error(JSON.stringify(err));
+    return response(500, 'Failed to start a new round');
   }
 };
