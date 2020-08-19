@@ -1,6 +1,7 @@
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { HasVersion } from '../models/Version';
 import { UserHand } from '../models/GameState';
+import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 
 /**
  * Remove version attribute from a Game object.
@@ -44,10 +45,24 @@ export const parseDynamoDBAttribute = <T>(
   return attributes as T;
 };
 
-export const getHandByConnectionId = (hands: UserHand[], connectionId: string): string[] => {
-  const userHand = hands.find((hand) => {
+export const getHandByConnectionId = (hands: UserHand[], connectionId: string): UserHand => {
+  return hands.find((hand) => {
     return hand.connectionId === connectionId;
   }) as UserHand;
+};
 
-  return userHand.hand;
+export const generateHongKongMahjongHands = (initialWall: HongKongWall, connectionIds: string[]): UserHand[] => {
+  const hands: UserHand[] = [];
+  connectionIds.forEach((connectionId: string) => {
+    const { hand: initHand, bonusTiles } = initialWall.getInitialTiles();
+
+    const hand = {
+      connectionId,
+      hand: initHand,
+      playedTiles: bonusTiles,
+    };
+    hands.push(hand);
+  });
+
+  return hands;
 };

@@ -1,6 +1,7 @@
 import { Game } from '../models/Game';
 import { User } from '../models/User';
 import { GameStatesEnum, UserStatesEnum } from '../enums/states';
+import { SelfPlayedTile } from '../models/GameState';
 
 /* ----------------------------------------------------------------------------
  * WebSocket Payload
@@ -78,6 +79,8 @@ export interface SendMessagePayload {
 
 export interface GameStartPayload {
   tiles: string[];
+  selfPlayedTiles: SelfPlayedTile[];
+  currentIndex: number;
 }
 
 export interface DrawTilePayload {

@@ -4,6 +4,7 @@ import {
   changeWind,
   drawTile,
   getCurrentDealer,
+  getCurrentTileIndex,
   getCurrentPlayedTile,
   getCurrentWallByGameId,
   getCurrentWind,
@@ -96,14 +97,14 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
       gameId,
       wall,
       hands,
-      currentIndex: DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
+      currentIndex: await getCurrentTileIndex(gameId),
       currentTurn: 0,
       currentWind: 0,
       dealer: 0,
     };
 
     // Test function calls
-    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
+    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(2); // getCurrentTileIndex calls getGameStateByGameId
 
     // Test response
     expect(response).toStrictEqual(expectedResponse);
@@ -170,7 +171,7 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
 });
 
 /* ----------------------------------------------------------------------------
- * Test incrementCurrentTileIndex
+ * Test incrementCurrentTileIndex, getCurrentTileIndex
  * ------------------------------------------------------------------------- */
 describe('test incrementCurrentTileIndex', () => {
   let gameState: GameState;
@@ -180,6 +181,7 @@ describe('test incrementCurrentTileIndex', () => {
   // Spies
   let incrementCurrentTileIndexSpy: jest.SpyInstance;
   let getGameStateByGameIdSpy: jest.SpyInstance;
+  let getCurrentTileIndexSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
@@ -188,6 +190,7 @@ describe('test incrementCurrentTileIndex', () => {
 
     incrementCurrentTileIndexSpy = jest.spyOn(gameStateDBFunctions, 'incrementCurrentTileIndex');
     getGameStateByGameIdSpy = jest.spyOn(gameStateDBFunctions, 'getGameStateByGameId');
+    getCurrentTileIndexSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentTileIndex');
   });
 
   afterEach(() => {
@@ -195,7 +198,7 @@ describe('test incrementCurrentTileIndex', () => {
   });
 
   test('it should increment tile index for the wall', async () => {
-    const initialIndex = DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME;
+    const initialIndex = (await getCurrentTileIndex(gameId)) as number;
     expect(currentIndex).toBe(initialIndex);
     await incrementCurrentTileIndex(gameId);
     await incrementCurrentTileIndex(gameId);
@@ -203,10 +206,12 @@ describe('test incrementCurrentTileIndex', () => {
     // Test response
     const newGameState = (await getGameStateByGameId(gameId)) as GameState;
     expect(newGameState.currentIndex).toBe(initialIndex + 2);
+    expect((await getCurrentTileIndex(gameId)) as number).toBe(currentIndex + 2);
 
     // Test function calls
     expect(incrementCurrentTileIndexSpy).toHaveBeenCalledTimes(2);
-    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
+    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(3); // getCurrentTileIndex calls getGameStateByGameId
+    expect(getCurrentTileIndexSpy).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -631,7 +636,7 @@ describe('test startNewGameRound', () => {
     const updatedGameState = (await startNewGameRound(gameId, CONNECTION_IDS, true)) as GameState;
 
     // test response
-    expect(updatedGameState.currentIndex).toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
+    expect(updatedGameState.currentIndex).toBe(await getCurrentTileIndex(gameId));
     expect(updatedGameState.hands).not.toStrictEqual(prevGameState.hands);
     expect(updatedGameState.wall).not.toStrictEqual(prevGameState.wall);
     expect(updatedGameState.interactionCount).toBe(0);

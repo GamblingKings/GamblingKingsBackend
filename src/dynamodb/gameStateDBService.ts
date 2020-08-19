@@ -1,9 +1,14 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, GAME_STATE_TABLE } from '../utils/constants';
+import { DEFAULT_MAX_USERS_IN_GAME, GAME_STATE_TABLE } from '../utils/constants';
 import { HongKongWall } from '../games/mahjong/Wall/version/HongKongWall';
 import { DB } from './db';
 import { GameState, PlayedTile, UserHand } from '../models/GameState';
-import { getHandByConnectionId, parseDynamoDBAttribute, parseDynamoDBItem } from './dbHelper';
+import {
+  generateHongKongMahjongHands,
+  getHandByConnectionId,
+  parseDynamoDBAttribute,
+  parseDynamoDBItem,
+} from './dbHelper';
 
 /* ----------------------------------------------------------------------------
  * Constants
@@ -32,20 +37,13 @@ export const initGameState = async (gameId: string, connectionIds: string[]): Pr
   const initialWall = new HongKongWall();
 
   // Generate hand for each user
-  const hands: UserHand[] = [];
-  connectionIds.forEach((connectionId: string) => {
-    const hand = {
-      connectionId,
-      hand: initialWall.generateHand(),
-    };
-    hands.push(hand);
-  });
+  const hands: UserHand[] = generateHongKongMahjongHands(initialWall, connectionIds);
 
   const initialGame: GameState = {
     gameId,
     wall: initialWall.getTiles(), // array of tiles
     hands, // current hands of users TODO: can remove this attribute if not needed
-    currentIndex: DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME, // index of the tile array after game init
+    currentIndex: initialWall.getCurrentTileIndex(),
     dealer: 0,
     currentWind: 0, // Start with East
     currentTurn: 0, // Game start from host
@@ -91,6 +89,15 @@ export const getGameStateByGameId = async (
 };
 
 /**
+ * Get the current tile index.
+ * @param {string} gameId Game Id
+ */
+export const getCurrentTileIndex = async (gameId: string): Promise<number | undefined> => {
+  const currentGameState = await getGameStateByGameId(gameId, ['currentIndex']);
+  return currentGameState?.currentIndex;
+};
+
+/**
  * Get the mahjong wall of a game by game Id.
  * @param {string} gameId Game Id
  */
@@ -109,7 +116,7 @@ export const getUserHandsInGame = async (gameId: string, connectionId: string): 
   const currentGameState = (await getGameStateByGameId(gameId)) as GameState;
   const { hands } = currentGameState;
 
-  return getHandByConnectionId(hands, connectionId);
+  return getHandByConnectionId(hands, connectionId).hand;
 };
 
 /**
@@ -359,14 +366,7 @@ export const startNewGameRound = async (
   const newWall = new HongKongWall();
 
   // Generate hand for each user
-  const hands: UserHand[] = [];
-  connectionIds.forEach((connectionId: string) => {
-    const hand = {
-      connectionId,
-      hand: newWall.generateHand(),
-    };
-    hands.push(hand);
-  });
+  const hands: UserHand[] = generateHongKongMahjongHands(newWall, connectionIds);
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
@@ -375,7 +375,7 @@ export const startNewGameRound = async (
     },
     ConditionExpression: 'attribute_exists(gameId)',
     ExpressionAttributeValues: {
-      ':initCurrentIndex': DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
+      ':initCurrentIndex': newWall.getCurrentTileIndex(),
       ':initWall': newWall,
       ':initHands': hands,
       ':initInteractionCount': 0,

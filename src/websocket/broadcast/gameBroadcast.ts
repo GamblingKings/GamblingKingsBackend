@@ -19,7 +19,7 @@ import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
 import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
-import { GameState } from '../../models/GameState';
+import { GameState, SelfPlayedTile, UserHand } from '../../models/GameState';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -167,16 +167,47 @@ export const broadcastInGameUpdate = async (
   return usersInGame;
 };
 
-export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, usersInGame: User[]): Promise<void> => {
-  const connectionIds = getConnectionIdsFromUsers(usersInGame);
-  const { hands } = await initGameState(gameId, connectionIds);
+export const broadcastGameStart = async (
+  ws: WebSocketClient,
+  gameId: string,
+  connectionIds: string[],
+  startNewGame: boolean,
+  gameState?: GameState,
+): Promise<void> => {
+  let hands: UserHand[];
+  let currentIndex: number;
+
+  // For starting a new game
+  if (startNewGame) {
+    const newGameState = await initGameState(gameId, connectionIds);
+    hands = newGameState.hands;
+    currentIndex = newGameState.currentIndex;
+  } else if (!startNewGame && gameState) {
+    // For starting a new round in a game
+    hands = gameState.hands;
+    currentIndex = gameState.currentIndex;
+  } else {
+    // Error
+    throw Error('broadcastGameStart: Failed to start a new game, please double check params passed in');
+  }
+
+  // Get self played tiles from all users in the game
+  const allSelfPlayedTilesAtStart = hands.map((hand) => {
+    return {
+      connectionId: hand.connectionId,
+      playedTiles: hand.playedTiles,
+    };
+  }) as SelfPlayedTile[];
 
   const promises = connectionIds.map((connectionId) => {
-    const tiles = getHandByConnectionId(hands, connectionId);
+    const { hand: tiles } = getHandByConnectionId(hands, connectionId);
 
     // Put random tiles in response
-    const wsResponse = createGameStartResponse({ tiles });
-
+    const wsResponse = createGameStartResponse({
+      tiles,
+      selfPlayedTiles: allSelfPlayedTilesAtStart,
+      currentIndex,
+    });
     // Send tiles as a string to each user in the game
     return ws.send(wsResponse, connectionId);
   });
@@ -274,19 +305,13 @@ export const broadcastUpdateGameState = async (
 /**
  * Broadcast new hands to all users and Resets game round
  * @param {WebSocketClient} ws WebSocketClient instance
- * @param {string[]} connectionIds all user connection ids in a game
- * @param {GameState} GameState Gamestate
+ * @param {string[]} connectionIds All user connection ids in a game
+ * @param {GameState} gameState Game state
  */
 export const broadcastGameReset = async (
   ws: WebSocketClient,
   connectionIds: string[],
   gameState: GameState,
 ): Promise<void> => {
-  const promises = connectionIds.map((connectionId) => {
-    const tiles = getHandByConnectionId(gameState.hands, connectionId);
-    const wsResponse = createGameStartResponse({ tiles });
-    return ws.send(wsResponse, connectionId);
-  });
-
-  await Promise.all(promises);
+  await broadcastGameStart(ws, '', connectionIds, true, gameState);
 };
