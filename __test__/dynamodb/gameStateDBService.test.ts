@@ -15,6 +15,7 @@ import {
   resetPlayedTileInteraction,
   setPlayedTileInteraction,
   testReplaceGameState,
+  startNewGameRound,
 } from '../../src/dynamodb/gameStateDBService';
 import {
   CONDITIONAL_FAILED_MSG,
@@ -627,7 +628,7 @@ describe('test startNewGameRound', () => {
     expect(prevGameState.currentWind).toBe(1);
 
     // reset game round
-    const updatedGameState = await gameStateDBFunctions.startNewGameRound(gameId, CONNECTION_IDS);
+    const updatedGameState = (await startNewGameRound(gameId, CONNECTION_IDS, true)) as GameState;
 
     // test response
     expect(updatedGameState.currentIndex).toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
@@ -637,5 +638,18 @@ describe('test startNewGameRound', () => {
     expect(updatedGameState.playedTileInteractions).toStrictEqual([]);
     expect(updatedGameState.dealer).toBe(0);
     expect(updatedGameState.currentWind).toBe(prevGameState.currentWind + 1);
+  });
+
+  test('it should not change dealer if isDealerChanged is false', async () => {
+    // Game State should not be initial game state
+    expect(prevGameState.dealer).toBe(3);
+    expect(prevGameState.currentWind).toBe(1);
+
+    // reset game round
+    const updatedGameState = (await startNewGameRound(gameId, CONNECTION_IDS, false)) as GameState;
+    console.log(updatedGameState);
+    // test response
+    expect(updatedGameState.dealer).toBe(prevGameState.dealer);
+    expect(updatedGameState.currentWind).toBe(prevGameState.currentWind);
   });
 });

@@ -369,10 +369,15 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
 
 /**
  * Starts new game round with new hands, wall and reset game round values.
- * @param gameId gameId
- * @param connectionIds connectionIds of players in gameId
+ * @param {string} gameId gameId
+ * @param {string[]} connectionIds connectionIds of players in gameId
+ * @param {boolean} isDealerChanged changes dealer in new round if true
  */
-export const startNewGameRound = async (gameId: string, connectionIds: string[]): Promise<GameState> => {
+export const startNewGameRound = async (
+  gameId: string,
+  connectionIds: string[],
+  isDealerChanged: boolean,
+): Promise<GameState | undefined> => {
   const newWall = new HongKongWall();
 
   // Generate hand for each user
@@ -408,8 +413,14 @@ export const startNewGameRound = async (gameId: string, connectionIds: string[])
     `,
   };
 
-  await DB.update(updateParam).promise();
-  const updatedGameState = (await changeDealer(gameId)) as GameState;
+  const res = await DB.update(updateParam).promise();
+  let updatedGameState = parseDynamoDBAttribute<GameState>(res);
+
+  // change dealer if specified
+  if (isDealerChanged) {
+    updatedGameState = await changeDealer(gameId);
+  }
+
   return updatedGameState;
 };
 

@@ -3,7 +3,7 @@ import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
 import { WebSocketClient } from '../../websocket/WebSocketClient';
 import { Logger } from '../../utils/Logger';
 import { LambdaEventBodyPayloadOptions } from '../../types/payload';
-import { changeDealer, getCurrentDealer, getCurrentWind } from '../../dynamodb/gameStateDBService';
+import { getCurrentDealer, startNewGameRound } from '../../dynamodb/gameStateDBService';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
 import { User } from '../../models/User';
 import {
@@ -12,6 +12,7 @@ import {
   broadcastGameReset,
 } from '../../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
+import { GameState } from '../../models/GameState';
 
 /**
  * Handler for Winning Round
@@ -37,21 +38,18 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // send winning tiles to all connections
     await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
 
-    if (users[dealer].connectionId !== connectionId) {
-      await changeDealer(gameId);
-    }
-
-    // get Updated dealer and Wind
-    const updatedGameState = await Promise.all([getCurrentDealer(gameId), getCurrentWind(gameId)]);
-    const updatedDealer = updatedGameState[0] as number;
-    const updatedWind = updatedGameState[1] as number;
+    const updatedGameState = (await startNewGameRound(
+      gameId,
+      connectionIds,
+      users[dealer].connectionId !== connectionId, // change dealer if winner is not currently a dealer
+    )) as GameState;
 
     // send current dealer and wind to all connections
-    await broadcastUpdateGameState(ws, connectionIds, updatedDealer, updatedWind);
+    await broadcastUpdateGameState(ws, connectionIds, updatedGameState.dealer, updatedGameState.currentWind);
 
     // start new round and send new hands to user
     setTimeout(async () => {
-      await broadcastGameReset(ws, gameId, users);
+      await broadcastGameReset(ws, connectionIds, updatedGameState);
     }, 5000);
   } catch (err) {
     console.error(JSON.stringify(err));

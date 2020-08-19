@@ -17,7 +17,7 @@ import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
 import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
-import { drawTile, initGameState, startNewGameRound } from '../../dynamodb/gameStateDBService';
+import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { GameState } from '../../models/GameState';
 
