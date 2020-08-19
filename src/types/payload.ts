@@ -110,3 +110,10 @@ export interface UpdateGameStatePayload {
   dealer: number;
   wind: number;
 }
+
+export interface SelfPlayTilePayload {
+  connectionId: string;
+  playedTile: string;
+  isQuad: boolean;
+  alreadyMeld: boolean;
+}

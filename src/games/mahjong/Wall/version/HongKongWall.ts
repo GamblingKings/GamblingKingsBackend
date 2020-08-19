@@ -9,6 +9,8 @@ import { MahjongVersions } from './Versions';
 
 import { bonusTileInit } from '../init/Bonus';
 import { TileFactory } from '../../Tile/TileFactory';
+import { HongKongMahjongHand } from '../../types/MahjongHand';
+import { BonusTilesMapper } from '../../Tile/map/TileMapper';
 
 export class HongKongWall extends Wall {
   static version: MahjongVersions = MahjongVersions.HongKong;
@@ -62,6 +64,46 @@ export class HongKongWall extends Wall {
    */
   public generateHand(): string[] {
     return super.generateHand();
+  }
+
+  public getInitialTiles(): HongKongMahjongHand {
+    // Get a new hand
+    const initHand = this.generateHand();
+
+    // Get bonus tiles and a cleaned hand (without any bonus tiles)
+    const allBonusTiles = Object.keys(BonusTilesMapper);
+    const bonusTilesInHand: string[] = [];
+    const cleanedHand: string[] = [];
+    initHand.forEach((tile: string) => {
+      if (allBonusTiles.includes(tile)) {
+        bonusTilesInHand.push(tile);
+      } else {
+        cleanedHand.push(tile);
+      }
+    });
+
+    // Draw the same amount of tiles as the discarded bonus tiles
+    const { length } = bonusTilesInHand;
+    if (length) {
+      for (let i = 0; i < length; i += 1) {
+        let newTile = this.draw() as string;
+        let isBonusTile = allBonusTiles.includes(newTile);
+
+        // Keep drawing new tiles until it is not a bonus tile
+        while (isBonusTile) {
+          bonusTilesInHand.push(newTile);
+          newTile = this.draw() as string;
+          isBonusTile = allBonusTiles.includes(newTile);
+        }
+
+        cleanedHand.push(newTile);
+      }
+    }
+
+    return {
+      hand: cleanedHand,
+      bonusTiles: bonusTilesInHand,
+    };
   }
 
   /**
