@@ -14,7 +14,6 @@ import {
   initGameState,
   resetPlayedTileInteraction,
   setPlayedTileInteraction,
-  testReplaceGameState,
   startNewGameRound,
 } from '../../src/dynamodb/gameStateDBService';
 import {
@@ -32,6 +31,7 @@ import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from 
 import { GameState, PlayedTile, UserHand } from '../../src/models/GameState';
 import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
 import { MeldEnum } from '../../src/enums/MeldEnum';
+import { testReplaceGameState } from './dbTestHelpers';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
 
