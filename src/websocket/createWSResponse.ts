@@ -15,6 +15,8 @@ import {
   PlayTilePayload,
   SendMessagePayload,
   UserUpdatePayload,
+  WinningTilesPayload,
+  UpdateGameStatePayload,
 } from '../types/payload';
 import { WebSocketResponse } from '../types/response';
 import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
@@ -169,6 +171,21 @@ export const createPlayedTileInteractionResponse = (payload: PlayedTileInteracti
   return createWSResponse(WebSocketActionsEnum.PLAYED_TILE_INTERACTION, payload);
 };
 
+/**
+ * Create WINNING_TILE response object for WIN_ROUND request
+ * @param {WinningTilesPayload} payload payload object
+ */
+export const createWinningTilesResponse = (payload: WinningTilesPayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
+};
+
+/**
+ * Create UPDATE_GAME_STATE response object for WIN_ROUND request
+ * @param {UpdateGameStatePayload} payload
+ */
+export const createUpdateGameStateResponse = (payload: UpdateGameStatePayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
+};
 /* ----------------------------------------------------------------------------
  * Success and Failure Response
  * ------------------------------------------------------------------------- */

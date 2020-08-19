@@ -288,7 +288,7 @@ describe('test createGamePageLoadResponse', () => {
 
 describe('test createGameStartResponse', () => {
   test('it should get the correct response', () => {
-    const testTiles = '';
+    const testTiles = [''];
     const response = createGameStartResponse({ tiles: testTiles });
     const expectedResponse = {
       action: WebSocketActionsEnum.GAME_START,

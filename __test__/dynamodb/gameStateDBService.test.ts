@@ -14,6 +14,7 @@ import {
   initGameState,
   resetPlayedTileInteraction,
   setPlayedTileInteraction,
+  startNewGameRound,
 } from '../../src/dynamodb/gameStateDBService';
 import {
   CONDITIONAL_FAILED_MSG,
@@ -30,6 +31,7 @@ import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from 
 import { GameState, PlayedTile, UserHand } from '../../src/models/GameState';
 import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
 import { MeldEnum } from '../../src/enums/MeldEnum';
+import { testReplaceGameState } from './dbTestHelpers';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
 
@@ -257,18 +259,22 @@ describe('test changeDealer, getCurrentDealer', () => {
   let gameState: GameState;
   let gameId: string;
   let currentDealerIndex: number;
+  let currentWind: number;
 
   // Spy
   let changeDealerSpy: jest.SpyInstance;
   let getDealerSpy: jest.SpyInstance;
+  let changeWindSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
     gameId = gameState.gameId;
     currentDealerIndex = gameState.dealer;
+    currentWind = gameState.currentWind;
 
     changeDealerSpy = jest.spyOn(gameStateDBFunctions, 'changeDealer');
     getDealerSpy = jest.spyOn(gameStateDBFunctions, 'getCurrentDealer');
+    changeWindSpy = jest.spyOn(gameStateDBFunctions, 'changeWind');
   });
 
   afterEach(() => {
@@ -291,10 +297,12 @@ describe('test changeDealer, getCurrentDealer', () => {
     expect(await getCurrentDealer(gameId)).toBe(1);
   });
 
-  test('it should reset index to 0 when max index is reached', async () => {
+  test('it should reset index to 0 when max index is reached and change wind', async () => {
     // Initial dealer should be user at the 0 index
     expect(currentDealerIndex).toBe(0);
+    expect(currentWind).toBe(0);
     expect(await getCurrentDealer(gameId)).toBe(0);
+    expect(await getCurrentWind(gameId)).toBe(0);
 
     await changeDealer(gameId);
     await changeDealer(gameId);
@@ -304,10 +312,13 @@ describe('test changeDealer, getCurrentDealer', () => {
     // Test function call
     expect(changeDealerSpy).toHaveBeenCalledTimes(4);
     expect(getDealerSpy).toHaveBeenCalledTimes(1);
+    expect(changeWindSpy).toHaveBeenCalledTimes(1);
 
     // Test response
     expect(response.dealer).toBe(0);
     expect(await getCurrentDealer(gameId)).toBe(0);
+    expect(response.currentWind).toBe(1);
+    expect(await getCurrentWind(gameId)).toBe(1);
   });
 
   test('it should throw error when the game does not exist', async () => {
@@ -571,5 +582,74 @@ describe('test resetPlayedTileInteraction', () => {
     // Test response
     expect(await getInteractionCount(gameId)).toBe(0);
     expect(await getCurrentPlayedTile(gameId)).toIncludeSameMembers([]);
+  });
+});
+
+/* ----------------------------------------------------------------------------
+ * Test startNewGameRound
+ * ------------------------------------------------------------------------- */
+describe('test startNewGameRound', () => {
+  let gameState: GameState;
+  let gameId: string;
+  let prevGameState: GameState;
+
+  beforeEach(async () => {
+    gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
+    gameId = gameState.gameId;
+
+    // Setup a game state of a mid-match
+    prevGameState = (await testReplaceGameState({
+      ...gameState,
+      dealer: 3,
+      currentWind: 1,
+      currentIndex: 23,
+      interactionCount: 27,
+      playedTileInteractions: [
+        {
+          playedTiles: TEST_TILES_CONSECUTIVE,
+          connectionId: FAKE_CONNECTION_ID1,
+          meldType: MeldEnum.CONSECUTIVE,
+          skipInteraction: false,
+        },
+      ],
+    })) as GameState;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('it should reset some game state and update dealer/wind', async () => {
+    // Game State should not be initial game state
+    expect(prevGameState.currentIndex).not.toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
+    expect(prevGameState.interactionCount).not.toBe(0);
+    expect(prevGameState.playedTileInteractions).not.toStrictEqual([]);
+    expect(prevGameState.dealer).toBe(3);
+    expect(prevGameState.currentWind).toBe(1);
+
+    // reset game round
+    const updatedGameState = (await startNewGameRound(gameId, CONNECTION_IDS, true)) as GameState;
+
+    // test response
+    expect(updatedGameState.currentIndex).toBe(DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME);
+    expect(updatedGameState.hands).not.toStrictEqual(prevGameState.hands);
+    expect(updatedGameState.wall).not.toStrictEqual(prevGameState.wall);
+    expect(updatedGameState.interactionCount).toBe(0);
+    expect(updatedGameState.playedTileInteractions).toStrictEqual([]);
+    expect(updatedGameState.dealer).toBe(0);
+    expect(updatedGameState.currentWind).toBe(prevGameState.currentWind + 1);
+  });
+
+  test('it should not change dealer if isDealerChanged is false', async () => {
+    // Game State should not be initial game state
+    expect(prevGameState.dealer).toBe(3);
+    expect(prevGameState.currentWind).toBe(1);
+
+    // reset game round
+    const updatedGameState = (await startNewGameRound(gameId, CONNECTION_IDS, false)) as GameState;
+    console.log(updatedGameState);
+    // test response
+    expect(updatedGameState.dealer).toBe(prevGameState.dealer);
+    expect(updatedGameState.currentWind).toBe(prevGameState.currentWind);
   });
 });

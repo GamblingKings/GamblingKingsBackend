@@ -10,6 +10,8 @@ import {
   createInGameMessageResponse,
   createInGameUpdateResponse,
   createPlayTileResponse,
+  createWinningTilesResponse,
+  createUpdateGameStateResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
@@ -17,6 +19,7 @@ import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
 import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
+import { GameState } from '../../models/GameState';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -172,7 +175,7 @@ export const broadcastGameStart = async (ws: WebSocketClient, gameId: string, us
     const tiles = getHandByConnectionId(hands, connectionId);
 
     // Put random tiles in response
-    const wsResponse = createGameStartResponse({ tiles: JSON.stringify(tiles) });
+    const wsResponse = createGameStartResponse({ tiles });
 
     // Send tiles as a string to each user in the game
     return ws.send(wsResponse, connectionId);
@@ -226,4 +229,64 @@ export const broadcastPlayedTileToUsers = async (
   );
 
   return tile;
+};
+
+/**
+ * Broadcast who won game and their winning tiles to all users in game
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string[]} connectionIds connection ids of all users
+ * @param {string} connectionId connectionId of winner
+ * @param {string} tiles winning tiles
+ */
+export const broadcastWinningTiles = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  connectionId: string,
+  tiles: string[],
+): Promise<void> => {
+  const wsResponse = createWinningTilesResponse({
+    connectionId,
+    tiles,
+  });
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
+};
+
+/**
+ * Broadcast updated game state after game round ends
+ * @param {WebSocketClient} ws WebSocketClient instance
+ * @param {string[]} connectionIds connectionIds of all users in game
+ * @param {number} dealer current dealer
+ * @param {number} wind current wind
+ */
+export const broadcastUpdateGameState = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  dealer: number,
+  wind: number,
+): Promise<void> => {
+  const wsResponse = createUpdateGameStateResponse({
+    dealer,
+    wind,
+  });
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
+};
+
+/**
+ * Broadcast new hands to all users and Resets game round
+ * @param {WebSocketClient} ws WebSocketClient instance
+ * @param {string[]} connectionIds all user connection ids in a game
+ * @param {GameState} GameState Gamestate
+ */
+export const broadcastGameReset = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  gameState: GameState,
+): Promise<void> => {
+  const promises = connectionIds.map((connectionId) => {
+    const tiles = getHandByConnectionId(gameState.hands, connectionId);
+    const wsResponse = createGameStartResponse({ tiles });
+    return ws.send(wsResponse, connectionId);
+  });
+
+  await Promise.all(promises);
 };

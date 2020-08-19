@@ -151,6 +151,7 @@ export const getInteractionCount = async (gameId: string): Promise<number | unde
 /* ----------------------------------------------------------------------------
  * Update
  * ------------------------------------------------------------------------- */
+
 /**
  * Increment the tile index by 1.
  * @param {string} gameId Game Id
@@ -196,47 +197,6 @@ export const drawTile = async (gameId: string): Promise<string> => {
 };
 
 /**
- * Change dealer number in a game.
- * @param {string} gameId Game Id
- */
-export const changeDealer = async (gameId: string): Promise<GameState | undefined> => {
-  const currentGameState = await getGameStateByGameId(gameId);
-
-  if (!currentGameState) {
-    throw Error('changeDealer: game state not found');
-  }
-
-  const { dealer: currentDealerIndex } = currentGameState;
-  let nextDealerIndex;
-
-  // reset dealer index
-  if (currentDealerIndex === 3) nextDealerIndex = 0;
-  else nextDealerIndex = currentDealerIndex + 1;
-
-  const updateParam: DocumentClient.UpdateItemInput = {
-    TableName: GAME_STATE_TABLE,
-    Key: {
-      gameId,
-    },
-    ConditionExpression: ':nextDealerIndex < :maxUserCount',
-    UpdateExpression: 'SET #dealer = :nextDealerIndex',
-    ExpressionAttributeNames: {
-      '#dealer': 'dealer',
-    },
-    ExpressionAttributeValues: {
-      ':nextDealerIndex': nextDealerIndex,
-      ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
-    },
-    ReturnValues: 'ALL_NEW',
-  };
-
-  const res = await DB.update(updateParam).promise();
-  console.log('\nchangeDealer result:', res);
-
-  return parseDynamoDBAttribute<GameState>(res);
-};
-
-/**
  * Change wind number in a game.
  * @param {string} gameId Game Id
  */
@@ -248,11 +208,7 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
   }
 
   const { currentWind: currentWindNum } = currentGameState;
-  let nextWindNum: number;
-
-  // reset wind num
-  if (currentWindNum === 3) nextWindNum = 0;
-  else nextWindNum = currentWindNum + 1;
+  const nextWindNum = (currentWindNum + 1) % 4;
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
@@ -273,6 +229,46 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
 
   const res = await DB.update(updateParam).promise();
   console.log('\nchangeWind result:', res);
+
+  return parseDynamoDBAttribute<GameState>(res);
+};
+
+/**
+ * Change dealer number in a game.
+ * @param {string} gameId Game Id
+ */
+export const changeDealer = async (gameId: string): Promise<GameState | undefined> => {
+  const currentGameState = await getGameStateByGameId(gameId);
+
+  if (!currentGameState) {
+    throw Error('changeDealer: game state not found');
+  }
+
+  const { dealer: currentDealerIndex } = currentGameState;
+
+  // increment dealer; also increment wind if dealer resets
+  const nextDealerIndex = (currentDealerIndex + 1) % 4;
+  if (nextDealerIndex === 0) await changeWind(gameId);
+
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId,
+    },
+    ConditionExpression: ':nextDealerIndex < :maxUserCount',
+    UpdateExpression: 'SET #dealer = :nextDealerIndex',
+    ExpressionAttributeNames: {
+      '#dealer': 'dealer',
+    },
+    ExpressionAttributeValues: {
+      ':nextDealerIndex': nextDealerIndex,
+      ':maxUserCount': DEFAULT_MAX_USERS_IN_GAME,
+    },
+    ReturnValues: 'ALL_NEW',
+  };
+
+  const res = await DB.update(updateParam).promise();
+  console.log('\nchangeDealer result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -347,6 +343,63 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
   console.log('\nincrementPlayedTileInteractionCount result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
+};
+
+/**
+ * Starts new game round with new hands, wall and reset game round values.
+ * @param {string} gameId gameId
+ * @param {string[]} connectionIds connectionIds of players in gameId
+ * @param {boolean} isDealerChanged changes dealer in new round if true
+ */
+export const startNewGameRound = async (
+  gameId: string,
+  connectionIds: string[],
+  isDealerChanged: boolean,
+): Promise<GameState | undefined> => {
+  const newWall = new HongKongWall();
+
+  // Generate hand for each user
+  const hands: UserHand[] = [];
+  connectionIds.forEach((connectionId: string) => {
+    const hand = {
+      connectionId,
+      hand: newWall.generateHand(),
+    };
+    hands.push(hand);
+  });
+
+  const updateParam: DocumentClient.UpdateItemInput = {
+    TableName: GAME_STATE_TABLE,
+    Key: {
+      gameId,
+    },
+    ConditionExpression: 'attribute_exists(gameId)',
+    ExpressionAttributeValues: {
+      ':initCurrentIndex': DEFAULT_HAND_LENGTH * DEFAULT_MAX_USERS_IN_GAME,
+      ':initWall': newWall,
+      ':initHands': hands,
+      ':initInteractionCount': 0,
+      ':initPlayedTileInteractions': [],
+    },
+    ReturnValues: 'ALL_NEW',
+    UpdateExpression: `
+      SET currentIndex           = :initCurrentIndex,
+          wall                   = :initWall,
+          hands                  = :initHands,
+          interactionCount       = :initInteractionCount,
+          playedTileInteractions = :initPlayedTileInteractions
+    `,
+  };
+
+  const res = await DB.update(updateParam).promise();
+  let updatedGameState = parseDynamoDBAttribute<GameState>(res);
+
+  // change dealer if specified
+  if (isDealerChanged) {
+    updatedGameState = await changeDealer(gameId);
+  }
+
+  return updatedGameState;
 };
 
 /* ----------------------------------------------------------------------------

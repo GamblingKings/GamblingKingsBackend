@@ -10,6 +10,7 @@ import { GameStatesEnum, UserStatesEnum } from '../enums/states';
  * Payload interface for Lambda event body
  */
 export interface LambdaEventBodyPayloadOptions {
+  connectionId?: string;
   username?: string;
   message?: string;
   user?: User;
@@ -21,12 +22,13 @@ export interface LambdaEventBodyPayloadOptions {
   error?: string;
   state?: string;
   time?: string;
-  tiles?: string;
+  tiles?: string[];
   tile?: string;
   playedTiles?: string[];
   meldType?: string;
   skipInteraction?: boolean;
-  connectionId?: string;
+  dealer?: number;
+  wind?: number;
 }
 
 export interface UserUpdatePayload {
@@ -75,7 +77,7 @@ export interface SendMessagePayload {
 }
 
 export interface GameStartPayload {
-  tiles: string;
+  tiles: string[];
 }
 
 export interface DrawTilePayload {
@@ -97,5 +99,14 @@ export interface InteractionSuccessPayload {
   playedTiles: string[];
   meldType: string;
   skipInteraction: boolean;
-  connectionId?: string;
+}
+
+export interface WinningTilesPayload {
+  connectionId: string;
+  tiles: string[];
+}
+
+export interface UpdateGameStatePayload {
+  dealer: number;
+  wind: number;
 }
