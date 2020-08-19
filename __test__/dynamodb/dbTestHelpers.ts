@@ -2,7 +2,6 @@ import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { CONNECTIONS_TABLE, GAMES_TABLE, GAME_STATE_TABLE } from '../../src/utils/constants';
 import { ddb } from '../../src/dynamodb/jestLocalDynamoDB';
 import { GameState } from '../../src/models/GameState';
-import { parseDynamoDBItem } from '../../src/dynamodb/dbHelper';
 import { getGameStateByGameId } from '../../src/dynamodb/gameStateDBService';
 
 /* ----------------------------------------------------------------------------

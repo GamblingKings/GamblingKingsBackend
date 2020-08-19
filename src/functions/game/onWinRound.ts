@@ -12,7 +12,6 @@ import {
   broadcastGameReset,
 } from '../../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
-import { GameState } from '../../models/GameState';
 import { response } from '../../utils/responseHelper';
 import { LambdaResponse } from '../../types/response';
 

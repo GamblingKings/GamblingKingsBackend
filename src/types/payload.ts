@@ -96,7 +96,6 @@ export interface PlayedTileInteractionPayload {
 }
 
 export interface InteractionSuccessPayload {
-  connectionId?: string;
   playedTiles: string[];
   meldType: string;
   skipInteraction: boolean;
