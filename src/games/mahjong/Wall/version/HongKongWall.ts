@@ -66,6 +66,10 @@ export class HongKongWall extends Wall {
     return super.generateHand();
   }
 
+  /**
+   * Generate initial hand by separating bonus tiles and other tiles into a
+   * different array (see HongKongMahjongHand for more details).
+   */
   public getInitialTiles(): HongKongMahjongHand {
     // Get a new hand
     const initHand = this.generateHand();

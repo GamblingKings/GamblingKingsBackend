@@ -169,6 +169,16 @@ export const broadcastInGameUpdate = async (
   return usersInGame;
 };
 
+/**
+ * Broadcast initial hands to users when game pages are all loaded on the client side.
+ * 1. If a new game is started, use initGameState function to add a new row to game state
+ * 2. If a new round is started (within the same game), use the gameState passed in via arguments
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} gameId Game Id
+ * @param {string[]} connectionIds All connection Ids in a game
+ * @param {boolean} startNewGame Starting a new game or not
+ * @param {GameState} gameState New gameState of a game
+ */
 export const broadcastGameStart = async (
   ws: WebSocketClient,
   gameId: string,

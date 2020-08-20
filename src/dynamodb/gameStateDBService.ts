@@ -280,6 +280,15 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
   return parseDynamoDBAttribute<GameState>(res);
 };
 
+/**
+ * Add a possible interaction type (triplet, consecutive, or quad), set in meld param, to
+ * the playedTileInteractions array and increment the interactionCount.
+ * @param {string} gameId Game Id
+ * @param {string} connectionId Connection Id
+ * @param {string[]} playedTiles Played that is being interacting with
+ * @param {string} meld Meld type
+ * @param {boolean} skipInteraction Skipping this interaction or not
+ */
 export const setPlayedTileInteraction = async (
   gameId: string,
   connectionId: string,
@@ -323,6 +332,11 @@ export const setPlayedTileInteraction = async (
   return parseDynamoDBAttribute<GameState>(res);
 };
 
+/**
+ * Reset interactionCount and playedTileInteractions to their initial state after the
+ * client is done interacting with a played tile and received INTERACTION_SUCCESS response
+ * @param {string} gameId Game Id
+ */
 export const resetPlayedTileInteraction = async (gameId: string): Promise<GameState | undefined> => {
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAME_STATE_TABLE,
@@ -331,7 +345,7 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
     },
     ConditionExpression: 'attribute_exists(#gameIdKey)',
     UpdateExpression: `
-      SET #interactionCountKey = :initialInteractionCountVal,
+      SET #interactionCountKey       = :initialInteractionCountVal,
           #playedTileInteractionsKey = :emptyPlayedTileVal
     `,
     ExpressionAttributeNames: {
