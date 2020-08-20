@@ -25,11 +25,14 @@ export interface LambdaEventBodyPayloadOptions {
   time?: string;
   tiles?: string[];
   tile?: string;
+  playedTile?: string;
   playedTiles?: string[];
   meldType?: string;
   skipInteraction?: boolean;
   dealer?: number;
   wind?: number;
+  isQuad?: boolean;
+  alreadyMeld?: boolean;
 }
 
 export interface UserUpdatePayload {

@@ -12,6 +12,7 @@ import {
   createPlayTileResponse,
   createWinningTilesResponse,
   createUpdateGameStateResponse,
+  createSelfPlayTileResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
@@ -20,6 +21,7 @@ import { User } from '../../models/User';
 import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { GameState, SelfPlayedTile, UserHand } from '../../models/GameState';
+import { SelfPlayTilePayload } from '../../types/payload';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -314,4 +316,13 @@ export const broadcastGameReset = async (
   gameState: GameState,
 ): Promise<void> => {
   await broadcastGameStart(ws, '', connectionIds, true, gameState);
+};
+
+export const broadcastSelfPlayTile = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  payload: SelfPlayTilePayload,
+): Promise<void> => {
+  const wsResponse = createSelfPlayTileResponse(payload);
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
 };
