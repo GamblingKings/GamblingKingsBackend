@@ -51,7 +51,7 @@ jobs:
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
           # With Parameters
           channel: '#ci-cd'
-          username: GamblingKings-CD-Bot
+          username: GamblingKings-CD-Bot (Backend)
           author_name: ${{ github.actor }}
           status: ${{ job.status }}
           icon_emoji: ':mahjong:'
