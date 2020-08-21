@@ -13,6 +13,7 @@ import {
 } from '../../websocket/createWSResponse';
 import { Game } from '../../models/Game';
 import { broadcastGameStart } from '../../websocket/broadcast/gameBroadcast';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onGamePageLoad.ts');
@@ -42,7 +43,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // Start game if 4 users' game page has been loaded
     // TODO: can probably add user ready logic to this
     if (gameLoadedCount === 4) {
-      await broadcastGameStart(ws, gameId, users);
+      const connectionIds = getConnectionIdsFromUsers(users);
+      await broadcastGameStart(ws, gameId, connectionIds, true);
       return response(200, 'Game started (after game page loaded) successfully');
     }
 

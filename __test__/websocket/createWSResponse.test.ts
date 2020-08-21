@@ -289,15 +289,18 @@ describe('test createGamePageLoadResponse', () => {
 describe('test createGameStartResponse', () => {
   test('it should get the correct response', () => {
     const testTiles = [''];
-    const response = createGameStartResponse({ tiles: testTiles });
+    const response = createGameStartResponse({ tiles: testTiles, selfPlayedTiles: [], currentIndex: 52 });
+    const expectedPayload = {
+      tiles: testTiles,
+      selfPlayedTiles: [],
+      currentIndex: 52,
+    };
     const expectedResponse = {
       action: WebSocketActionsEnum.GAME_START,
-      payload: {
-        tiles: testTiles,
-      },
+      payload: expectedPayload,
     };
 
-    expect(response.payload).toStrictEqual({ tiles: testTiles });
+    expect(response.payload).toStrictEqual(expectedPayload);
     expect(response).toStrictEqual(expectedResponse);
   });
 });

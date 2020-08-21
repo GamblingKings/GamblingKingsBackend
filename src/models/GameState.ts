@@ -26,4 +26,10 @@ export interface PlayedTile {
 export interface UserHand {
   connectionId: string;
   hand: string[];
+  playedTiles?: string[];
+}
+
+export interface SelfPlayedTile {
+  connectionId: string;
+  playedTiles: string[];
 }

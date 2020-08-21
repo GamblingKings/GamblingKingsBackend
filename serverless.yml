@@ -179,6 +179,10 @@ functions:
     handler: src/functions/game/onWinRound.handler
     events:
       - websocket: WIN_ROUND
+  onSelfPlayTile:
+    handler: src/functions/game/onSelfPlayTile.handler
+    events:
+      - websocket: SELF_PLAY_TILE
 
 #######################################
 # Resources (e.g. dynamoDB tables)

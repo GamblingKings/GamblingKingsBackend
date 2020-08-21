@@ -1,6 +1,7 @@
 import { Game } from '../models/Game';
 import { User } from '../models/User';
 import { GameStatesEnum, UserStatesEnum } from '../enums/states';
+import { SelfPlayedTile } from '../models/GameState';
 
 /* ----------------------------------------------------------------------------
  * WebSocket Payload
@@ -24,11 +25,14 @@ export interface LambdaEventBodyPayloadOptions {
   time?: string;
   tiles?: string[];
   tile?: string;
+  playedTile?: string;
   playedTiles?: string[];
   meldType?: string;
   skipInteraction?: boolean;
   dealer?: number;
   wind?: number;
+  isQuad?: boolean;
+  alreadyMeld?: boolean;
 }
 
 export interface UserUpdatePayload {
@@ -78,6 +82,8 @@ export interface SendMessagePayload {
 
 export interface GameStartPayload {
   tiles: string[];
+  selfPlayedTiles: SelfPlayedTile[];
+  currentIndex: number;
 }
 
 export interface DrawTilePayload {
@@ -109,4 +115,11 @@ export interface WinningTilesPayload {
 export interface UpdateGameStatePayload {
   dealer: number;
   wind: number;
+}
+
+export interface SelfPlayTilePayload {
+  connectionId: string;
+  playedTile: string;
+  isQuad: boolean;
+  alreadyMeld: boolean;
 }

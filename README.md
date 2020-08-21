@@ -241,6 +241,20 @@ yarn start
 }
 ```
 
+`SELF_PLAY_TILE`
+
+```json
+{
+  "action": "SELF_PLAY_TILE",
+  "payload": {
+    "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c",
+    "playedTile": "1_Dot",
+    "isQuad": false,
+    "alreadyMeld": false
+  }
+}
+```
+
 ## General user flow
 
 1. `connect` **x 4**: Four users connect to websocket
