@@ -1,5 +1,5 @@
 /**
- * Tiles Mapping used to create a tile given a string value
+ * Tile Mapping used to create a tile given a string value
  */
 
 import { SimpleTileTypes } from '../types/SimpleTileTypes';

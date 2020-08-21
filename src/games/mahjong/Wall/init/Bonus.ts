@@ -1,5 +1,5 @@
 /**
- * Object used to initialize Bonus Tiles in the wall class
+ * Object used to initialize Bonus Tile in the wall class
  */
 
 import { BonusTileTypes } from '../../Tile/types/BonusTileTypes';

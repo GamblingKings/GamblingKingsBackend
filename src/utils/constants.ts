@@ -15,4 +15,3 @@ export const DEFAULT_DOCUMENT_VERSION = 1;
  */
 export const DEFAULT_MAX_USERS_IN_GAME = 4;
 export const DEFAULT_HAND_LENGTH = 13;
-export const MAX_WALL_LENGTH = 144;

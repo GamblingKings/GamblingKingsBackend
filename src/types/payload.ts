@@ -110,6 +110,7 @@ export interface InteractionSuccessPayload {
 export interface WinningTilesPayload {
   connectionId: string;
   tiles: string[];
+  points: number;
 }
 
 export interface UpdateGameStatePayload {
