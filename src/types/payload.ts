@@ -2,6 +2,7 @@ import { Game } from '../models/Game';
 import { User } from '../models/User';
 import { GameStatesEnum, UserStatesEnum } from '../enums/states';
 import { SelfPlayedTile } from '../models/GameState';
+import { HandPointResults } from '../games/mahjong/types/MahjongTypes';
 
 /* ----------------------------------------------------------------------------
  * WebSocket Payload
@@ -110,7 +111,7 @@ export interface InteractionSuccessPayload {
 export interface WinningTilesPayload {
   connectionId: string;
   tiles: string[];
-  points: number;
+  points?: HandPointResults;
 }
 
 export interface UpdateGameStatePayload {
