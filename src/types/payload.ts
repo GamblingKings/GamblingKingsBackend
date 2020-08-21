@@ -34,6 +34,7 @@ export interface LambdaEventBodyPayloadOptions {
   wind?: number;
   isQuad?: boolean;
   alreadyMeld?: boolean;
+  handPointResults?: HandPointResults;
 }
 
 export interface UserUpdatePayload {
@@ -110,8 +111,7 @@ export interface InteractionSuccessPayload {
 
 export interface WinningTilesPayload {
   connectionId: string;
-  tiles: string[];
-  points?: HandPointResults;
+  handPointResults: HandPointResults;
 }
 
 export interface UpdateGameStatePayload {

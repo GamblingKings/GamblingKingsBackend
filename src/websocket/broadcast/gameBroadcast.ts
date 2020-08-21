@@ -22,6 +22,7 @@ import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { GameState, SelfPlayedTile, UserHand } from '../../models/GameState';
 import { SelfPlayTilePayload } from '../../types/payload';
+import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -279,17 +280,17 @@ export const broadcastPlayedTileToUsers = async (
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string[]} connectionIds connection ids of all users
  * @param {string} connectionId connectionId of winner
- * @param {string} tiles winning tiles
+ * @param {HandPointResults} handPointResults A winning hand with tiles and points
  */
 export const broadcastWinningTiles = async (
   ws: WebSocketClient,
   connectionIds: string[],
   connectionId: string,
-  tiles: string[],
+  handPointResults: HandPointResults,
 ): Promise<void> => {
   const wsResponse = createWinningTilesResponse({
     connectionId,
-    tiles,
+    handPointResults,
   });
   await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
 };

@@ -25,7 +25,6 @@ export interface HandDefinition {
 }
 
 export interface HandPointResults {
-  melds?: Meld[];
   totalPoints: number;
   handPoints: number;
   extraPoints: number;
@@ -38,6 +37,7 @@ export interface HandPointResults {
   bonusTiles: Tile[];
   wind: WindEnum;
   flower: number;
+  melds?: Meld[];
 }
 
 /**
