@@ -184,6 +184,12 @@ functions:
     events:
       - websocket: SELF_PLAY_TILE
 
+  # For testing
+  createTestGameState:
+    handler: src/functions/test/createTestGameState.handler
+    events:
+      - websocket: CREATE_TEST_GAMESTATE
+
 #######################################
 # Resources (e.g. dynamoDB tables)
 #######################################

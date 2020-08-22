@@ -1,7 +1,7 @@
 import { Game } from '../models/Game';
 import { User } from '../models/User';
 import { GameStatesEnum, UserStatesEnum } from '../enums/states';
-import { SelfPlayedTile } from '../models/GameState';
+import { GameState, SelfPlayedTile } from '../models/GameState';
 import { HandPointResults } from '../games/mahjong/types/MahjongTypes';
 
 /* ----------------------------------------------------------------------------
@@ -35,6 +35,9 @@ export interface LambdaEventBodyPayloadOptions {
   isQuad?: boolean;
   alreadyMeld?: boolean;
   handPointResults?: HandPointResults;
+
+  // For testing
+  gameState?: GameState;
 }
 
 export interface UserUpdatePayload {
@@ -124,4 +127,11 @@ export interface SelfPlayTilePayload {
   playedTile: string;
   isQuad: boolean;
   alreadyMeld: boolean;
+}
+
+/**
+ * For testing
+ */
+export interface TestGameUpdatePayload {
+  gameState: GameState;
 }

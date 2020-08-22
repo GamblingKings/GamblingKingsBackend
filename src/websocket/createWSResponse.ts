@@ -18,6 +18,7 @@ import {
   WinningTilesPayload,
   UpdateGameStatePayload,
   SelfPlayTilePayload,
+  TestGameUpdatePayload,
 } from '../types/payload';
 import { WebSocketResponse } from '../types/response';
 import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
@@ -194,6 +195,10 @@ export const createUpdateGameStateResponse = (payload: UpdateGameStatePayload): 
  */
 export const createSelfPlayTileResponse = (payload: SelfPlayTilePayload): WebSocketResponse => {
   return createWSResponse(WebSocketActionsEnum.SELF_PLAY_TILE, payload);
+};
+
+export const createTestGameStateResponse = (payload: TestGameUpdatePayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.GAME_START, payload);
 };
 
 /* ----------------------------------------------------------------------------

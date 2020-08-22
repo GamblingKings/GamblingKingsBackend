@@ -235,8 +235,82 @@ yarn start
   "action": "WIN_ROUND",
   "payload": {
     "gameId": "5938902b-2e2c-4da8-b900-5cdfbba8f10c",
-    "tiles": ["1_DOT", "1_DOT", "1_DOT"],
-    "points": 6
+    "handPointResults": {
+      "totalPoints": 3,
+      "handPoints": 3,
+      "extraPoints": 0,
+      "windPoints": 0,
+      "dragonPoints": 0,
+      "flowerPoints": 0,
+      "hands": [
+        {
+          "points": 3,
+          "name": "ALL_TRIPLET"
+        }
+      ],
+      "tiles": [
+        {
+          "type": "DOT",
+          "value": 1
+        },
+        {
+          "type": "DOT",
+          "value": 1
+        },
+        {
+          "type": "DOT",
+          "value": 2
+        },
+        {
+          "type": "DOT",
+          "value": 2
+        },
+        {
+          "type": "DOT",
+          "value": 2
+        },
+        {
+          "type": "DOT",
+          "value": 3
+        },
+        {
+          "type": "DOT",
+          "value": 3
+        },
+        {
+          "type": "DOT",
+          "value": 3
+        },
+        {
+          "type": "DOT",
+          "value": 4
+        },
+        {
+          "type": "DOT",
+          "value": 4
+        },
+        {
+          "type": "DOT",
+          "value": 4
+        },
+        {
+          "type": "CHARACTER",
+          "value": 7
+        },
+        {
+          "type": "CHARACTER",
+          "value": 7
+        },
+        {
+          "type": "CHARACTER",
+          "value": 7
+        }
+      ],
+      "wind": "EAST",
+      "bonusTiles": [],
+      "flower": 1,
+      "concealedPoint": 0
+    }
   }
 }
 ```

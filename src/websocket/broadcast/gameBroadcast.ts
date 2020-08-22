@@ -326,7 +326,7 @@ export const broadcastGameReset = async (
   connectionIds: string[],
   gameState: GameState,
 ): Promise<void> => {
-  await broadcastGameStart(ws, '', connectionIds, true, gameState);
+  await broadcastGameStart(ws, '', connectionIds, false, gameState);
 };
 
 export const broadcastSelfPlayTile = async (

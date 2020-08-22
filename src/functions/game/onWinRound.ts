@@ -5,11 +5,10 @@ import { Logger } from '../../utils/Logger';
 import { LambdaEventBodyPayloadOptions } from '../../types/payload';
 import { getCurrentDealer, startNewGameRound } from '../../dynamodb/gameStateDBService';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
-import { User } from '../../models/User';
 import {
-  broadcastWinningTiles,
-  broadcastUpdateGameState,
   broadcastGameReset,
+  broadcastUpdateGameState,
+  broadcastWinningTiles,
 } from '../../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { response } from '../../utils/responseHelper';
@@ -32,17 +31,16 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   try {
     // Find dealer and users from game state by game Id
-    const gameState = await Promise.all([getCurrentDealer(gameId), getUsersInGame(gameId)]);
-    const dealer = gameState[0] as number;
-    const users = gameState[1] as User[];
-
-    if (!gameState) {
-      const errorMsg = `Cannot find game state by gameId ${gameId}`;
+    const dealer = await getCurrentDealer(gameId);
+    if (dealer === undefined || !dealer.toString()) {
+      const errorMsg = `Cannot find dealer in game state by gameId ${gameId}`;
       console.error(errorMsg);
       return response(400, errorMsg);
     }
-    if (!dealer || !users) {
-      const errorMsg = `Cannot find dealer or users in game state by gameId ${gameId}:\n dealer: ${dealer}, users: [${users}]`;
+
+    const users = await getUsersInGame(gameId);
+    if (!users || users.length === 0) {
+      const errorMsg = `Cannot find users in game state by gameId ${gameId}`;
       console.error(errorMsg);
       return response(400, errorMsg);
     }
