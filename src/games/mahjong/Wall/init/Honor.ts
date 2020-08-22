@@ -1,5 +1,5 @@
 /**
- * Object used to initialize Honor Tiles in the wall class
+ * Object used to initialize Honor Tile in the wall class
  */
 
 import { HonorTileTypes } from '../../Tile/types/HonorTileTypes';

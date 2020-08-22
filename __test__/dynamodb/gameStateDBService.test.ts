@@ -28,11 +28,12 @@ import {
   TEST_TILES_CONSECUTIVE,
   TEST_TILES_TRIPLET,
 } from '../testConstants';
-import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME, MAX_WALL_LENGTH } from '../../src/utils/constants';
+import { DEFAULT_HAND_LENGTH, DEFAULT_MAX_USERS_IN_GAME } from '../../src/utils/constants';
 import { GameState, PlayedTile, UserHand } from '../../src/models/GameState';
 import { TileMapper } from '../../src/games/mahjong/Tile/map/TileMapper';
 import { MeldEnum } from '../../src/enums/MeldEnum';
 import { testReplaceGameState } from './dbTestHelpers';
+import { Wall } from '../../src/games/mahjong/Wall/Wall';
 
 const CONNECTION_IDS = [FAKE_CONNECTION_ID1, FAKE_CONNECTION_ID2, FAKE_CONNECTION_ID3, FAKE_CONNECTION_ID4];
 
@@ -46,7 +47,7 @@ describe('test initGameState', () => {
     // Test game Id and remaining tiles in the wall
     const { gameId, wall, hands } = response;
     expect(gameId).toBe(FAKE_GAME_ID);
-    expect(wall).toHaveLength(MAX_WALL_LENGTH);
+    expect(wall).toHaveLength(Wall.DEFAULT_WALL_LENGTH);
 
     // Test hands
     const [hand1, hand2, hand3, hand4] = hands;
@@ -117,7 +118,7 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(1);
 
     // Test response
-    expect(response.wall).toHaveLength(MAX_WALL_LENGTH);
+    expect(response.wall).toHaveLength(Wall.DEFAULT_WALL_LENGTH);
   });
 
   test('it should get the correct hands from the game state using getGameStateByGameId', async () => {

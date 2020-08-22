@@ -1,12 +1,11 @@
+import { Wall } from '../../../../src/games/mahjong/Wall/Wall';
 import { HongKongWall } from '../../../../src/games/mahjong/Wall/version/HongKongWall';
 import { DEFAULT_HAND_LENGTH } from '../../../../src/utils/constants';
 import { BonusTilesMapper } from '../../../../src/games/mahjong/Tile/map/TileMapper';
 
-const DEFAULT_WALL_LENGTH = 144;
-
 test('wall to have DEFAULT_WALL_LENGTH tiles when initialized', () => {
   const wall = new HongKongWall();
-  expect(wall.getTiles()).toHaveLength(DEFAULT_WALL_LENGTH);
+  expect(wall.getTiles()).toHaveLength(Wall.DEFAULT_WALL_LENGTH);
 });
 
 test('Generate hand will yield a hand of 13 tiles', () => {

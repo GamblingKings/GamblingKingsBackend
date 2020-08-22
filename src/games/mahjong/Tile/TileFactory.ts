@@ -2,10 +2,6 @@
  * Class designed to create a Tiles given a string definition
  */
 
-import { SimpleTiles } from './SimpleTiles';
-import { BonusTiles } from './BonusTiles';
-import { HonorTiles } from './HonorTiles';
-import { Tiles } from './Tiles';
 import { TileMapper } from './map/TileMapper';
 
 import { SimpleTileTypes } from './types/SimpleTileTypes';
@@ -13,29 +9,33 @@ import { BonusTileTypes } from './types/BonusTileTypes';
 import { HonorTileTypes } from './types/HonorTileTypes';
 
 import { TileDefinition } from '../types/MahjongTypes';
+import { Tile } from './Tile';
+import { BonusTile } from './BonusTile';
+import { SimpleTile } from './SimpleTile';
+import { HonorTile } from './HonorTile';
 
 export class TileFactory {
   /**
    *
    * @param strDef : string representation of a tile
-   * @returns a SimpleTiles, BonusTiles, or HonorTiles depending on the strDef
+   * @returns a SimpleTile, BonusTile, or HonorTile depending on the strDef
    */
-  static createTileFromStringDef(strDef: string): SimpleTiles | BonusTiles | HonorTiles {
+  static createTileFromStringDef(strDef: string): SimpleTile | BonusTile | HonorTile {
     const mappedTile: TileDefinition = TileMapper[strDef];
-    const splitMappedTile: string[] = strDef.split(Tiles.DELIMITER);
+    const splitMappedTile: string[] = strDef.split(Tile.DELIMITER);
 
     if (splitMappedTile.length === 1) {
-      return new HonorTiles(<HonorTileTypes>mappedTile.type);
+      return new HonorTile(mappedTile.type as HonorTileTypes);
     }
 
-    if (Object.values(SimpleTileTypes).includes(<SimpleTileTypes>splitMappedTile[1])) {
-      return new SimpleTiles(<SimpleTileTypes>mappedTile.type, mappedTile.value);
+    if (Object.values(SimpleTileTypes).includes(splitMappedTile[1] as SimpleTileTypes)) {
+      return new SimpleTile(mappedTile.type as SimpleTileTypes, mappedTile.value);
     }
 
-    return new BonusTiles(<BonusTileTypes>mappedTile.type, mappedTile.value);
+    return new BonusTile(mappedTile.type as BonusTileTypes, mappedTile.value);
   }
 
-  static createStringDefFromTile(tile: Tiles): string {
+  static createStringDefFromTile(tile: Tile): string {
     // For HonorTiles
     if (tile.getValue() === -1) {
       return `${tile.getType()}`;

@@ -7,8 +7,8 @@
  * and thus this class is left for inheritence
  */
 
-import { SimpleTiles } from '../Tile/SimpleTiles';
-import { HonorTiles } from '../Tile/HonorTiles';
+import { SimpleTile } from '../Tile/SimpleTile';
+import { HonorTile } from '../Tile/HonorTile';
 
 import { simpleTileInit } from './init/Simple';
 import { honorTileInit } from './init/Honor';
@@ -48,7 +48,7 @@ export abstract class Wall {
     Object.values(simpleTileInit).forEach((object) => {
       for (let value = 1; value <= object.range; value += 1) {
         for (let i = 0; i < Wall.DEFAULT_NUM_OF_TILE; i += 1) {
-          const t: SimpleTiles = new SimpleTiles(object.type, value);
+          const t: SimpleTile = new SimpleTile(object.type, value);
           const stringDef: string = TileFactory.createStringDefFromTile(t);
           this.tiles.push(stringDef);
         }
@@ -62,7 +62,7 @@ export abstract class Wall {
   protected initializeHonorTiles(): void {
     Object.values(honorTileInit).forEach((object) => {
       for (let i = 0; i < Wall.DEFAULT_NUM_OF_TILE; i += 1) {
-        const t: HonorTiles = new HonorTiles(object.type);
+        const t: HonorTile = new HonorTile(object.type);
         const stringDef: string = TileFactory.createStringDefFromTile(t);
         this.tiles.push(stringDef);
       }
@@ -81,7 +81,7 @@ export abstract class Wall {
 
   /**
    * Generates a hand from the wall
-   * @returns a Tiles Array
+   * @returns a Tile Array
    */
   public generateHand(): string[] {
     const hand: string[] = [];
@@ -96,7 +96,7 @@ export abstract class Wall {
 
   /**
    * Draws a tile from the wall
-   * @returns a Tiles if available, otherwise null
+   * @returns a Tile if available, otherwise null
    */
   public draw(): string | undefined | null {
     if (this.currentTileIndex < Wall.DEFAULT_WALL_LENGTH) {

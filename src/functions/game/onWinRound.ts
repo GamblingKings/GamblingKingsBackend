@@ -5,15 +5,15 @@ import { Logger } from '../../utils/Logger';
 import { LambdaEventBodyPayloadOptions } from '../../types/payload';
 import { getCurrentDealer, startNewGameRound } from '../../dynamodb/gameStateDBService';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
-import { User } from '../../models/User';
 import {
-  broadcastWinningTiles,
-  broadcastUpdateGameState,
   broadcastGameReset,
+  broadcastUpdateGameState,
+  broadcastWinningTiles,
 } from '../../websocket/broadcast/gameBroadcast';
 import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { response } from '../../utils/responseHelper';
 import { LambdaResponse } from '../../types/response';
+import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
 
 /**
  * Handler for Winning Round
@@ -26,34 +26,49 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
-  const winningTiles = (payload.tiles as unknown) as string[];
+  const handPointResults = payload.handPointResults as HandPointResults;
   const ws = new WebSocketClient(event.requestContext);
 
   try {
-    // TODO: Deal with errors if gameid is invalid
-    const gameState = await Promise.all([getCurrentDealer(gameId), getUsersInGame(gameId)]);
-    const dealer = gameState[0] as number;
-    const users = gameState[1] as User[];
+    // Find dealer and users from game state by game Id
+    const dealer = await getCurrentDealer(gameId);
+    if (dealer === undefined || !dealer.toString()) {
+      const errorMsg = `Cannot find dealer in game state by gameId ${gameId}`;
+      console.error(errorMsg);
+      return response(400, errorMsg);
+    }
+
+    const users = await getUsersInGame(gameId);
+    if (!users || users.length === 0) {
+      const errorMsg = `Cannot find users in game state by gameId ${gameId}`;
+      console.error(errorMsg);
+      return response(400, errorMsg);
+    }
+
     const connectionIds = getConnectionIdsFromUsers(users);
 
-    // send winning tiles to all connections
-    await broadcastWinningTiles(ws, connectionIds, connectionId, winningTiles);
+    // Send WINNING_TILES response to all connections
+    await broadcastWinningTiles(ws, connectionIds, connectionId, handPointResults);
 
+    // Start new round
     const updatedGameState = await startNewGameRound(
       gameId,
       connectionIds,
       users[dealer].connectionId !== connectionId, // change dealer if winner is not currently a dealer
     );
+    if (!updatedGameState) {
+      console.error('Cannot start new game round');
+      return response(400, 'Cannot start new game round');
+    }
 
-    if (!updatedGameState) throw Error('cannot start new game round');
+    // Send UPDATE_GAME_STATE with current dealer and wind to all connections
+    const { dealer: newDealer, currentWind } = updatedGameState;
+    await broadcastUpdateGameState(ws, connectionIds, newDealer, currentWind);
 
-    // send current dealer and wind to all connections
-    await broadcastUpdateGameState(ws, connectionIds, updatedGameState.dealer, updatedGameState.currentWind);
-
-    // start new round and send new hands to user
+    // Send GAME_START to start new round and send new hands to users
     setTimeout(async () => {
       await broadcastGameReset(ws, connectionIds, updatedGameState);
-    }, 5000);
+    }, 5000); // Delay 5s before sending GAME_START to client
 
     return response(200, 'New round started successfully');
   } catch (err) {

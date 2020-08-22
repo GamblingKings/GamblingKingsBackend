@@ -4,12 +4,12 @@
  */
 
 import { Wall } from '../Wall';
-import { BonusTiles } from '../../Tile/BonusTiles';
+import { BonusTile } from '../../Tile/BonusTile';
 import { MahjongVersions } from './Versions';
 
 import { bonusTileInit } from '../init/Bonus';
 import { TileFactory } from '../../Tile/TileFactory';
-import { HongKongMahjongHand } from '../../types/MahjongHand';
+import { HongKongMahjongHand } from '../../types/MahjongTypes';
 import { BonusTilesMapper } from '../../Tile/map/TileMapper';
 
 export class HongKongWall extends Wall {
@@ -46,12 +46,12 @@ export class HongKongWall extends Wall {
   }
 
   /**
-   * Initialize all the bonus tiles in the wall using the Bonus Tiles Init object
+   * Initialize all the bonus tiles in the wall using the Bonus Tile Init object
    */
   private initializeBonusTiles(): void {
     Object.values(bonusTileInit).forEach((object) => {
       for (let value = 1; value <= 4; value += 1) {
-        const b: BonusTiles = new BonusTiles(object.type, value);
+        const b: BonusTile = new BonusTile(object.type, value);
         const stringDef: string = TileFactory.createStringDefFromTile(b);
         this.tiles.push(stringDef);
       }
@@ -112,7 +112,7 @@ export class HongKongWall extends Wall {
 
   /**
    * Draws a tile from the wall
-   * @returns a Tiles
+   * @returns a Tile
    */
   public draw(): string | null | undefined {
     return super.draw();
