@@ -13,6 +13,11 @@ import { testReplaceGameState } from '../../../__test__/dynamodb/dbTestHelpers';
 import { createTestGameStateResponse } from '../../websocket/createWSResponse';
 import { LambdaEventBodyPayloadOptions } from '../../types/payload';
 
+/**
+ * For testing: need to create a game and add 3 other users in the game in advance, then this
+ * lambda will create a new game state and overwrite with any game state you want for testing purposes.
+ * @param {WebSocketAPIGatewayEvent} event Websocket API gateway event
+ */
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('createTestGameState.ts.ts');
 
