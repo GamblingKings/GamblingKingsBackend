@@ -100,8 +100,12 @@ export abstract class Wall {
    */
   public draw(): string | undefined | null {
     if (this.currentTileIndex < Wall.DEFAULT_WALL_LENGTH) {
+      // currentTileIndex is the next available tile,
+      // so need to get it before incrementing the index
+      const newTile = this.tiles[this.currentTileIndex];
       this.currentTileIndex += 1;
-      return this.tiles[this.currentTileIndex];
+
+      return newTile;
     }
 
     return null;
@@ -112,6 +116,16 @@ export abstract class Wall {
    */
   public getTiles(): string[] {
     return this.tiles;
+  }
+
+  /**
+   * Set tiles in the wall for testing purposes.
+   */
+  public setTiles(tiles: string[]): boolean {
+    if (tiles.length > Wall.DEFAULT_WALL_LENGTH) return false;
+
+    this.tiles = tiles;
+    return true;
   }
 
   /**

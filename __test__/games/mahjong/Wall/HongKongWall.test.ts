@@ -134,4 +134,109 @@ describe('test getInitialTiles', () => {
     expect(expectedUsedTiles).toHaveLength(actualUsedTiles.length);
     expect(expectedUsedTiles).toStrictEqual(expect.arrayContaining(actualUsedTiles));
   });
+
+  test('Drawing multiple flowers in initial hand', () => {
+    const testHand1 = [
+      '1_FLOWER',
+      '1_DOT',
+      '2_DOT',
+      '3_DOT',
+      '4_DOT',
+      '5_DOT',
+      '6_DOT',
+      '7_DOT',
+      '8_DOT',
+      '9_DOT',
+      '1_BAMBOO',
+      '2_BAMBOO',
+      '3_BAMBOO',
+    ];
+
+    const testHand2 = [
+      '2_FLOWER',
+      '3_FLOWER',
+      '4_BAMBOO',
+      '5_BAMBOO',
+      '6_BAMBOO',
+      '7_BAMBOO',
+      '8_BAMBOO',
+      '9_BAMBOO',
+      '1_CHARACTER',
+      '2_CHARACTER',
+      '3_CHARACTER',
+      '4_CHARACTER',
+      '5_CHARACTER',
+    ];
+
+    const testHand3 = [
+      '6_CHARACTER',
+      '7_CHARACTER',
+      '8_CHARACTER',
+      '9_CHARACTER',
+      'EAST',
+      'EAST',
+      'EAST',
+      'EAST',
+      'WEST',
+      'WEST',
+      'WEST',
+      'WEST',
+      'NORTH',
+    ];
+
+    const testHand4 = [
+      'NORTH',
+      'NORTH',
+      'NORTH',
+      'SOUTH',
+      'SOUTH',
+      'SOUTH',
+      'SOUTH',
+      'REDDRAGON',
+      'REDDRAGON',
+      'REDDRAGON',
+      'REDDRAGON',
+      'WHITEDRAGON',
+      'WHITEDRAGON',
+    ];
+    const testExtraTiles = ['4_FLOWER', '3_SEASON', '1_DOT', '4_SEASON', '2_DOT', '3_DOT'];
+
+    const testWall = [
+      // Hand 1 (1 bonus tiles)
+      ...testHand1,
+      // Hand 2 (2 bonus tiles)
+      ...testHand2,
+      // Hand 3 (No bonus tile)
+      ...testHand3,
+      // Hand 4 (No bonus tile)
+      ...testHand4,
+      // Extra tiles
+      ...testExtraTiles,
+    ];
+
+    wall.setTiles(testWall);
+
+    const initHand1 = wall.getInitialTiles();
+    const initHand2 = wall.getInitialTiles();
+    const initHand3 = wall.getInitialTiles();
+    const initHand4 = wall.getInitialTiles();
+
+    // Check length
+    const { hand: hand1, bonusTiles: bonusTiles1 } = initHand1;
+    const { hand: hand2, bonusTiles: bonusTiles2 } = initHand2;
+    const { hand: hand3, bonusTiles: bonusTiles3 } = initHand3;
+    const { hand: hand4, bonusTiles: bonusTiles4 } = initHand4;
+
+    expect(hand1).toStrictEqual([...testHand1.slice(1, 13), testHand2[2]]);
+    expect(bonusTiles1).toStrictEqual([testHand1[0], testHand2[0], testHand2[1]]);
+
+    expect(hand2).toStrictEqual([...testHand2.slice(3, 13), ...testHand3.slice(0, 3)]);
+    expect(bonusTiles2).toStrictEqual([]);
+
+    expect(hand3).toStrictEqual([...testHand3.slice(3, 13), ...testHand4.slice(0, 3)]);
+    expect(bonusTiles3).toStrictEqual([]);
+
+    expect(hand4).toStrictEqual([...testHand4.slice(3, 13), testExtraTiles[2], testExtraTiles[4], testExtraTiles[5]]);
+    expect(bonusTiles4).toStrictEqual([testExtraTiles[0], testExtraTiles[1], testExtraTiles[3]]);
+  });
 });
