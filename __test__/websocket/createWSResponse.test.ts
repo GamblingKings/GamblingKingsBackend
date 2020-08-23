@@ -308,15 +308,14 @@ describe('test createGameStartResponse', () => {
 describe('test createDrawTileResponse', () => {
   test('it should get the correct response', () => {
     const testTile = '1_DOT';
-    const response = createDrawTileResponse({ tile: testTile });
+    const payload = { tile: testTile, currentIndex: 50 };
+    const response = createDrawTileResponse(payload);
     const expectedResponse = {
       action: WebSocketActionsEnum.DRAW_TILE,
-      payload: {
-        tile: testTile,
-      },
+      payload,
     };
 
-    expect(response.payload).toStrictEqual({ tile: testTile });
+    expect(response.payload).toStrictEqual(payload);
     expect(response).toStrictEqual(expectedResponse);
   });
 });

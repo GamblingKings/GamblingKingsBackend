@@ -196,8 +196,15 @@ export const drawTile = async (gameId: string): Promise<string> => {
   // Draw a tile and increment index by 1
   if (currentGameState) {
     const { wall, currentIndex } = currentGameState;
-    await incrementCurrentTileIndex(gameId);
+
+    // return empty string if index reach 143
+    if (currentIndex === 143) {
+      return tileDrawn;
+    }
+
+    // Assign new tile at currentIndex and increment index by 1
     tileDrawn = wall[currentIndex];
+    await incrementCurrentTileIndex(gameId);
   }
 
   return tileDrawn;
