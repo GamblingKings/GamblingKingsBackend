@@ -256,6 +256,29 @@ describe('test drawsTile', () => {
     expect(tileDrawn).toBe(tileToBeDrawn);
     expect(newGameState.currentIndex).toBe(currentIndex + 1);
   });
+
+  test('it should return empty string when max wall index is reached', async () => {
+    // Increment currentIndex to 143
+    const incrementCurrentTileIndexSpy = jest.spyOn(gameStateDBFunctions, 'incrementCurrentTileIndex');
+    const promises = [];
+    for (let i = 0; i < Wall.DEFAULT_WALL_LENGTH - currentIndex - 1; i += 1) {
+      promises.push(incrementCurrentTileIndex(gameId));
+    }
+    await Promise.all(promises);
+    expect(await getCurrentTileIndex(gameId)).toBe(143);
+
+    // Try to draw a tile
+    const tileDrawn = await drawTile(gameId);
+
+    // Test function calls
+    expect(incrementCurrentTileIndexSpy).toHaveBeenCalledTimes(Wall.DEFAULT_WALL_LENGTH - currentIndex - 1);
+    expect(drawTileSpy).toHaveBeenCalledTimes(1);
+    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(tileDrawn).toBe('');
+    expect(await getCurrentTileIndex(gameId)).toBe(Wall.DEFAULT_WALL_LENGTH - 1);
+  });
 });
 
 /* ----------------------------------------------------------------------------
