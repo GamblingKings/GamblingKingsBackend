@@ -228,6 +228,7 @@ describe('test drawsTile', () => {
   // Spies
   let drawTileSpy: jest.SpyInstance;
   let getGameStateByGameIdSpy: jest.SpyInstance;
+  let incrementCurrentTileIndexSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     gameState = await initGameState(FAKE_GAME_ID, CONNECTION_IDS);
@@ -237,6 +238,7 @@ describe('test drawsTile', () => {
 
     drawTileSpy = jest.spyOn(gameStateDBFunctions, 'drawTile');
     getGameStateByGameIdSpy = jest.spyOn(gameStateDBFunctions, 'getGameStateByGameId');
+    incrementCurrentTileIndexSpy = jest.spyOn(gameStateDBFunctions, 'incrementCurrentTileIndex');
   });
 
   afterEach(() => {
@@ -257,9 +259,8 @@ describe('test drawsTile', () => {
     expect(newGameState.currentIndex).toBe(currentIndex + 1);
   });
 
-  test('it should return empty string when max wall index is reached', async () => {
+  test('it should return last tile when max wall index (143) is reached', async () => {
     // Increment currentIndex to 143
-    const incrementCurrentTileIndexSpy = jest.spyOn(gameStateDBFunctions, 'incrementCurrentTileIndex');
     const promises = [];
     for (let i = 0; i < Wall.DEFAULT_WALL_LENGTH - currentIndex - 1; i += 1) {
       promises.push(incrementCurrentTileIndex(gameId));
@@ -268,16 +269,39 @@ describe('test drawsTile', () => {
     expect(await getCurrentTileIndex(gameId)).toBe(143);
 
     // Try to draw a tile
+    const lastTile = wall[wall.length - 1];
     const tileDrawn = await drawTile(gameId);
 
     // Test function calls
-    expect(incrementCurrentTileIndexSpy).toHaveBeenCalledTimes(Wall.DEFAULT_WALL_LENGTH - currentIndex - 1);
+    expect(incrementCurrentTileIndexSpy).toHaveBeenCalledTimes(Wall.DEFAULT_WALL_LENGTH - currentIndex); // drawTile calls incrementCurrentTileIndex once
+    expect(drawTileSpy).toHaveBeenCalledTimes(1);
+    expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(2);
+
+    // Test response
+    expect(tileDrawn).toBe(lastTile);
+    expect(await getCurrentTileIndex(gameId)).toBe(Wall.DEFAULT_WALL_LENGTH);
+  });
+
+  test('it should return empty string when max wall length (144) is reached', async () => {
+    // Increment currentIndex to 144
+    const promises = [];
+    for (let i = 0; i < Wall.DEFAULT_WALL_LENGTH - currentIndex; i += 1) {
+      promises.push(incrementCurrentTileIndex(gameId));
+    }
+    await Promise.all(promises);
+    expect(await getCurrentTileIndex(gameId)).toBe(144);
+
+    // Try to draw a tile
+    const tileDrawn = await drawTile(gameId);
+
+    // Test function calls
+    expect(incrementCurrentTileIndexSpy).toHaveBeenCalledTimes(Wall.DEFAULT_WALL_LENGTH - currentIndex);
     expect(drawTileSpy).toHaveBeenCalledTimes(1);
     expect(getGameStateByGameIdSpy).toHaveBeenCalledTimes(2);
 
     // Test response
     expect(tileDrawn).toBe('');
-    expect(await getCurrentTileIndex(gameId)).toBe(Wall.DEFAULT_WALL_LENGTH - 1);
+    expect(await getCurrentTileIndex(gameId)).toBe(Wall.DEFAULT_WALL_LENGTH);
   });
 });
 

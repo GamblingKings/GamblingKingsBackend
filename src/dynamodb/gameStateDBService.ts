@@ -9,6 +9,7 @@ import {
   parseDynamoDBAttribute,
   parseDynamoDBItem,
 } from './dbHelper';
+import { Wall } from '../games/mahjong/Wall/Wall';
 
 /* ----------------------------------------------------------------------------
  * Constants
@@ -193,8 +194,8 @@ export const drawTile = async (gameId: string): Promise<string> => {
   const { wall, currentIndex } = (await getGameStateByGameId(gameId)) as GameState;
   let tileDrawn = '';
 
-  // Return empty string if index reach 143
-  if (currentIndex === 143) {
+  // Return empty string if index reach 144
+  if (currentIndex >= Wall.DEFAULT_WALL_LENGTH) {
     return tileDrawn;
   }
 

@@ -261,9 +261,9 @@ export const broadcastDrawTileToUser = async (
   const tileDrawn = await drawTile(gameId);
 
   if (!tileDrawn || tileDrawn === '') {
-    // Double check to make sure tile index reach 143
+    // Double check to make sure tile index reach 144
     const currentIndex = (await getCurrentTileIndex(gameId)) as number;
-    if (currentIndex !== Wall.DEFAULT_WALL_LENGTH - 1) {
+    if (currentIndex !== Wall.DEFAULT_WALL_LENGTH) {
       throw Error('broadcastDrawTileToUser: Draw empty tile while currentIndex did not reach 144');
     }
 
