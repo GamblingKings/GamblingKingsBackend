@@ -19,6 +19,7 @@ import {
   UpdateGameStatePayload,
   SelfPlayTilePayload,
   TestGameUpdatePayload,
+  DrawRoundPayload,
 } from '../types/payload';
 import { WebSocketResponse } from '../types/response';
 import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
@@ -197,8 +198,12 @@ export const createSelfPlayTileResponse = (payload: SelfPlayTilePayload): WebSoc
   return createWSResponse(WebSocketActionsEnum.SELF_PLAY_TILE, payload);
 };
 
-export const createTestGameStateResponse = (payload: TestGameUpdatePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActionsEnum.GAME_START, payload);
+/**
+ * Create DRAW_ROUND response object.
+ * @param {string} payload payload object
+ */
+export const createDrawRoundResponse = (payload: DrawRoundPayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.DRAW_ROUND, payload);
 };
 
 /* ----------------------------------------------------------------------------
@@ -272,4 +277,11 @@ export const createSendMessageResponse = ({ username, message }: SendMessagePayl
     time: new Date().toISOString(),
   };
   return createWSResponse(WebSocketActionsEnum.SEND_MESSAGE, wsPayload);
+};
+
+/* ----------------------------------------------------------------------------
+ * Testing
+ * ------------------------------------------------------------------------- */
+export const createTestGameStateResponse = (payload: TestGameUpdatePayload): WebSocketResponse => {
+  return createWSResponse(WebSocketActionsEnum.GAME_START, payload);
 };

@@ -1,6 +1,6 @@
 import { WebSocketClient } from '../WebSocketClient';
 import { Game } from '../../models/Game';
-import { getAllGames, getGameByGameId } from '../../dynamodb/gameDBService';
+import { getAllGames, getGameByGameId, getUsersInGame } from '../../dynamodb/gameDBService';
 import { getHandByConnectionId, removeDynamoDocumentVersion } from '../../dynamodb/dbHelper';
 import {
   createDrawTileResponse,
@@ -13,16 +13,18 @@ import {
   createWinningTilesResponse,
   createUpdateGameStateResponse,
   createSelfPlayTileResponse,
+  createDrawRoundResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
 import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
-import { drawTile, initGameState } from '../../dynamodb/gameStateDBService';
+import { drawTile, getCurrentTileIndex, initGameState } from '../../dynamodb/gameStateDBService';
 import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { GameState, SelfPlayedTile, UserHand } from '../../models/GameState';
 import { SelfPlayTilePayload } from '../../types/payload';
 import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
+import { Wall } from '../../games/mahjong/Wall/Wall';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -229,23 +231,57 @@ export const broadcastGameStart = async (
 };
 
 /**
+ * Broadcast DRAW_ROUND to users when the wall runs out of tile.
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string} gameId Game Id
+ * @param {string} connectionId Connection Id
+ * @param {string[]} connectionIds All connection Ids in the game
+ */
+export const broadcastDrawRound = async (
+  ws: WebSocketClient,
+  gameId: string,
+  connectionId: string,
+  connectionIds: string[],
+): Promise<void> => {
+  const wsResponse = createDrawRoundResponse({ gameId, connectionId });
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
+};
+
+/**
  * Broadcast a tile string to a user in the game.
  * @param {WebSocketClient} ws a WebSocketClient instance
- * @param {string} gameId game Id
- * @param {string} connectionId connection Id
+ * @param {string} gameId Game Id
+ * @param {string} connectionId Connection Id
  */
 export const broadcastDrawTileToUser = async (
   ws: WebSocketClient,
   gameId: string,
   connectionId: string,
-): Promise<string> => {
+): Promise<void> => {
   const tileDrawn = await drawTile(gameId);
-  console.log('tile drawn:', tileDrawn);
 
-  const wsResponse = createDrawTileResponse({ tile: tileDrawn });
+  if (!tileDrawn || tileDrawn === '') {
+    // Double check to make sure tile index reach 144
+    const currentIndex = (await getCurrentTileIndex(gameId)) as number;
+    if (currentIndex !== Wall.DEFAULT_WALL_LENGTH) {
+      throw Error('broadcastDrawTileToUser: Draw empty tile while currentIndex did not reach 144');
+    }
+
+    // Users must exist in the game
+    const users = await getUsersInGame(gameId);
+    if (!users) throw Error('broadcastDrawTileToUser: No user found in game, failed to broadcast DRAW_ROUND');
+
+    const connectionIds = getConnectionIdsFromUsers(users);
+    await broadcastDrawRound(ws, gameId, connectionId, connectionIds);
+    return;
+  }
+
+  console.log(`Tile ${tileDrawn} was drawn by ${connectionId}`);
+  const wsResponse = createDrawTileResponse({
+    tile: tileDrawn,
+    currentIndex: (await getCurrentTileIndex(gameId)) as number,
+  });
   await ws.send(wsResponse, connectionId);
-
-  return tileDrawn;
 };
 
 /**

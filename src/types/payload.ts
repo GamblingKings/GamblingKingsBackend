@@ -93,6 +93,7 @@ export interface GameStartPayload {
 
 export interface DrawTilePayload {
   tile: string;
+  currentIndex: number;
 }
 
 export interface PlayTilePayload {
@@ -127,6 +128,11 @@ export interface SelfPlayTilePayload {
   playedTile: string;
   isQuad: boolean;
   alreadyMeld: boolean;
+}
+
+export interface DrawRoundPayload {
+  gameId: string;
+  connectionId: string;
 }
 
 /**
