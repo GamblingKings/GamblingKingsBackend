@@ -29,6 +29,13 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const handPointResults = payload.handPointResults as HandPointResults;
   const ws = new WebSocketClient(event.requestContext);
 
+  /**
+   * The WIN_ROUND lambda will do the following:
+   * 1. Send WINNING_TILES to all users with points and the winning tiles
+   * 2. Update the the GameState with new wall/hands/dealer/wind
+   * 3. Send UPDATE_GAME_STATE to all users with the updated dealer/wind
+   * 4. Delay 5s and send GAME_START to all users to start off a new game
+   */
   try {
     // Find dealer and users from game state by game Id
     const dealer = await getCurrentDealer(gameId);
@@ -50,7 +57,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // Send WINNING_TILES response to all connections
     await broadcastWinningTiles(ws, connectionIds, connectionId, handPointResults);
 
-    // Start new round
+    // Start a new round and update the dealer/wind
     const updatedGameState = await startNewGameRound(
       gameId,
       connectionIds,
@@ -65,7 +72,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const { dealer: newDealer, currentWind } = updatedGameState;
     await broadcastUpdateGameState(ws, connectionIds, newDealer, currentWind);
 
-    // Send GAME_START to start new round and send new hands to users
+    // Send GAME_START to start a new round and send new hands to users
     setTimeout(async () => {
       await broadcastGameReset(ws, connectionIds, updatedGameState);
     }, 5000); // Delay 5s before sending GAME_START to client

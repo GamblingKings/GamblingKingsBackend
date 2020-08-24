@@ -54,6 +54,7 @@ provider:
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   memorySize: 512 # optional, in MB, default is 1024
+  timeout: 10 # optional, in seconds, default is 6
 
   websocketsApiName: mahjong-websocket
   websocketsApiRouteSelectionExpression: $request.body.action # custom routes are selected by the value of the action property in the body
@@ -177,6 +178,7 @@ functions:
       - websocket: PLAYED_TILE_INTERACTION
   onWinRound:
     handler: src/functions/game/onWinRound.handler
+    timeout: 15 # optional, in seconds, default is 6
     events:
       - websocket: WIN_ROUND
   onSelfPlayTile:

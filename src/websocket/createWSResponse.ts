@@ -179,7 +179,7 @@ export const createPlayedTileInteractionResponse = (payload: PlayedTileInteracti
  * @param {WinningTilesPayload} payload payload object
  */
 export const createWinningTilesResponse = (payload: WinningTilesPayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
+  return createWSResponse(WebSocketActionsEnum.WINNING_TILES, payload);
 };
 
 /**
@@ -187,7 +187,7 @@ export const createWinningTilesResponse = (payload: WinningTilesPayload): WebSoc
  * @param {UpdateGameStatePayload} payload
  */
 export const createUpdateGameStateResponse = (payload: UpdateGameStatePayload): WebSocketResponse => {
-  return createWSResponse(WebSocketActionsEnum.WIN_ROUND, payload);
+  return createWSResponse(WebSocketActionsEnum.UPDATE_GAME_STATE, payload);
 };
 
 /**
