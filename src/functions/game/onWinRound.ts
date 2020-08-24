@@ -14,6 +14,19 @@ import { getConnectionIdsFromUsers, sleep } from '../../utils/broadcastHelper';
 import { response } from '../../utils/responseHelper';
 import { LambdaResponse } from '../../types/response';
 import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
+import { Tile } from '../../games/mahjong/Tile/Tile';
+
+/**
+ * Convert handPointResults.tiles from Tile[] to string[].
+ * @param {HandPointResults} handPointResults
+ */
+export const parseHandPointResults = (handPointResults: HandPointResults): HandPointResults => {
+  const updatedHandPointResults = handPointResults;
+  const tiles = handPointResults.tiles as Tile[];
+  updatedHandPointResults.tiles = tiles.map((tile: Tile) => tile.toString());
+
+  return updatedHandPointResults;
+};
 
 /**
  * Handler for Winning Round
@@ -26,7 +39,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
-  const handPointResults = payload.handPointResults as HandPointResults;
+  const handPointResults = parseHandPointResults(payload.handPointResults as HandPointResults);
   const ws = new WebSocketClient(event.requestContext);
 
   /**
