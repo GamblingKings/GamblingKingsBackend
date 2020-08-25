@@ -45,6 +45,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
     await broadcastInteractionSuccess(
       ws,
       {
+        connectionId: '',
         meldType: '',
         playedTiles: [],
         skipInteraction: true,
@@ -101,7 +102,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
      * Only one user (the next user to the user who played the tile) can make consecutive
      */
     if (!canMakeTripletOrQuad) {
-      console.log('TESTING canMakeTripletOrQuad:', canMakeTripletOrQuad);
+      console.log('onPlayedTileInteraction: canMakeTripletOrQuad:', canMakeTripletOrQuad);
 
       if (meld === MeldEnum.CONSECUTIVE) {
         consecutivePayload = {
@@ -110,7 +111,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
           playedTiles: tile,
           skipInteraction: false,
         };
-        console.log('TESTING consecutivePayload:', consecutivePayload);
+        console.log('onPlayedTileInteraction: consecutivePayload:', consecutivePayload);
       }
     }
   }
