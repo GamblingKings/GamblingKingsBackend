@@ -85,7 +85,6 @@ export const sendUpdates = async (
  */
 export const findNextUser = (connectionId: string, connectionIds: string[]): string => {
   const playedTileUserIndex = connectionIds.findIndex((cid) => cid === connectionId);
-  const canMakeConsecutiveIndex =
-    playedTileUserIndex + 1 <= DEFAULT_MAX_USERS_IN_GAME - 1 ? playedTileUserIndex + 1 : 0;
+  const canMakeConsecutiveIndex = (playedTileUserIndex + 1) % DEFAULT_MAX_USERS_IN_GAME;
   return connectionIds[canMakeConsecutiveIndex];
 };

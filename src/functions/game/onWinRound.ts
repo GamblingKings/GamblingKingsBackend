@@ -13,17 +13,19 @@ import {
 import { getConnectionIdsFromUsers, sleep } from '../../utils/broadcastHelper';
 import { response } from '../../utils/responseHelper';
 import { LambdaResponse } from '../../types/response';
-import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
-import { Tile } from '../../games/mahjong/Tile/Tile';
+import { HandPointResults, TileObject } from '../../games/mahjong/types/MahjongTypes';
 
 /**
- * Convert handPointResults.tiles from Tile[] to string[].
+ * Convert handPointResults.tiles from TileObjects[] to string[].
  * @param {HandPointResults} handPointResults
  */
 export const parseHandPointResults = (handPointResults: HandPointResults): HandPointResults => {
   const updatedHandPointResults = handPointResults;
-  const tiles = handPointResults.tiles as Tile[];
-  updatedHandPointResults.tiles = tiles.map((tile: Tile) => tile.toString());
+  const tileObjs = handPointResults.tiles as TileObject[];
+  updatedHandPointResults.tiles = tileObjs.map((tileObj: TileObject) => {
+    if (tileObj.value === -1) return tileObj.type;
+    return `${tileObj.value}_${tileObj.type}`;
+  });
 
   return updatedHandPointResults;
 };

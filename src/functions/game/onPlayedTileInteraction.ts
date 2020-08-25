@@ -45,6 +45,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
     await broadcastInteractionSuccess(
       ws,
       {
+        connectionId: '',
         meldType: '',
         playedTiles: [],
         skipInteraction: true,
@@ -69,17 +70,19 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
     const interaction: PlayedTile = interactions[i];
     const { connectionId: cid, playedTiles: tile, meldType: meld } = interaction;
 
+    const payload = {
+      connectionId: cid,
+      meldType: meld,
+      playedTiles: tile,
+      skipInteraction: false,
+    };
+
     /**
      * Win game
      */
     if (meld === MeldEnum.WIN) {
       canWinGame = true;
-      winGamePayload = {
-        connectionId: cid,
-        meldType: meld,
-        playedTiles: tile,
-        skipInteraction: false,
-      };
+      winGamePayload = payload;
       break; // once Win game is found, break out of the for loop
     }
 
@@ -88,12 +91,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
      */
     if (meld === MeldEnum.TRIPLET || meld === MeldEnum.QUAD) {
       canMakeTripletOrQuad = true;
-      tripletOrQuadPayload = {
-        connectionId: cid,
-        meldType: meld,
-        playedTiles: tile,
-        skipInteraction: false,
-      };
+      tripletOrQuadPayload = payload;
     }
 
     /**
@@ -101,16 +99,11 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
      * Only one user (the next user to the user who played the tile) can make consecutive
      */
     if (!canMakeTripletOrQuad) {
-      console.log('TESTING canMakeTripletOrQuad:', canMakeTripletOrQuad);
+      console.log('onPlayedTileInteraction: canMakeTripletOrQuad:', canMakeTripletOrQuad);
 
       if (meld === MeldEnum.CONSECUTIVE) {
-        consecutivePayload = {
-          connectionId: cid,
-          meldType: meld,
-          playedTiles: tile,
-          skipInteraction: false,
-        };
-        console.log('TESTING consecutivePayload:', consecutivePayload);
+        consecutivePayload = payload;
+        console.log('onPlayedTileInteraction: consecutivePayload:', consecutivePayload);
       }
     }
   }
