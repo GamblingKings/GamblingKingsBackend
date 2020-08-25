@@ -70,17 +70,19 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
     const interaction: PlayedTile = interactions[i];
     const { connectionId: cid, playedTiles: tile, meldType: meld } = interaction;
 
+    const payload = {
+      connectionId: cid,
+      meldType: meld,
+      playedTiles: tile,
+      skipInteraction: false,
+    };
+
     /**
      * Win game
      */
     if (meld === MeldEnum.WIN) {
       canWinGame = true;
-      winGamePayload = {
-        connectionId: cid,
-        meldType: meld,
-        playedTiles: tile,
-        skipInteraction: false,
-      };
+      winGamePayload = payload;
       break; // once Win game is found, break out of the for loop
     }
 
@@ -89,12 +91,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
      */
     if (meld === MeldEnum.TRIPLET || meld === MeldEnum.QUAD) {
       canMakeTripletOrQuad = true;
-      tripletOrQuadPayload = {
-        connectionId: cid,
-        meldType: meld,
-        playedTiles: tile,
-        skipInteraction: false,
-      };
+      tripletOrQuadPayload = payload;
     }
 
     /**
@@ -105,12 +102,7 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
       console.log('onPlayedTileInteraction: canMakeTripletOrQuad:', canMakeTripletOrQuad);
 
       if (meld === MeldEnum.CONSECUTIVE) {
-        consecutivePayload = {
-          connectionId: cid,
-          meldType: meld,
-          playedTiles: tile,
-          skipInteraction: false,
-        };
+        consecutivePayload = payload;
         console.log('onPlayedTileInteraction: consecutivePayload:', consecutivePayload);
       }
     }
