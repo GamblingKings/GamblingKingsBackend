@@ -33,14 +33,14 @@ export interface HandPointResults {
   flowerPoints: number;
   concealedPoint: number;
   hands: HandDefinition[];
-  tiles: Tile[] | TileObjects[] | string[];
+  tiles: Tile[] | TileObject[] | string[];
   bonusTiles: Tile[];
   wind: WindEnum;
   flower: number;
   melds?: Meld[];
 }
 
-export interface TileObjects {
+export interface TileObject {
   type: string;
   value: number;
 }
