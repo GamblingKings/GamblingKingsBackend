@@ -33,7 +33,7 @@ export interface HandPointResults {
   flowerPoints: number;
   concealedPoint: number;
   hands: HandDefinition[];
-  tiles: Tile[];
+  tiles: Tile[] | string[];
   bonusTiles: Tile[];
   wind: WindEnum;
   flower: number;

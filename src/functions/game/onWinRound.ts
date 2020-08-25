@@ -10,10 +10,23 @@ import {
   broadcastUpdateGameState,
   broadcastWinningTiles,
 } from '../../websocket/broadcast/gameBroadcast';
-import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
+import { getConnectionIdsFromUsers, sleep } from '../../utils/broadcastHelper';
 import { response } from '../../utils/responseHelper';
 import { LambdaResponse } from '../../types/response';
 import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
+import { Tile } from '../../games/mahjong/Tile/Tile';
+
+/**
+ * Convert handPointResults.tiles from Tile[] to string[].
+ * @param {HandPointResults} handPointResults
+ */
+export const parseHandPointResults = (handPointResults: HandPointResults): HandPointResults => {
+  const updatedHandPointResults = handPointResults;
+  const tiles = handPointResults.tiles as Tile[];
+  updatedHandPointResults.tiles = tiles.map((tile: Tile) => tile.toString());
+
+  return updatedHandPointResults;
+};
 
 /**
  * Handler for Winning Round
@@ -26,7 +39,7 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const body: LambdaEventBody = JSON.parse(event.body);
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
-  const handPointResults = payload.handPointResults as HandPointResults;
+  const handPointResults = parseHandPointResults(payload.handPointResults as HandPointResults);
   const ws = new WebSocketClient(event.requestContext);
 
   /**
@@ -73,9 +86,8 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     await broadcastUpdateGameState(ws, connectionIds, newDealer, currentWind);
 
     // Send GAME_START to start a new round and send new hands to users
-    setTimeout(async () => {
-      await broadcastGameReset(ws, connectionIds, updatedGameState);
-    }, 5000); // Delay 5s before sending GAME_START to client
+    await sleep(5000); // Delay 5s before sending GAME_START to client
+    await broadcastGameReset(ws, connectionIds, updatedGameState);
 
     return response(200, 'New round started successfully');
   } catch (err) {
