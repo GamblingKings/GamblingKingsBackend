@@ -342,7 +342,9 @@ yarn start
 8. `LEAVE_GAME`: To remove user from the Games table if user disconnects or manually leave a game.
    Note: if the user leaving the game is the game host, the game will be deleted
 9. `PLAY_TILE`: Send a played tile to all users in the game
-10. `PLAYED_TILE_INTERACTION` \* 3: Interact with a played tile to make a meld (Consecutive, Triplet, or Quad), and the backend will decide who can take this tile based on meld priority. If all three other users decide not to take the tile, the tile can be skipped and not taken by anyone.
+10. `PLAYED_TILE_INTERACTION` \* 3: Interact with a played tile to make a meld (Consecutive, Triplet, or Quad), and the backend will decide who can take this tile based on meld priority. If all three other users decide not to take the tile, the tile can be skipped and not taken by anyone
+11. `SELF_PLAY_TILE`: To play bonus tiles automatically at game start or during the game
+12. `WIN_ROUND`: To win a game, update wind/dealer, and start a new game and distribute tiles to each user
 
 ## Testing
 

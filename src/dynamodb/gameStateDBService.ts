@@ -392,7 +392,7 @@ export const startNewGameRound = async (
     ConditionExpression: 'attribute_exists(gameId)',
     ExpressionAttributeValues: {
       ':initCurrentIndex': newWall.getCurrentTileIndex(),
-      ':initWall': newWall,
+      ':initWall': newWall.getTiles(), // array of tiles
       ':initHands': hands,
       ':initInteractionCount': 0,
       ':initPlayedTileInteractions': [],
