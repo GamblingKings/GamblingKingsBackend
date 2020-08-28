@@ -3,6 +3,7 @@ import { Game } from '../../models/Game';
 import { getAllGames, getGameByGameId, getUsersInGame } from '../../dynamodb/gameDBService';
 import { getHandByConnectionId, removeDynamoDocumentVersion } from '../../dynamodb/dbHelper';
 import {
+  createDrawRoundResponse,
   createDrawTileResponse,
   createGameStartResponse,
   createGameUpdateResponse,
@@ -10,21 +11,28 @@ import {
   createInGameMessageResponse,
   createInGameUpdateResponse,
   createPlayTileResponse,
-  createWinningTilesResponse,
-  createUpdateGameStateResponse,
   createSelfPlayTileResponse,
-  createDrawRoundResponse,
+  createUpdateGameStateResponse,
+  createWinningTilesResponse,
 } from '../createWSResponse';
 import { GameStatesEnum } from '../../enums/states';
 import { WebSocketActionsEnum } from '../../enums/WebSocketActionsEnum';
 import { getUserByConnectionId } from '../../dynamodb/userDBService';
 import { User } from '../../models/User';
-import { drawTile, getCurrentTileIndex, initGameState } from '../../dynamodb/gameStateDBService';
-import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
+import {
+  drawTile,
+  getCurrentDealer,
+  getCurrentTileIndex,
+  initGameState,
+  startNewGameRound,
+} from '../../dynamodb/gameStateDBService';
+import { getConnectionIdsExceptCaller, getConnectionIdsFromUsers, sleep } from '../../utils/broadcastHelper';
 import { GameState, SelfPlayedTile, UserHand } from '../../models/GameState';
 import { SelfPlayTilePayload } from '../../types/payload';
 import { HandPointResults } from '../../games/mahjong/types/MahjongTypes';
 import { Wall } from '../../games/mahjong/Wall/Wall';
+import { LambdaResponse } from '../../types/response';
+import { response } from '../../utils/responseHelper';
 
 /* ----------------------------------------------------------------------------
  * Game
@@ -248,6 +256,79 @@ export const broadcastDrawRound = async (
 };
 
 /**
+ * Broadcast updated game state after game round ends
+ * @param {WebSocketClient} ws WebSocketClient instance
+ * @param {string[]} connectionIds connectionIds of all users in game
+ * @param {number} dealer current dealer
+ * @param {number} wind current wind
+ */
+export const broadcastUpdateGameState = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  dealer: number,
+  wind: number,
+): Promise<void> => {
+  const wsResponse = createUpdateGameStateResponse({
+    dealer,
+    wind,
+  });
+  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
+};
+
+/**
+ * Broadcast new hands to all users and Resets game round
+ * @param {WebSocketClient} ws WebSocketClient instance
+ * @param {string[]} connectionIds All user connection ids in a game
+ * @param {GameState} gameState Game state
+ */
+export const broadcastGameReset = async (
+  ws: WebSocketClient,
+  connectionIds: string[],
+  gameState: GameState,
+): Promise<void> => {
+  await broadcastGameStart(ws, '', connectionIds, false, gameState);
+};
+
+/**
+ * Helper function to start a new round of a game and send updates (UPDATE_GAME_STATE, GAME_START) to users.
+ * @param {WebSocketClient} ws Websocket client
+ * @param {string} gameId Game Id
+ * @param {string} connectionId Connection Id of the caller
+ * @param {User[]} users List of users in a game
+ * @param {number} dealer Current dealer index
+ */
+export const startNewRoundAndSendUpdates = async (
+  ws: WebSocketClient,
+  gameId: string,
+  connectionId: string,
+  users: User[],
+  dealer: number,
+): Promise<LambdaResponse | undefined> => {
+  const connectionIds = getConnectionIdsFromUsers(users);
+
+  // Start a new round and update the dealer/wind
+  const updatedGameState = await startNewGameRound(
+    gameId,
+    connectionIds,
+    users[dealer].connectionId !== connectionId, // change dealer if winner is not currently a dealer
+  );
+  if (!updatedGameState) {
+    console.error('Cannot start new game round');
+    return response(400, 'Cannot start new game round');
+  }
+
+  // Send UPDATE_GAME_STATE with current dealer and wind to all connections
+  const { dealer: newDealer, currentWind } = updatedGameState;
+  await broadcastUpdateGameState(ws, connectionIds, newDealer, currentWind);
+
+  // Send GAME_START to start a new round and send new hands to users
+  await sleep(5000); // Delay 5s before sending GAME_START to client
+  await broadcastGameReset(ws, connectionIds, updatedGameState);
+
+  return undefined;
+};
+
+/**
  * Broadcast a tile string to a user in the game.
  * @param {WebSocketClient} ws a WebSocketClient instance
  * @param {string} gameId Game Id
@@ -273,6 +354,9 @@ export const broadcastDrawTileToUser = async (
 
     const connectionIds = getConnectionIdsFromUsers(users);
     await broadcastDrawRound(ws, gameId, connectionId, connectionIds);
+
+    const currentDealer = (await getCurrentDealer(gameId)) as number;
+    await startNewRoundAndSendUpdates(ws, gameId, connectionId, users, currentDealer);
     return;
   }
 
@@ -332,39 +416,11 @@ export const broadcastWinningTiles = async (
 };
 
 /**
- * Broadcast updated game state after game round ends
- * @param {WebSocketClient} ws WebSocketClient instance
- * @param {string[]} connectionIds connectionIds of all users in game
- * @param {number} dealer current dealer
- * @param {number} wind current wind
+ *
+ * @param {WebSocketClient} ws a WebSocketClient instance
+ * @param {string[]} connectionIds Connection ids of all users
+ * @param {SelfPlayTilePayload} payload Payload for SELF_PLAY_TILE route
  */
-export const broadcastUpdateGameState = async (
-  ws: WebSocketClient,
-  connectionIds: string[],
-  dealer: number,
-  wind: number,
-): Promise<void> => {
-  const wsResponse = createUpdateGameStateResponse({
-    dealer,
-    wind,
-  });
-  await Promise.all(connectionIds.map((cid) => ws.send(wsResponse, cid)));
-};
-
-/**
- * Broadcast new hands to all users and Resets game round
- * @param {WebSocketClient} ws WebSocketClient instance
- * @param {string[]} connectionIds All user connection ids in a game
- * @param {GameState} gameState Game state
- */
-export const broadcastGameReset = async (
-  ws: WebSocketClient,
-  connectionIds: string[],
-  gameState: GameState,
-): Promise<void> => {
-  await broadcastGameStart(ws, '', connectionIds, false, gameState);
-};
-
 export const broadcastSelfPlayTile = async (
   ws: WebSocketClient,
   connectionIds: string[],

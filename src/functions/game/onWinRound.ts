@@ -3,14 +3,10 @@ import { LambdaEventBody, WebSocketAPIGatewayEvent } from '../../types/event';
 import { WebSocketClient } from '../../websocket/WebSocketClient';
 import { Logger } from '../../utils/Logger';
 import { LambdaEventBodyPayloadOptions } from '../../types/payload';
-import { getCurrentDealer, startNewGameRound } from '../../dynamodb/gameStateDBService';
+import { getCurrentDealer } from '../../dynamodb/gameStateDBService';
 import { getUsersInGame } from '../../dynamodb/gameDBService';
-import {
-  broadcastGameReset,
-  broadcastUpdateGameState,
-  broadcastWinningTiles,
-} from '../../websocket/broadcast/gameBroadcast';
-import { getConnectionIdsFromUsers, sleep } from '../../utils/broadcastHelper';
+import { broadcastWinningTiles, startNewRoundAndSendUpdates } from '../../websocket/broadcast/gameBroadcast';
+import { getConnectionIdsFromUsers } from '../../utils/broadcastHelper';
 import { response } from '../../utils/responseHelper';
 import { LambdaResponse } from '../../types/response';
 import { HandPointResults, TileObject } from '../../games/mahjong/types/MahjongTypes';
@@ -72,24 +68,9 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // Send WINNING_TILES response to all connections
     await broadcastWinningTiles(ws, connectionIds, connectionId, handPointResults);
 
-    // Start a new round and update the dealer/wind
-    const updatedGameState = await startNewGameRound(
-      gameId,
-      connectionIds,
-      users[dealer].connectionId !== connectionId, // change dealer if winner is not currently a dealer
-    );
-    if (!updatedGameState) {
-      console.error('Cannot start new game round');
-      return response(400, 'Cannot start new game round');
-    }
-
-    // Send UPDATE_GAME_STATE with current dealer and wind to all connections
-    const { dealer: newDealer, currentWind } = updatedGameState;
-    await broadcastUpdateGameState(ws, connectionIds, newDealer, currentWind);
-
-    // Send GAME_START to start a new round and send new hands to users
-    await sleep(5000); // Delay 5s before sending GAME_START to client
-    await broadcastGameReset(ws, connectionIds, updatedGameState);
+    // Start new round and send updates (dealer/wind/new tiles)
+    const error = await startNewRoundAndSendUpdates(ws, gameId, connectionId, users, dealer);
+    if (error) return error;
 
     return response(200, 'New round started successfully');
   } catch (err) {
