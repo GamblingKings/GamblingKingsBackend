@@ -38,6 +38,7 @@ settings:
         - .tsx
 rules:
   '@typescript-eslint/no-floating-promises': ['error']
+  no-shadow: 0
   linebreak-style: 0
   no-console: 0
   import/extensions:
@@ -55,3 +56,4 @@ rules:
     - error
     - endOfLine: auto
   jest/prefer-strict-equal: error
+  jest/no-conditional-expect: off

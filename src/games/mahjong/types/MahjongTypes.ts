@@ -24,6 +24,11 @@ export interface HandDefinition {
   name: string;
 }
 
+export interface TileObject {
+  type: string;
+  value: number;
+}
+
 export interface HandPointResults {
   totalPoints: number;
   handPoints: number;
@@ -38,11 +43,6 @@ export interface HandPointResults {
   wind: WindEnum;
   flower: number;
   melds?: Meld[];
-}
-
-export interface TileObject {
-  type: string;
-  value: number;
 }
 
 /**
