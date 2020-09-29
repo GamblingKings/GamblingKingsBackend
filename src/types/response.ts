@@ -6,6 +6,14 @@ import { WebSocketActionsEnum } from '../enums/WebSocketActionsEnum';
  * ------------------------------------------------------------------------- */
 
 /**
+ * Response Header interface for Lambda functions
+ */
+export interface LambdaResponseHeader {
+  'Content-Type': string;
+  'Access-Control-Allow-Origin': string;
+}
+
+/**
  * Response interface for Lambda functions
  */
 export interface LambdaResponse {
@@ -13,14 +21,6 @@ export interface LambdaResponse {
   body: string | string[];
   headers: LambdaResponseHeader;
   isBase64Encoded: boolean;
-}
-
-/**
- * Response Header interface for Lambda functions
- */
-export interface LambdaResponseHeader {
-  'Content-Type': string;
-  'Access-Control-Allow-Origin': string;
 }
 
 /* ----------------------------------------------------------------------------
