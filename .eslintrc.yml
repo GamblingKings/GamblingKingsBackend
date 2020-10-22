@@ -38,9 +38,9 @@ settings:
         - .tsx
 rules:
   '@typescript-eslint/no-floating-promises': ['error']
-  no-shadow: 0
-  linebreak-style: 0
-  no-console: 0
+  no-shadow: off
+  linebreak-style: off
+  no-console: warn
   import/extensions:
     - error
     - ignorePackages

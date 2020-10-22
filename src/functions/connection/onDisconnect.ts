@@ -49,7 +49,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   const { connectionId } = event.requestContext;
 
-  console.log('Deleting connectionId from the db table...');
   const ws = new WebSocketClient(event.requestContext);
   try {
     // Send USER_UPDATE with DISCONNECT to all other users
@@ -87,7 +86,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Connection deleted successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

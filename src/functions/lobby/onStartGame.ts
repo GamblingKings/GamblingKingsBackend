@@ -25,7 +25,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
 
-  console.log('Starting a game...');
   const ws = new WebSocketClient(event.requestContext);
   const emptyGameResponse = createStartGameResponse();
   try {
@@ -47,8 +46,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Game started successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
-
     // Send failure message
     const res: WebSocketResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
     await ws.send(res, connectionId);

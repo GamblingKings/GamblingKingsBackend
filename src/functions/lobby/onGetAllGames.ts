@@ -13,13 +13,11 @@ import { broadcastGames } from '../../websocket/broadcast/gameBroadcast';
 export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise<LambdaResponse> => {
   Logger.createLogTitle('onGetAllGames.ts');
 
-  console.log('Getting all games...');
   const ws = new WebSocketClient(event.requestContext);
   try {
     const res = await broadcastGames(ws, event.requestContext.connectionId);
     return response(200, JSON.stringify(res));
   } catch (err) {
-    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

@@ -19,7 +19,6 @@ export const broadcastMessage = async (
   message: string,
 ): Promise<User[] | []> => {
   const users: User[] = await getAllConnections();
-  console.log('broadcastMessage, Connections:', users);
 
   if (users && users.length > 0) {
     const wsResponse = createSendMessageResponse({

@@ -25,7 +25,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const isQuad = payload.isQuad as boolean;
   const alreadyMeld = payload.alreadyMeld as boolean;
 
-  console.log(`User with connection Id ${connectionId} ran SELF_PLAY_TILE route...`);
   const ws = new WebSocketClient(event.requestContext);
   try {
     let connectionIds: string[] = [];
@@ -34,7 +33,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const users = await getUsersInGame(gameId);
 
     if (!users) {
-      console.error('Failed to get users in game');
       return response(400, 'Failed to get users in game');
     }
 
@@ -50,8 +48,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Self play tile function is run successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
-
     return response(500, 'Failed to run self play tile function');
   }
 };

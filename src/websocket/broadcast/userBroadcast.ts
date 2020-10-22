@@ -18,8 +18,6 @@ export const broadcastConnections = async (ws: WebSocketClient, connectionId: st
   const users: User[] = await getAllConnections();
 
   if (users && users.length > 0) {
-    console.log('broadcastConnections, Connections:', users);
-
     // Create users response object
     const wsResponse = createGetAllUsersResponse({
       users,
@@ -46,7 +44,6 @@ export const broadcastUserUpdate = async (
   allConnectionIds: string[],
 ): Promise<User | undefined> => {
   const currentUser = await getUserByConnectionId(callerConnectionId);
-  console.log('broadcastUserUpdate, User update:', currentUser);
 
   if (currentUser) {
     const wsResponse = createUserUpdateResponse({

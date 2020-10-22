@@ -22,6 +22,5 @@ export const getConnectionIdsExceptCaller = (callerConnectionId: string, connect
  * @param {number} ms Time in ms
  */
 export const sleep = async (ms: number): Promise<unknown> => {
-  console.log(`Sleeping for ${ms} ms`);
   return new Promise((resolve) => setTimeout(resolve, ms));
 };

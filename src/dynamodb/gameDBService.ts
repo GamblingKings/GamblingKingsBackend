@@ -80,7 +80,6 @@ export const getAllGames = async (): Promise<Game[]> => {
   };
 
   const res = await DB.scan(scanParams).promise();
-  console.log('\ngetAllGames result:', res);
 
   return parseDynamoDBItemList<Game>(res);
 };
@@ -98,7 +97,6 @@ export const getGameByGameId = async (gameId: string): Promise<Game | undefined>
   };
 
   const res = await DB.get(getParam).promise();
-  console.log('\ngetGameStateByGameId result:', res);
 
   return parseDynamoDBItem<Game>(res);
 };
@@ -135,7 +133,6 @@ export const addUserToGame = async (gameId: string, connectionId: string): Promi
 
   // Get current game version
   const version = game.version || DEFAULT_DOCUMENT_VERSION;
-  console.log(`addUserToGame: Current game version for game '${gameId}' is:`, version);
 
   // Get users list and check if is already in the game
   const { users } = game;
@@ -167,7 +164,6 @@ export const addUserToGame = async (gameId: string, connectionId: string): Promi
 
   // Update game
   const res = await DB.update(updateParam).promise();
-  console.log('\naddUserToGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };
@@ -202,7 +198,6 @@ export const removeUserFromGame = async (gameId: string, connectionId: string): 
 
   // Get current game document version
   const version = game.version || DEFAULT_DOCUMENT_VERSION;
-  console.log(`removeUserFromGame: Current game version for game '${gameId}' is:`, version);
 
   const updateParam: DocumentClient.UpdateItemInput = {
     TableName: GAMES_TABLE,
@@ -225,7 +220,6 @@ export const removeUserFromGame = async (gameId: string, connectionId: string): 
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nremoveUserFromGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };
@@ -274,7 +268,6 @@ export const startGame = async (gameId: string, callerConnectionId: string): Pro
 
   // Update game
   const res = await DB.update(updateParam).promise();
-  console.log('\nstartGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };
@@ -314,7 +307,6 @@ export const incrementGameLoadedCount = async (gameId: string): Promise<Game | u
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nincrementUserReadyCount result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };
@@ -336,7 +328,6 @@ export const deleteGame = async (gameId: string): Promise<Game | undefined> => {
   };
 
   const res = await DB.delete(deleteParams).promise();
-  console.log('\ndeleteGame result:', res);
 
   return parseDynamoDBAttribute<Game>(res);
 };

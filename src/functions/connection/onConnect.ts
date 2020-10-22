@@ -14,14 +14,12 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   const { connectionId } = event.requestContext;
 
-  console.log('Writing connectionId to the db table...');
   try {
     // Add user to Connections Table
     await saveConnection(connectionId);
 
     return response(200, 'Connection added successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

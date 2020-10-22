@@ -28,7 +28,7 @@
     "format": "prettier --write \"**/*.{js,ts,md,json,yml}\"",
     "format:check": "yarn prettier . --check",
     "lint": "eslint -c .eslintrc.yml . --ext .js,.ts --fix --cache",
-    "test": "jest && codecov"
+    "test": "jest --silent && codecov"
   },
   "dependencies": {
     "@types/aws-lambda": "^8.10.64",
