@@ -20,14 +20,11 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const gameId = payload.gameId as string;
 
-  console.log('Drawing a tile...');
   const ws = new WebSocketClient(event.requestContext);
   try {
     await broadcastDrawTileToUser(ws, gameId, connectionId);
     return response(200, 'Tile drawn from wall successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
-
     return response(500, 'Failed to draw a tile');
   }
 };

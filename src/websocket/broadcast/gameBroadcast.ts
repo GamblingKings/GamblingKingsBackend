@@ -49,8 +49,6 @@ export const broadcastGames = async (ws: WebSocketClient, connectionId: string):
     removeDynamoDocumentVersion<Game>(game);
   });
 
-  console.log('broadcastGames, Games:', games);
-
   // Create games response object
   const wsResponse = createGetAllGamesResponse({
     games,
@@ -81,8 +79,6 @@ export const broadcastGameUpdate = async (
 ): Promise<Game | undefined> => {
   // Get updated game info
   const updatedGame = await getGameByGameId(gameId);
-
-  console.log('broadcastGameUpdate, Game update:', updatedGame);
 
   if (updatedGame) {
     // Remove document version on game object
@@ -141,7 +137,6 @@ export const broadcastInGameMessage = async (
   // Format message
   const actionWord: string = action === WebSocketActionsEnum.JOIN_GAME ? 'joined' : 'left';
   const message = `${username || callerConnectionId} just ${actionWord} the game.`;
-  console.log('broadcastInGameMessage, In game message:', message);
 
   // Send message to the other connectionIds that are already in the game
   const otherConnectionIds = connectionIds.filter((otherConnectionId) => otherConnectionId !== callerConnectionId);
@@ -164,8 +159,6 @@ export const broadcastInGameUpdate = async (
   callerConnectionId: string,
   usersInGame: User[],
 ): Promise<User[]> => {
-  console.log('broadcastInGameUpdate, Users in game:', usersInGame);
-
   // Send users list to the other connectionIds that are already in the game
   const otherConnectionIds = getConnectionIdsExceptCaller(callerConnectionId, getConnectionIdsFromUsers(usersInGame));
   const wsResponse = createInGameUpdateResponse({
@@ -313,7 +306,6 @@ export const startNewRoundAndSendUpdates = async (
     users[dealer].connectionId !== connectionId, // change dealer if winner is not currently a dealer
   );
   if (!updatedGameState) {
-    console.error('Cannot start new game round');
     return response(400, 'Cannot start new game round');
   }
 
@@ -360,7 +352,6 @@ export const broadcastDrawTileToUser = async (
     return;
   }
 
-  console.log(`Tile ${tileDrawn} was drawn by ${connectionId}`);
   const wsResponse = createDrawTileResponse({
     tile: tileDrawn,
     currentIndex: (await getCurrentTileIndex(gameId)) as number,

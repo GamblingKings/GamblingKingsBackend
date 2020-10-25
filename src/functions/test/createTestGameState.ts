@@ -71,7 +71,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     await Promise.all(connectionIds.map((cid) => ws.send(createTestGameStateResponse({ gameState: result }), cid)));
     return response(200, 'Added test game state successfully');
   } catch (err) {
-    console.log(JSON.stringify(err));
     return response(500, err);
   }
 };

@@ -20,7 +20,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   // Broadcast message
   const { username, message } = payload;
 
-  console.log('Sending message to users');
   const ws = new WebSocketClient(event.requestContext);
   try {
     if (username && message) {
@@ -30,7 +29,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(400, 'Message attribute cannot be empty');
   } catch (err) {
-    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

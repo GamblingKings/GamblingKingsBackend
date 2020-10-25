@@ -52,14 +52,12 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     const dealer = await getCurrentDealer(gameId);
     if (dealer === undefined || !dealer.toString()) {
       const errorMsg = `Cannot find dealer in game state by gameId ${gameId}`;
-      console.error(errorMsg);
       return response(400, errorMsg);
     }
 
     const users = await getUsersInGame(gameId);
     if (!users || users.length === 0) {
       const errorMsg = `Cannot find users in game state by gameId ${gameId}`;
-      console.error(errorMsg);
       return response(400, errorMsg);
     }
 
@@ -74,7 +72,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'New round started successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
     return response(500, 'Failed to start a new round');
   }
 };

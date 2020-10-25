@@ -23,7 +23,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const { username } = payload;
 
   // Set username
-  console.log(`Setting username to ${username}...`);
   const ws = new WebSocketClient(event.requestContext);
   try {
     if (username) {
@@ -36,7 +35,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(400, 'Username attribute cannot be empty');
   } catch (err) {
-    console.error(JSON.stringify(err));
     const wsResponse = createLoginFailureResponse(JSON.stringify(err));
     await ws.send(wsResponse, connectionId);
 

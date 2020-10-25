@@ -36,7 +36,6 @@ const leaveGame = async (ws: WebSocketClient, connectionId: string, gameId: stri
   if (updatedGame) {
     // Remove document version on game object
     removeDynamoDocumentVersion<Game>(updatedGame);
-    console.log('Updated game after leaving a game:', updatedGame);
 
     // Send success response
     const res = createLeaveResponse({ game: updatedGame });
@@ -66,7 +65,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const gameId = payload.gameId as string;
 
   // Leave game
-  console.log('Leaving a game...');
   const ws = new WebSocketClient(event.requestContext);
   try {
     /**
@@ -86,8 +84,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Left game successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
-
     // Send failure response
     const emptyGameResponse = createLeaveResponse(undefined);
     const wsResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));

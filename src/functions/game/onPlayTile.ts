@@ -23,7 +23,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const gameId = payload.gameId as string;
   const tile = payload.tile as string;
 
-  console.log(`User with connection Id ${connectionId} played a tile...`);
   const ws = new WebSocketClient(event.requestContext);
   try {
     let connectionIds: string[] = [];
@@ -39,8 +38,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Tile discarded successfully');
   } catch (err) {
-    console.error(JSON.stringify(err));
-
     return response(500, 'Failed to discard a tile');
   }
 };

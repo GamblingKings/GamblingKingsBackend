@@ -84,7 +84,6 @@ export const getGameStateByGameId = async (
   };
 
   const res = await DB.get(getParam).promise();
-  console.log('\ngetGameStateByGameId result:', res);
 
   return parseDynamoDBItem<GameState>(res);
 };
@@ -181,7 +180,6 @@ export const incrementCurrentTileIndex = async (gameId: string): Promise<GameSta
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nincrementCurrentTileIndex result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -237,7 +235,6 @@ export const changeWind = async (gameId: string): Promise<GameState | undefined>
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nchangeWind result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -277,7 +274,6 @@ export const changeDealer = async (gameId: string): Promise<GameState | undefine
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nchangeDealer result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -329,7 +325,6 @@ export const setPlayedTileInteraction = async (
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nincrementPlayedTileInteractionCount result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -363,7 +358,6 @@ export const resetPlayedTileInteraction = async (gameId: string): Promise<GameSt
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nincrementPlayedTileInteractionCount result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };
@@ -435,7 +429,6 @@ export const deleteGameState = async (gameId: string): Promise<GameState | undef
   };
 
   const res = await DB.delete(deleteParams).promise();
-  console.log('\ndeleteGame result:', res);
 
   return parseDynamoDBAttribute<GameState>(res);
 };

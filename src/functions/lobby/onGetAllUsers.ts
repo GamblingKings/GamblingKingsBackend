@@ -18,7 +18,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
   const { connectionId } = event.requestContext;
 
-  console.log('Getting all users...');
   const ws = new WebSocketClient(event.requestContext);
   try {
     // Send all users to the caller
@@ -30,7 +29,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, JSON.stringify(res));
   } catch (err) {
-    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

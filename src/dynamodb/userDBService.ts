@@ -20,8 +20,7 @@ export const saveConnection = async (connectionId: string): Promise<User> => {
     ReturnValues: 'ALL_OLD',
   };
 
-  const res = await DB.put(putParams).promise(); // response is empty
-  console.log('\nsaveConnection result:', res);
+  await DB.put(putParams).promise(); // response is empty
 
   return { connectionId } as User;
 };
@@ -39,7 +38,6 @@ export const getAllConnections = async (): Promise<User[]> => {
   };
 
   const res = await DB.scan(scanParams).promise();
-  console.log('\ngetAllConnections result:', res);
 
   return parseDynamoDBItemList<User>(res);
 };
@@ -57,7 +55,6 @@ export const getUserByConnectionId = async (connectionId: string): Promise<User 
   };
 
   const res = await DB.get(getParam).promise();
-  console.log('\ngetUserByConnectionId result:', res);
 
   return parseDynamoDBItem<User>(res);
 };
@@ -92,7 +89,6 @@ export const setUsername = async (connectionId: string, username: string): Promi
   };
 
   const res = await DB.update(updateParams).promise();
-  console.log('\nsetUserName result:', res);
 
   return parseDynamoDBAttribute<User>(res);
 };
@@ -123,7 +119,6 @@ export const setGameIdForUser = async (connectionId: string, gameId: string): Pr
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nsetGameIdForUser result:', res);
 
   return parseDynamoDBAttribute<User>(res);
 };
@@ -150,7 +145,6 @@ export const removeGameIdFromUser = async (connectionId: string): Promise<User |
   };
 
   const res = await DB.update(updateParam).promise();
-  console.log('\nremoveGameIdFromUser result:', res);
 
   return parseDynamoDBAttribute<User>(res);
 };
@@ -172,7 +166,6 @@ export const deleteConnection = async (connectionId: string): Promise<User | und
   };
 
   const res = await DB.delete(deleteParams).promise();
-  console.log('\ndeleteConnection result:', res);
 
   return parseDynamoDBAttribute<User>(res);
 };

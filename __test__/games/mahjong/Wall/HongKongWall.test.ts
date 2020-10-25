@@ -77,7 +77,6 @@ describe('test getInitialTiles', () => {
 
   test('it should get 13 tiles as initial hand and f/s in a separate array', () => {
     const initHand = wall.getInitialTiles();
-    console.log(initHand);
 
     // Check length
     const { hand, bonusTiles } = initHand;

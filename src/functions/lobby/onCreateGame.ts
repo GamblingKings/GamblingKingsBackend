@@ -30,7 +30,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const { payload }: { payload: LambdaEventBodyPayloadOptions } = body;
   const { game } = payload;
 
-  console.log('Adding game to the db table...');
   const ws = new WebSocketClient(event.requestContext);
   const emptyGameResponse = createGameResponse(undefined);
   try {
@@ -72,7 +71,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     // Send failed response
     const wsResponse = failedWebSocketResponse(emptyGameResponse, JSON.stringify(err));
     await ws.send(wsResponse, connectionId);
-    console.error(JSON.stringify(err));
     return response(500, err);
   }
 };

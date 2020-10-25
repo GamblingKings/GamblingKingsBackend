@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 import { CONNECTIONS_TABLE, GAMES_TABLE, GAME_STATE_TABLE } from '../../src/utils/constants';
 import { GameState } from '../../src/models/GameState';
@@ -18,7 +19,7 @@ export const cleanupTestUser = async (connectionId: string): Promise<void> => {
   try {
     await DB.delete(deleteParam).promise();
   } catch (err) {
-    console.log(`User "${connectionId}" does not exist`);
+    return err;
   }
 };
 
@@ -33,7 +34,7 @@ export const cleanupTestGame = async (gameId: string): Promise<void> => {
   try {
     await DB.delete(deleteParam).promise();
   } catch (err) {
-    console.log(`Game "${gameId}" does not exist`);
+    return err;
   }
 };
 

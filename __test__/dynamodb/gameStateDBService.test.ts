@@ -93,7 +93,6 @@ describe('test getGameStateByGameId, getCurrentWallByGameId, getUserHandInGame',
 
   test('it should get the game state of a game by game Id', async () => {
     const response = await getGameStateByGameId(gameId);
-    console.log(response);
     const expectedResponse = {
       gameId,
       wall,
@@ -700,7 +699,6 @@ describe('test startNewGameRound', () => {
 
     // reset game round
     const updatedGameState = (await startNewGameRound(gameId, CONNECTION_IDS, false)) as GameState;
-    console.log(updatedGameState);
     // test response
     expect(updatedGameState.dealer).toBe(prevGameState.dealer);
     expect(updatedGameState.currentWind).toBe(prevGameState.currentWind);

@@ -99,25 +99,17 @@ export const compareTileInteractionAndSendUpdate = async (gameId: string, ws: We
      * Only one user (the next user to the user who played the tile) can make consecutive
      */
     if (!canMakeTripletOrQuad) {
-      console.log('onPlayedTileInteraction: canMakeTripletOrQuad:', canMakeTripletOrQuad);
-
       if (meld === MeldEnum.CONSECUTIVE) {
         consecutivePayload = payload;
-        console.log('onPlayedTileInteraction: consecutivePayload:', consecutivePayload);
       }
     }
   }
 
   if (canWinGame && JSON.stringify(winGamePayload) !== '{}') {
-    console.log('Win game payload:', winGamePayload);
-
     await broadcastInteractionSuccess(ws, winGamePayload, connectionIds);
   } else {
     const finalWsPayload: InteractionSuccessPayload =
       JSON.stringify(tripletOrQuadPayload) !== '{}' ? tripletOrQuadPayload : consecutivePayload;
-    console.log('Triplet Or Quad payload:', tripletOrQuadPayload);
-    console.log('Consecutive payload:', consecutivePayload);
-    console.log('Final INTERACTION_SUCCESS payload:', finalWsPayload);
 
     await broadcastInteractionSuccess(ws, finalWsPayload, connectionIds);
   }
@@ -139,7 +131,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
   const meldType = payload.meldType as string;
   const skipInteraction = payload.skipInteraction as boolean;
 
-  console.log('Incrementing interaction count and decide which meld type takes priority');
   const ws = new WebSocketClient(event.requestContext);
   const playedTileResponse = { playedTiles, meldType, skipInteraction };
   const playedTileInteractionResponse = createPlayedTileInteractionResponse(playedTileResponse);
@@ -163,7 +154,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
     }
 
     // Compare meld type and send message based on priority
-    console.log('newInteractionCount:', newInteractionCount);
     let interactionEnded = false;
     if (newInteractionCount === 3) {
       interactionEnded = true;
@@ -177,7 +167,6 @@ export const handler: Handler = async (event: WebSocketAPIGatewayEvent): Promise
 
     return response(200, 'Tile interaction is successful');
   } catch (err) {
-    console.error(JSON.stringify(err));
     await ws.send(failedWebSocketResponse(playedTileInteractionResponse, err), connectionId);
     return response(500, err);
   }
